@@ -1,7 +1,7 @@
-file = {SOI ~ equation ~ EOI}
+file = {SOI ~ question ~ EOI}
 WHITESPACE = _{ " "| "\t" | NEWLINE }
 COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
-
+question = {equation | expression}
 equation = {expression ~ equality_operator ~ expression}
 expression = {word*}
 word = {literal | any | range | length  } //manyany
@@ -9,6 +9,6 @@ literal = @{ASCII_ALPHA+}
 //manyany = {"**"}
 any = {"*"}
 length = {ASCII_DIGIT+}
-range = @{length ~ ".." ~ length}
+range = ${length ~ ".." ~ length}
 //conjuction, disjunction, keyword, tag, length, range, wildcard
-equality_operator = {"==" | "=a"}
+equality_operator = { "=a"}

@@ -3,8 +3,9 @@ use std::str::FromStr;
 use enumflags2::{bitflags, make_bitflags, BitFlags};
 
 
-#[derive(Debug,  Clone, PartialEq, Eq)]
+#[derive(Debug, Copy,  Clone, PartialEq, Eq)]
 pub struct Term<'a>{
+    pub part_of_speech: PartOfSpeech,
     pub text: &'a str,
     pub tags: BitFlags<WordTag>,
     pub is_single_word: bool
@@ -30,6 +31,7 @@ impl<'a> Ord for Term<'a>{
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PartOfSpeech{
     Noun,
     Verb,

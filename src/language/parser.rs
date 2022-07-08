@@ -12,6 +12,35 @@ use serde::{Deserialize, Serialize};
 #[grammar = "language/wordlang.pest"]
 pub struct ConvextParser;
 
+pub fn parse(input: &str) -> Result<Question, String> {
+    let mut pairs = ConvextParser::parse(Rule::file, input).map_err(|e| e.to_string())?;        
+    let next = pairs.next().unwrap();
+    let question = next.into_inner().next().unwrap();
+    let result = Question::try_parse(question);
+    result
+}
+
+
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum Question{
+    Expression(Expression),
+    Equation(Equation)
+}
+
+
+
+impl CanParse for Question {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+        let p = pair.into_inner().next().unwrap();
+        match p.as_rule(){
+            Rule::equation => Ok(Question::Equation(Equation::try_parse(p)?)),
+            Rule::expression => Ok(Question::Expression(Expression::try_parse(p)?)),
+            rul => unreachable!("Reached {:?}", rul)
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Equation{
     left: Expression,
@@ -28,11 +57,10 @@ pub struct Expression{
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum EqualityOperator{
-    Simple,
     Anagram
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone,  PartialEq, Eq, Debug)]
 pub enum WordQuery{
     Literal(String),
     //ManyAny,
@@ -52,7 +80,6 @@ impl FromStr for EqualityOperator{
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().as_str() {
-            "==" => Ok(EqualityOperator::Simple),
             "=a" => Ok(EqualityOperator::Anagram),
             _ => Err(format!("Could not parse {} as equality operator", s)),
         }
@@ -83,19 +110,20 @@ impl CanParse for Expression{
     }
 }
 impl CanParse for WordQuery{
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {        
-        let rule = pair.as_rule();
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+        let inner = pair.into_inner().next().unwrap();
+        let rule = inner.as_rule();
 
         match  rule {
-            Rule::literal => Ok(WordQuery::Literal(pair.as_str().to_string())),
+            Rule::literal => Ok(WordQuery::Literal(inner.as_str().to_string())),
             //Rule::manyany => Ok(WordQuery::ManyAny),
             Rule::any => Ok(WordQuery::Any),
-            Rule::length => Ok(WordQuery::Length(usize::from_str(pair.as_str()).unwrap())),
+            Rule::length => Ok(WordQuery::Length(usize::from_str(inner.as_str()).unwrap())),
             Rule::range => {
-                let mut inner  = pair.into_inner();
-                let start = inner.next().unwrap();
-                let dots = inner.next().unwrap();
-                let end = inner.next().unwrap();
+                let mut range_inner  = inner.into_inner();
+
+                let start = range_inner.next().unwrap();
+                let end = range_inner.next().unwrap();
 
                 let min = usize::from_str(start.as_str()).unwrap();
                 let max = usize::from_str(end.as_str()).unwrap();
@@ -110,9 +138,4 @@ impl CanParse for WordQuery{
 }
 
 
-pub fn parse(input: &str) -> Result<Equation, String> {
-    let mut pairs = ConvextParser::parse(Rule::file, input).map_err(|e| e.to_string())?;    
-    let next = pairs.next().unwrap();
-    let result = Equation::try_parse(next);
-    result
-}
+

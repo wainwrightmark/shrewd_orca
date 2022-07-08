@@ -190,6 +190,7 @@ mod tests {
         let words = include_str!("common_words.txt")
             .split_ascii_whitespace()
             .map(|text| Term {
+                part_of_speech: PartOfSpeech::Noun,
                 text,
                 tags: Default::default(),
                 is_single_word: true,
@@ -228,6 +229,7 @@ mod tests {
     #[test]
     fn test_solve_basic() {
         let words = "act ire cat".split_ascii_whitespace().map(|text| Term {
+            part_of_speech: PartOfSpeech::Noun,
             text,
             tags: Default::default(),
             is_single_word: true,
@@ -249,6 +251,7 @@ mod tests {
     #[test]
     fn test_duplicate_word() {
         let words = "cha".split_ascii_whitespace().map(|text| Term {
+            part_of_speech: PartOfSpeech::Noun,
             text,
             tags: Default::default(),
             is_single_word: true,

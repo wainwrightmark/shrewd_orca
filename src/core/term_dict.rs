@@ -34,8 +34,8 @@ impl<'a> TermDict<'a>{
                 _ => Default::default()
             };
             
-            let pos = PartOfSpeech::from_str(pos_lit)?;
-            let term = Term{text: text, is_single_word: true, tags};
+            let part_of_speech = PartOfSpeech::from_str(pos_lit)?;
+            let term = Term{part_of_speech, text: text, is_single_word: true, tags};
             terms.push(term);
         }
         Ok(TermDict{terms})
