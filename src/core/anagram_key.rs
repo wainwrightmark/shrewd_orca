@@ -1,17 +1,31 @@
 use std::{ops::{Add, Sub}, str::FromStr, num, fmt::{Display, Debug, Write}};
 use itertools::{self, Itertools};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct AnagramKey{
+    pub len: u8,
     pub inner: u128
 }
+
+impl Ord for AnagramKey{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.inner.cmp(&other.inner)
+    }
+}
+
+impl PartialOrd for AnagramKey{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.inner.partial_cmp(&other.inner)
+    }
+}
+
 
 impl AnagramKey{
     pub fn is_empty(self: &Self)-> bool{
         self.inner == 1
     }
 
-    pub const EMPTY : AnagramKey = AnagramKey{inner: 1};
+    pub const EMPTY : AnagramKey = AnagramKey{inner: 1, len: 0};
 
     pub const PRIMESBYSIZE : [usize; 26] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,101];
     pub const LETTERSBYFREQUENCY : [char; 26] = ['e','t','a','i','n',
@@ -44,7 +58,8 @@ impl Add for AnagramKey{
 
     fn add(self, rhs: Self) -> Self::Output {
         let inner = self.inner.checked_mul(rhs.inner)?;
-        AnagramKey{inner}.into()
+        let len = self.len + rhs.len;
+        AnagramKey{inner, len}.into()
     }
 }
 
@@ -55,10 +70,13 @@ impl Sub for AnagramKey{
 
         if rhs.inner == 0 {return None;}
 
+        if self.len < rhs.len {return None;}
+
         if self.inner % rhs.inner != 0{return None;}
 
         let inner = self.inner / rhs.inner;
-        AnagramKey{inner}.into()
+        let len = self.len - rhs.len;
+        AnagramKey{inner, len}.into()
     }
 }
 
@@ -103,6 +121,7 @@ impl FromStr for AnagramKey{
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut inner: u128 = 1;        
+        let mut len: u8 = 0;
 
         for c in s.to_ascii_lowercase().chars().filter(|c|c.is_ascii_lowercase()){
             let i = c as usize - 'a' as usize;
@@ -112,10 +131,11 @@ impl FromStr for AnagramKey{
             match r {
                 Some(p) => inner = p,
                 None => return Err(AnagramKeyErr::WordTooBig),
-            }        
+            }      
+            len += 1;  
         }
 
-       Ok(AnagramKey{inner})
+       Ok(AnagramKey{inner, len})
     }
 }
 
