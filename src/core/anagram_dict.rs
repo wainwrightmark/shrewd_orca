@@ -55,7 +55,7 @@ impl<'a> AnagramDict<'a> {
         let solutions = iterator.flat_map(|solution| {
             solution
                 .into_iter()
-                .map(|k| self.words.get(&k).unwrap().clone())
+                .map(|k| self.words.get(&k).unwrap().clone()) //Note if terms with the same text, they will each be returned
                 .multi_cartesian_product()
         });
 
@@ -88,19 +88,21 @@ pub struct AnagramIterator<'a, 'b>
 //TODO const N
 {
     dict: &'b AnagramDict<'a>,
-    stack: SmallVec<[(AnagramKey, AnagramKey, SmallVec<[AnagramKey; 5]>); 5]>,
+    stack: SmallVec<[(AnagramKey, AnagramKey); 5]>,
+    used_words: SmallVec<[AnagramKey; 5]>,
     settings: SolveSettings,
 }
 
 impl<'a, 'b> AnagramIterator<'a, 'b> {
     pub fn create(dict: &'b AnagramDict<'a>, key: AnagramKey, settings: SolveSettings) -> Self {
-        let mut stack = SmallVec::<[(AnagramKey, AnagramKey, SmallVec<[AnagramKey; 5]>); 5]>::new();
-        stack.push((key, AnagramKey::EMPTY, SmallVec::<[AnagramKey; 5]>::new()));
+        let mut stack = SmallVec::<[(AnagramKey, AnagramKey); 5]>::new();
+        stack.push((key, AnagramKey::EMPTY));
 
         Self {
             dict,
             stack,
             settings,
+            used_words: Default::default()
         }
     }
 }
@@ -110,63 +112,51 @@ impl<'a, 'b> Iterator for AnagramIterator<'a, 'b> {
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.stack.is_empty() {
-            let current_len = self.stack.len();
+            let current_len = self.used_words.len();
+            let (current_key, previous) = self.stack.last_mut().unwrap();
 
-            if current_len > self.settings.max_words {
+            if previous >= current_key {
+                //todo check previous squared
                 self.stack.pop();
-            } else if current_len == self.settings.max_words {
-                let (current_key, _, used) = self.stack.pop().unwrap();
+                self.used_words.pop();
+                continue;
+            }
 
-                if self.settings.allow(&current_key) && self.dict.words.contains_key(&current_key) {
-                    let mut new_used = used.clone();
-                    new_used.push(current_key);
-                    return Some(new_used);
-                }
-            } else 
+            if let Some((remainder, next_key)) = self
+                .dict
+                .words
+                .range((Bound::Excluded(*previous), Bound::Included(*current_key)))
+                .filter(|(&next_key, _)| self.settings.allow(&next_key))
+                .filter_map(|(&next_key, _)| {
+                    (*current_key - next_key).map(|remainder| (remainder, next_key))
+                })
+                .next()
             {
-                let (current_key, previous, used) = self.stack.last_mut().unwrap();
+                previous.inner = next_key.inner;
 
-                if previous >= current_key {
-                    //todo check previous squared
+                if remainder.is_empty() {
+                    let mut new_used = self.used_words.clone();
+                    new_used.push(next_key);
+                    self.used_words.pop();
                     self.stack.pop();
-                    continue;
-                }
-
-                if let Some((remainder, next_key)) = self
-                    .dict
-                    .words
-                    .range((Bound::Excluded(*previous), Bound::Included(*current_key)))
-                    .filter(|(&next_key, _)| self.settings.allow(&next_key))
-                    .filter_map(|(&next_key, _)| {
-                        (*current_key - next_key).map(|remainder| (remainder, next_key))
-                    })
-                    .next()
+                    return Some(new_used);
+                } else if next_key > remainder {
+                    // if the remainder is in the dictionary, we have already passed it
+                } else if self.settings.allow(&remainder)
+                    && self.settings.max_words > current_len
                 {
-                    previous.inner = next_key.inner;
-
-                    if remainder.is_empty() {
-                        let mut new_used = used.clone();
-                        new_used.push(next_key);
-                        return Some(new_used);
-                    } else if next_key > remainder {
-                        // if the remainder is in the dictionary, we have already passed it
-                    } else if self.settings.allow(&remainder)
-                        && self.settings.max_words > current_len
-                    {
-                        let mut new_used = used.clone();
-                        new_used.push(next_key);
-                        self.stack.push((
-                            remainder,
-                            AnagramKey {
-                                inner: next_key.inner - 1,
-                                len: next_key.len,
-                            },
-                            new_used,
-                        ))
-                    }
-                } else {
-                    self.stack.pop();
+                    self.used_words.push(next_key);
+                    self.stack.push((
+                        remainder,
+                        AnagramKey {
+                            inner: next_key.inner - 1,
+                            len: next_key.len,
+                        },
+                    ))
                 }
+            } else {
+                self.stack.pop();
+                self.used_words.pop();
             }
         }
 
@@ -185,29 +175,7 @@ mod tests {
     use super::AnagramKey;
     use crate::core::prelude::*;
 
-    #[test]
-    fn test_solve() {
-        let words = include_str!("common_words.txt")
-            .split_ascii_whitespace()
-            .map(|text| Term {
-                part_of_speech: PartOfSpeech::Noun,
-                text,
-                tags: Default::default(),
-                is_single_word: true,
-            });
-
-        let dict = AnagramDict::from(words);
-        let solutions = dict.solve_for_word("clint eastwood", Default::default());
-
-        let solutions_string = solutions
-            .into_iter()
-            .sorted_by_key(|x| x.len())
-            .map(|s| s.into_iter().map(|t| t.text).join(" "))
-            .join("; ");
-
-        assert!(solutions_string.contains("west old action;"));        
-    }
-
+    
     #[test]
     fn test_solve_with_term_dict() {
         let term_dict = TermDict::from_term_data().unwrap();
@@ -219,8 +187,9 @@ mod tests {
         let solutions_string = solutions
             .into_iter()
             .sorted_by_key(|x| x.len())
-            .take(10)
             .map(|s| s.into_iter().map(|t| t.text).join(" "))
+            .dedup()
+            .take(10)            
             .join("; ");
 
         assert_eq!(solutions_string, "Tito downscale; lot wainscoted; Watt colonised; twat colonised; cwt desolation; stint lacewood; Eliot downcast; Low anecdotist; owl anecdotist; town dislocate")
@@ -246,6 +215,23 @@ mod tests {
             .join("; ");
 
         assert_eq!(solutions_string, "ire act; ire cat");
+    }
+
+    #[test]
+    fn test_create_dict(){
+        let words = "act ire cat act ire cat".split_ascii_whitespace().enumerate() .map(|(position, text)| Term {
+            part_of_speech: if position < 3{PartOfSpeech::Noun} else{PartOfSpeech::Verb} ,
+            text,
+            tags: Default::default(),
+            is_single_word: true,
+        });
+
+        let dict = AnagramDict::from(words);
+
+        assert_eq!(dict.words.len(), 2); //act and cat should be the same word
+        let terms = dict.words.values().flat_map(|x|x).map(|x|x.text).join(";");
+        assert_eq!(terms, "ire;ire;act;act;cat;cat")
+
     }
 
     #[test]

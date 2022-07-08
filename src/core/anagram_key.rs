@@ -1,7 +1,7 @@
 use std::{ops::{Add, Sub}, str::FromStr, num, fmt::{Display, Debug, Write}};
 use itertools::{self, Itertools};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct AnagramKey{
     pub len: u8,
     pub inner: u128
@@ -83,6 +83,21 @@ impl Sub for AnagramKey{
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum AnagramKeyErr{
     WordTooBig
+}
+
+impl Debug for AnagramKey{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+        let display = format!("{}", self);
+
+        f.debug_struct("AnagramKey")
+        .field("txt", &display)
+        .field("len", &self.len)
+        .field("inner", &self.inner)
+        
+        
+        .finish()
+    }
 }
 
 impl Display for AnagramKey{
