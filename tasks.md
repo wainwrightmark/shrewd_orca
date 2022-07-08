@@ -1,0 +1,7 @@
+- [ ] Dictionary
+- [ ] Definitions
+- [ ] Anagrams
+- [ ] Puns
+- [ ] Gematria
+- [ ] Expression Language
+- [ ] Emoji!
