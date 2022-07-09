@@ -1,20 +1,21 @@
 use std::str::FromStr;
 
 use enumflags2::{bitflags, make_bitflags, BitFlags};
+use serde::{Serialize, Deserialize};
 
 
-#[derive(Debug, Copy,  Clone, PartialEq, Eq)]
-pub struct Term<'a>{
+#[derive(Debug,  Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Term{
     pub part_of_speech: PartOfSpeech,
-    pub text: &'a str,
+    pub text: String,
     pub tags: BitFlags<WordTag>,
     pub is_single_word: bool,
-    pub definition: &'a str
+    pub definition: String
 }
 
-impl<'a> PartialOrd for Term<'a>{
+impl PartialOrd for Term{
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match self.text.partial_cmp(other.text) {
+        match self.text.partial_cmp(&other.text) {
             Some(core::cmp::Ordering::Equal) => {}
             ord => return ord,
         }
@@ -22,7 +23,7 @@ impl<'a> PartialOrd for Term<'a>{
     }
 }
 
-impl<'a> Ord for Term<'a>{
+impl Ord for Term{
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         match self.text.cmp(&other.text) {
             core::cmp::Ordering::Equal => {}
@@ -32,7 +33,7 @@ impl<'a> Ord for Term<'a>{
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PartOfSpeech{
     Noun,
     Verb,
@@ -44,7 +45,7 @@ pub enum PartOfSpeech{
 
 #[bitflags]
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum WordTag{
     Masculine,
     Feminine,

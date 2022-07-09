@@ -7,19 +7,19 @@ use super::term::{Term, PartOfSpeech, WordTag};
 
 
 #[derive(Debug)]
-pub struct TermDict<'a>{
-    pub terms: Vec<Term<'a>>
+pub struct TermDict{
+    pub terms: Vec<Term>
 }
 
 
-impl<'a> TermDict<'a>{
+impl TermDict{
 
     pub fn from_term_data()-> Result<Self, String>{
         let txt = include_str!("WordData.tsv");
         Self::from_csv(txt)
     }
 
-    pub fn from_csv (s: &'a str) -> Result<Self, String> {
+    pub fn from_csv (s: &str) -> Result<Self, String> {
         
         let mut terms = Vec::new();
 
@@ -37,7 +37,7 @@ impl<'a> TermDict<'a>{
             };
             
             let part_of_speech = PartOfSpeech::from_str(pos_lit)?;
-            let term = Term{part_of_speech, text: text, is_single_word: true, tags, definition};
+            let term = Term{part_of_speech, text: text.to_string(), is_single_word: true, tags, definition: definition.to_string()};
             terms.push(term);
         }
         Ok(TermDict{terms})

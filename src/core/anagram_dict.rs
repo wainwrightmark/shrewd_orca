@@ -10,24 +10,24 @@ use std::{
 
 use crate::core::prelude::*;
 
-pub struct AnagramDict<'a> {
-    pub words: BTreeMap<AnagramKey, Vec<Term<'a>>>,
+pub struct AnagramDict {
+    pub words: BTreeMap<AnagramKey, Vec<Term>>,
 }
 
-impl<'a> From<TermDict<'a>> for AnagramDict<'a> {
-    fn from(term_dict: TermDict<'a>) -> Self {
+impl From<TermDict> for AnagramDict {
+    fn from(term_dict: TermDict) -> Self {
         let terms = term_dict.terms;
 
         Self::from(terms.into_iter())
     }
 }
 
-impl<'a, T: Iterator<Item = Term<'a>>> From<T> for AnagramDict<'a> {
+impl<'a, T: Iterator<Item = Term>> From<T> for AnagramDict {
     fn from(iter: T) -> Self {
         let groups = iter
             .sorted()
             .dedup()
-            .filter_map(|term| AnagramKey::from_str(term.text).ok().map(|key| (key, term)))
+            .filter_map(|term| AnagramKey::from_str(&term.text).ok().map(|key| (key, term)))
             .into_group_map();
         let words = BTreeMap::from_iter(groups);
 
@@ -35,7 +35,7 @@ impl<'a, T: Iterator<Item = Term<'a>>> From<T> for AnagramDict<'a> {
     }
 }
 
-impl<'a> AnagramDict<'a> {
+impl AnagramDict {
     fn solve_for_word(
         &self,
         word: &str,
@@ -84,17 +84,17 @@ impl SolveSettings {
     }
 }
 
-pub struct AnagramIterator<'a, 'b>
+pub struct AnagramIterator<'b>
 //TODO const N
 {
-    dict: &'b AnagramDict<'a>,
+    dict: &'b AnagramDict,
     stack: SmallVec<[(AnagramKey, AnagramKey); 5]>,
     used_words: SmallVec<[AnagramKey; 5]>,
     settings: SolveSettings,
 }
 
-impl<'a, 'b> AnagramIterator<'a, 'b> {
-    pub fn create(dict: &'b AnagramDict<'a>, key: AnagramKey, settings: SolveSettings) -> Self {
+impl< 'b> AnagramIterator<'b> {
+    pub fn create(dict: &'b AnagramDict, key: AnagramKey, settings: SolveSettings) -> Self {
         let mut stack = SmallVec::<[(AnagramKey, AnagramKey); 5]>::new();
         stack.push((key, AnagramKey::EMPTY));
 
@@ -107,7 +107,7 @@ impl<'a, 'b> AnagramIterator<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Iterator for AnagramIterator<'a, 'b> {
+impl<'a, 'b> Iterator for AnagramIterator<'b> {
     type Item = SmallVec<[AnagramKey; 5]>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -199,10 +199,10 @@ mod tests {
     fn test_solve_basic() {
         let words = "act ire cat".split_ascii_whitespace().map(|text| Term {
             part_of_speech: PartOfSpeech::Noun,
-            text,
+            text: text.to_string(),
             tags: Default::default(),
             is_single_word: true,
-            definition: ""
+            definition: "".to_string()
         });
 
         let dict = AnagramDict::from(words);
@@ -222,16 +222,16 @@ mod tests {
     fn test_create_dict(){
         let words = "act ire cat act ire cat".split_ascii_whitespace().enumerate() .map(|(position, text)| Term {
             part_of_speech: if position < 3{PartOfSpeech::Noun} else{PartOfSpeech::Verb} ,
-            text,
+            text: text.to_string(),
             tags: Default::default(),
             is_single_word: true,
-            definition: ""
+            definition: "".to_string()
         });
 
         let dict = AnagramDict::from(words);
 
         assert_eq!(dict.words.len(), 2); //act and cat should be the same word
-        let terms = dict.words.values().flat_map(|x|x).map(|x|x.text).join(";");
+        let terms = dict.words.values().flat_map(|x|x).map(|x|x.text.clone()).join(";");
         assert_eq!(terms, "ire;ire;act;act;cat;cat")
 
     }
@@ -240,10 +240,10 @@ mod tests {
     fn test_duplicate_word() {
         let words = "cha".split_ascii_whitespace().map(|text| Term {
             part_of_speech: PartOfSpeech::Noun,
-            text,
+            text: text.to_string(),
             tags: Default::default(),
             is_single_word: true,
-            definition: ""
+            definition: "".to_string()
         });
 
         let dict = AnagramDict::from(words);

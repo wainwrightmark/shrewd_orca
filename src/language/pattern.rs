@@ -39,7 +39,7 @@ impl CanParse for Pattern{
 
 impl Pattern {
     pub fn allow(&self, term: &Term) -> bool {        
-        self.regex.is_match(term.text)
+        self.regex.is_match(&term.text)
     }
 
 }

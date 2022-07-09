@@ -15,12 +15,12 @@ impl Default for SolveSettings{
 }
 
 pub trait Solvable{
-    fn solve<'a>(&self, dict: &'a TermDict, settings: &SolveSettings) -> Vec<Vec<Term<'a>>>;
+    fn solve(&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Vec<Term>>;
 }
 
 impl Solvable for Question
 {
-    fn solve<'a>(&self, dict: &'a TermDict, settings: &SolveSettings) -> Vec<Vec<Term<'a>>>{
+    fn solve(&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Vec<Term>>{
         match self {
             Question::Expression(ex) => ex.solve(dict, settings),
             Question::Equation(eq) => eq.solve(dict, settings),
@@ -29,7 +29,7 @@ impl Solvable for Question
 }
 
 impl Solvable for Expression{
-    fn solve<'a>(&self, dict: &'a TermDict, settings: &SolveSettings) -> Vec<Vec<Term<'a>>>{
+    fn solve(&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Vec<Term>>{
         let solutions =  self.words.iter().map(|w|w.solve(dict, settings)).multi_cartesian_product() 
         .take(settings.max_solutions).collect_vec();
 
@@ -38,7 +38,7 @@ impl Solvable for Expression{
 }
 
 impl Solvable for Equation{
-    fn solve<'a>(&self, dict: &'a TermDict, settings: &SolveSettings) -> Vec<Vec<Term<'a>>>{
+    fn solve(&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Vec<Term>>{
         todo!()
     }
 }
@@ -56,11 +56,11 @@ impl WordQuery{
     }
 
     ///Find the solution of there is a single solution
-    pub fn find<'a>(&self, dict: &'a TermDict) -> Option<Term<'a>>{
+    pub fn find(&self, dict: & TermDict) -> Option<Term>{
         None //TODO implement for Literal
     }
 
-    pub fn solve<'a> (&self, dict: &'a TermDict, settings: &SolveSettings) -> Vec<Term<'a>>{
+    pub fn solve (&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Term>{
         if let Some(solution) = self.find(dict){
             vec![solution]
         }
