@@ -93,7 +93,7 @@ pub struct AnagramIterator<'b>
     settings: SolveSettings,
 }
 
-impl< 'b> AnagramIterator<'b> {
+impl<'b> AnagramIterator<'b> {
     pub fn create(dict: &'b AnagramDict, key: AnagramKey, settings: SolveSettings) -> Self {
         let mut stack = SmallVec::<[(AnagramKey, AnagramKey); 5]>::new();
         stack.push((key, AnagramKey::EMPTY));
@@ -102,20 +102,20 @@ impl< 'b> AnagramIterator<'b> {
             dict,
             stack,
             settings,
-            used_words: Default::default()
+            used_words: Default::default(),
         }
     }
 }
 
-impl<'a, 'b> Iterator for AnagramIterator<'b> {
+impl<'b> Iterator for AnagramIterator<'b> {
     type Item = SmallVec<[AnagramKey; 5]>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.stack.is_empty() {
-            let current_len = self.used_words.len();
+            let current_words = self.used_words.len();
             let (current_key, previous) = self.stack.last_mut().unwrap();
 
-            if previous >= current_key {
+            if previous > current_key {
                 //todo check previous squared
                 self.stack.pop();
                 self.used_words.pop();
@@ -125,34 +125,41 @@ impl<'a, 'b> Iterator for AnagramIterator<'b> {
             if let Some((remainder, next_key)) = self
                 .dict
                 .words
-                .range((Bound::Excluded(*previous), Bound::Included(*current_key)))
+                .range((Bound::Included(*previous), Bound::Included(*current_key)))
                 .filter(|(&next_key, _)| self.settings.allow(&next_key))
                 .filter_map(|(&next_key, _)| {
                     (*current_key - next_key).map(|remainder| (remainder, next_key))
                 })
                 .next()
             {
-                previous.inner = next_key.inner;
-
                 if remainder.is_empty() {
                     let mut new_used = self.used_words.clone();
                     new_used.push(next_key);
                     self.used_words.pop();
                     self.stack.pop();
                     return Some(new_used);
-                } else if next_key > remainder {
-                    // if the remainder is in the dictionary, we have already passed it
-                } else if self.settings.allow(&remainder)
-                    && self.settings.max_words > current_len
-                {
-                    self.used_words.push(next_key);
-                    self.stack.push((
-                        remainder,
-                        AnagramKey {
-                            inner: next_key.inner - 1,
-                            len: next_key.len,
-                        },
-                    ))
+                }else {
+                    previous.inner = next_key.inner + 1;
+                    previous.len = next_key.len;
+
+                    if next_key <= remainder && self.settings.allow(&remainder) {
+
+                        if self.settings.max_words == current_words + 1{
+                            if self.dict.words.contains_key(&remainder) && self.settings.allow(&remainder) {
+                                let mut new_used = self.used_words.clone();
+                                new_used.push(next_key);
+                                new_used.push(remainder);
+                                self.used_words.pop();
+                                self.stack.pop();
+                                return Some(new_used);
+                            }
+
+                        }
+                        else{
+                            self.used_words.push(next_key);
+                            self.stack.push((remainder, next_key))
+                        }                       
+                    }
                 }
             } else {
                 self.stack.pop();
@@ -174,88 +181,110 @@ mod tests {
     use super::AnagramDict;
     use super::AnagramKey;
     use crate::core::prelude::*;
+    use ntest::test_case;
 
-    
     #[test]
     fn test_solve_with_term_dict() {
         let term_dict = TermDict::from_term_data().unwrap();
 
         let dict = AnagramDict::from(term_dict);
 
-        let solutions = dict.solve_for_word("clint eastwood", Default::default());
+        let solutions = dict.solve_for_word("clint eastwood", SolveSettings { min_word_length: 3, max_words: 3 });
 
         let solutions_string = solutions
             .into_iter()
             .sorted_by_key(|x| x.len())
             .map(|s| s.into_iter().map(|t| t.text).join(" "))
             .dedup()
-            .take(10)            
+            .take(10)
             .join("; ");
 
         assert_eq!(solutions_string, "Tito downscale; lot wainscoted; Watt colonised; twat colonised; cwt desolation; stint lacewood; Eliot downcast; Low anecdotist; owl anecdotist; town dislocate")
     }
 
-    #[test]
-    fn test_solve_basic() {
-        let words = "act ire cat".split_ascii_whitespace().map(|text| Term {
+    #[test_case("i react", "act ire cat", 3, 3, 10, "ire act; ire cat", name = "basic")]
+    #[test_case("clint eastwood", "Tito downscale", 3, 2, 10, "Tito downscale", name = "clint")]
+    #[test_case("chacha", "cha", 3, 3, 10, "cha cha", name = "repeat_word")]
+    #[test_case(
+        "i react",
+        "act ire cat",
+        3,
+        2,
+        10,
+        "ire act; ire cat",
+        name = "two_words"
+    )]
+    #[test_case(
+        "i react",
+        "act ire cat i react",
+        3,
+        2,
+        10,
+        "ire act; ire cat",
+        name = "min_word_length"
+    )]
+    fn test_solve(
+        input: String,
+        terms: String,
+        min_word_length: u8,
+        max_words: usize,
+        take: usize,
+        expect: String,
+    ) {
+        let words = terms.split_ascii_whitespace().map(|text| Term {
             part_of_speech: PartOfSpeech::Noun,
             text: text.to_string(),
             tags: Default::default(),
             is_single_word: true,
-            definition: "".to_string()
+            definition: "".to_string(),
         });
 
         let dict = AnagramDict::from(words);
 
-        let solutions = dict.solve_for_word("i react", Default::default());
+        let solutions = dict.solve_for_word(
+            input,
+            SolveSettings {
+                min_word_length,
+                max_words,
+            },
+        );
 
         let solutions_string = solutions
             .into_iter()
+            .take(take)
             .sorted_by_key(|x| x.len())
             .map(|s| s.into_iter().map(|t| t.text).join(" "))
             .join("; ");
 
-        assert_eq!(solutions_string, "ire act; ire cat");
+        assert_eq!(solutions_string, expect);
     }
 
     #[test]
-    fn test_create_dict(){
-        let words = "act ire cat act ire cat".split_ascii_whitespace().enumerate() .map(|(position, text)| Term {
-            part_of_speech: if position < 3{PartOfSpeech::Noun} else{PartOfSpeech::Verb} ,
-            text: text.to_string(),
-            tags: Default::default(),
-            is_single_word: true,
-            definition: "".to_string()
-        });
+    fn test_create_dict() {
+        let words = "act ire cat act ire cat"
+            .split_ascii_whitespace()
+            .enumerate()
+            .map(|(position, text)| Term {
+                part_of_speech: if position < 3 {
+                    PartOfSpeech::Noun
+                } else {
+                    PartOfSpeech::Verb
+                },
+                text: text.to_string(),
+                tags: Default::default(),
+                is_single_word: true,
+                definition: "".to_string(),
+            });
 
         let dict = AnagramDict::from(words);
 
         assert_eq!(dict.words.len(), 2); //act and cat should be the same word
-        let terms = dict.words.values().flat_map(|x|x).map(|x|x.text.clone()).join(";");
+        let terms = dict
+            .words
+            .values()
+            .flat_map(|x| x)
+            .map(|x| x.text.clone())
+            .join(";");
         assert_eq!(terms, "ire;ire;act;act;cat;cat")
-
-    }
-
-    #[test]
-    fn test_duplicate_word() {
-        let words = "cha".split_ascii_whitespace().map(|text| Term {
-            part_of_speech: PartOfSpeech::Noun,
-            text: text.to_string(),
-            tags: Default::default(),
-            is_single_word: true,
-            definition: "".to_string()
-        });
-
-        let dict = AnagramDict::from(words);
-
-        let solutions = dict.solve_for_word("chacha", Default::default());
-
-        let solutions_string = solutions
-            .into_iter()
-            .sorted_by_key(|x| x.len())
-            .map(|s| s.into_iter().map(|t| t.text).join(" "))
-            .join("; ");
-
-        assert_eq!(solutions_string, "cha cha");
     }
 }
