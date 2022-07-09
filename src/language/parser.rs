@@ -58,6 +58,8 @@ pub enum EqualityOperator {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum WordQuery {
     Literal(String),
+    PartOfSpeech(PartOfSpeech),
+    Tag(WordTag),
     //ManyAny,
     Any,
     Range { min: usize, max: usize },
@@ -138,7 +140,24 @@ impl CanParse for WordQuery {
                 let max = usize::from_str(end.as_str()).unwrap();
 
                 Ok(WordQuery::Range { min, max })
-            }
+            },
+            Rule::tag =>{
+                let mut tag_inner = inner.into_inner();
+                //tag_inner.next().unwrap();
+                let lit = tag_inner.next().unwrap().as_str();
+
+                if let Ok(pos) =  PartOfSpeech::from_str(lit){
+                    return Ok(WordQuery::PartOfSpeech(pos));
+                }
+
+                if let Ok(wordtag) = WordTag::from_str(lit){
+                    return Ok(WordQuery::Tag(wordtag))
+                }
+
+                Err(format!("'!{}' in not a valid tag", lit))
+            },
+
+
             Rule::pattern => {
                 let pattern = Pattern::try_parse(inner)?;
                 Ok(WordQuery::Pattern(pattern))

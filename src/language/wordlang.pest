@@ -4,9 +4,10 @@ COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 question = {equation | expression}
 equation = {expression ~ equality_operator ~ expression}
 expression = {word*}
-word = ${ pattern | literal |  any | range | length  } //manyany
+word = ${ pattern | literal |  any | range | length | tag  } //manyany
 literal = @{ASCII_ALPHA+}
 question_marks = @{"?"+}
+tag = ${"!" ~ literal}
 pattern = ${
 &(any? ~ (literal | question_marks) ) ~ 
 &(literal? ~ (any | question_marks) ) ~ 

@@ -20,13 +20,13 @@ pub struct Meaning {
 
 impl PartialOrd for Homograph {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.text.partial_cmp(&other.text)
+        self.text.to_ascii_lowercase().partial_cmp(&other.text.to_ascii_lowercase())
     }
 }
 
 impl Ord for Homograph {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.text.cmp(&other.text)
+        self.text.to_ascii_lowercase().cmp(&other.text.to_ascii_lowercase())
     }
 }
 
@@ -48,6 +48,22 @@ pub enum WordTag {
     Feminine,
     FirstName,
     LastName,
+}
+
+
+impl FromStr for WordTag {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "masculine" => Ok(WordTag::Masculine),
+            "feminine" => Ok(WordTag::Feminine),
+            "firstname" => Ok(WordTag::FirstName),
+            "lastname" => Ok(WordTag::LastName),
+
+            _ => Err(format!("Could not parse {} as tag", s)),
+        }
+    }
 }
 
 impl FromStr for PartOfSpeech {

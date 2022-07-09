@@ -54,7 +54,12 @@ impl Solvable for Expression {
                     WordQuery::Literal(s) => s,
                     _ => unreachable!(),
                 })
-                .join("sep");
+                .join("");
+            
+                if text.is_empty(){
+                    return Default::default();
+                }
+            
 
             dict.anagram_dict
                 .solve_for_word(text.as_str(), Default::default())
@@ -88,6 +93,8 @@ impl WordQuery {
             WordQuery::Range { min, max } => term.text.len() >= *min && term.text.len() <= *max,
             WordQuery::Length(len) => term.text.len() == *len,
             WordQuery::Pattern(p) => p.allow(term),
+            WordQuery::PartOfSpeech(pos) => term.meanings.iter().any(|m|m.part_of_speech == *pos),
+            WordQuery::Tag(tag) => term.meanings.iter().any(|m|m.tags.contains(*tag)),
         }
     }
 

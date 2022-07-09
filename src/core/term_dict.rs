@@ -46,9 +46,12 @@ impl TermDict {
             terms.push(term);
         }
 
-        terms.sort_by_key(|x|x.0);
-        let homographs = terms.into_iter().group_by(|a|a.0).into_iter().map(|x| Homograph{
-            text: x.0.to_string(),
+        terms.sort_by_key(|x|x.0.to_ascii_lowercase());
+        let homographs = terms
+        .into_iter()
+        .group_by(|a|a.0.to_ascii_lowercase())
+        .into_iter().map(|x| Homograph{
+            text: x.0,
             is_single_word: true,
             meanings: SmallVec::from_iter(x.1.map(|p|p.1))
 
