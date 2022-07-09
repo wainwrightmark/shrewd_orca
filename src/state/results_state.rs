@@ -1,6 +1,6 @@
 use crate::core::prelude::*;
-use crate::state::prelude::*;
 use crate::language::prelude::*;
+use crate::state::prelude::*;
 use itertools::Itertools;
 use num::ToPrimitive;
 use once_cell::sync::OnceCell;
@@ -11,14 +11,14 @@ use std::iter::Once;
 use std::rc::Rc;
 use yewdux::prelude::*;
 
-#[derive( Store, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Store, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[store(storage = "local")] // can also be "session"
-pub struct ResultsState{
-    pub data: Rc<Vec<Vec<Term>>> ,
-    pub warning: Option<String>
+pub struct ResultsState {
+    pub data: Rc<Vec<Vec<Term>>>,
+    pub warning: Option<String>,
 }
 
-static SOLVECONTEXT : OnceCell<SolveContext> = OnceCell::new();
+static SOLVECONTEXT: OnceCell<SolveContext> = OnceCell::new();
 
 pub fn get_solve_context() -> &'static SolveContext {
     SOLVECONTEXT.get_or_init(|| SolveContext::from_data())

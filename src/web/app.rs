@@ -58,7 +58,7 @@ pub fn diplay_box() -> Html {
         .as_ref()
         .clone();
 
-        log::debug!("Update Display box solved with {} solutions", terms.len());
+    log::debug!("Update Display box solved with {} solutions", terms.len());
 
     let rows = terms.iter().map(|t| row(t)).collect_vec();
 
@@ -72,9 +72,7 @@ pub fn diplay_box() -> Html {
 }
 
 pub fn row(terms: &Vec<Term>) -> Html {
-
-    let spans = terms.iter().map(|t|term_display(t)).collect_vec();
-    
+    let spans = terms.iter().map(|t| term_display(t)).collect_vec();
 
     html!(
         <tr>
@@ -83,12 +81,10 @@ pub fn row(terms: &Vec<Term>) -> Html {
     )
 }
 
-pub fn term_display(term: &Term) -> Html{
+pub fn term_display(term: &Term) -> Html {
     let text = term.text.to_owned() + " ";
     let definition = term.definition.to_owned();
     html!(
         <span style="border-bottom: none;" data-tooltip={definition}>{text} </span>
     )
-    
-
 }

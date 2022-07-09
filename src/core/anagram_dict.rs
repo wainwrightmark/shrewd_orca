@@ -138,14 +138,15 @@ impl<'b> Iterator for AnagramIterator<'b> {
                     self.used_words.pop();
                     self.stack.pop();
                     return Some(new_used);
-                }else {
+                } else {
                     previous.inner = next_key.inner + 1;
                     previous.len = next_key.len;
 
                     if next_key <= remainder && self.settings.allow(&remainder) {
-
-                        if self.settings.max_words == current_words + 2{
-                            if self.dict.words.contains_key(&remainder) && self.settings.allow(&remainder) {
+                        if self.settings.max_words == current_words + 2 {
+                            if self.dict.words.contains_key(&remainder)
+                                && self.settings.allow(&remainder)
+                            {
                                 let mut new_used = self.used_words.clone();
                                 new_used.push(next_key);
                                 new_used.push(remainder);
@@ -155,11 +156,10 @@ impl<'b> Iterator for AnagramIterator<'b> {
                             }
                             self.used_words.pop();
                             self.stack.pop();
-                        }
-                        else  {
+                        } else {
                             self.used_words.push(next_key);
                             self.stack.push((remainder, next_key))
-                        }                       
+                        }
                     }
                 }
             } else {
@@ -190,7 +190,13 @@ mod tests {
 
         let dict = AnagramDict::from(term_dict);
 
-        let solutions = dict.solve_for_word("clint eastwood", SolveSettings { min_word_length: 3, max_words: 3 });
+        let solutions = dict.solve_for_word(
+            "clint eastwood",
+            SolveSettings {
+                min_word_length: 3,
+                max_words: 3,
+            },
+        );
 
         let solutions_string = solutions
             .into_iter()
@@ -204,7 +210,15 @@ mod tests {
     }
 
     #[test_case("i react", "act ire cat", 3, 3, 10, "ire act; ire cat", name = "basic")]
-    #[test_case("clint eastwood", "Tito downscale", 3, 2, 10, "Tito downscale", name = "clint")]
+    #[test_case(
+        "clint eastwood",
+        "Tito downscale",
+        3,
+        2,
+        10,
+        "Tito downscale",
+        name = "clint"
+    )]
     #[test_case("chacha", "cha", 3, 3, 10, "cha cha", name = "repeat_word")]
     #[test_case(
         "i react",
