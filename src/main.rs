@@ -2,14 +2,13 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 #![allow(unused_parens)]
-//use crate::web::prelude::*;
+use crate::web::prelude::*;
 pub mod core;
 pub mod language;
 pub mod state;
 pub mod web;
 
 fn main() {
-    //wasm_logger::init(wasm_logger::Config::default());
-    //yew::Renderer::<App>::new().render();
-    todo!()
+    wasm_logger::init(wasm_logger::Config::default());
+    yew::Renderer::<App>::new().render();    
 }

@@ -10,10 +10,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
 #[grammar = "language/wordlang.pest"]
-pub struct ConvextParser;
+pub struct WordLangParser;
 
-pub fn parse(input: &str) -> Result<Question, String> {
-    let mut pairs = ConvextParser::parse(Rule::file, input).map_err(|e| e.to_string())?;        
+pub fn word_lang_parse(input: &str) -> Result<Question, String> {
+    let mut pairs = WordLangParser::parse(Rule::file, input).map_err(|e| e.to_string())?;        
     let next = pairs.next().unwrap();
     let question = next.into_inner().next().unwrap();
     let result = Question::try_parse(question);
@@ -113,12 +113,16 @@ impl CanParse for WordQuery{
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let inner = pair.into_inner().next().unwrap();
         let rule = inner.as_rule();
+        let s = inner.as_str();
 
         match  rule {
-            Rule::literal => Ok(WordQuery::Literal(inner.as_str().to_string())),
+            Rule::literal => Ok(WordQuery::Literal(s.to_string())),
             //Rule::manyany => Ok(WordQuery::ManyAny),
             Rule::any => Ok(WordQuery::Any),
-            Rule::length => Ok(WordQuery::Length(usize::from_str(inner.as_str()).unwrap())),
+            Rule::length =>{
+                
+                Ok(WordQuery::Length(usize::from_str(s).unwrap()))
+            } ,
             Rule::range => {
                 let mut range_inner  = inner.into_inner();
 

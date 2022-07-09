@@ -81,23 +81,28 @@ mod tests {
     use super::AnagramKey;
     use crate::core::prelude::*;
     use crate::language::prelude::*;
+    use ntest::test_case;
 
+    
+    #[test_case("5", 2, "thing; whole", name="length")]
+    #[test_case("6 7", 2, "entity benthos; entity someone", name="two lengths")]
+    #[test_case("red", 5, "red; red", name="literal")]
+    #[test_case("6..7", 3, "entity; object; benthos", name="range")]
 
-    #[test]
-    fn test_solve_with_term_dict() {
+    fn test_solve_with_term_dict(input:String, take: usize, expected: String) {
         let dict = TermDict::from_term_data().unwrap();
 
-        let p =  parse("6..7").unwrap();
+        let p =  word_lang_parse(input).unwrap();
 
         let solutions = p.solve(&dict, &Default::default());
 
         let solutions_string = solutions
             .into_iter()
             .sorted_by_key(|x| x.len())
-            .take(10)
+            .take(take)
             .map(|s| s.into_iter().map(|t| t.text).join(" "))
             .join("; ");
 
-        assert_eq!(solutions_string, "entity; object; benthos; someone; mortal; animal; native; matter; article; noesis")
+        assert_eq!(solutions_string, expected)
     }
 }
