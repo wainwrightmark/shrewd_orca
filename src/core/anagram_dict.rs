@@ -88,15 +88,15 @@ pub struct AnagramIterator<'b>
 //TODO const N
 {
     dict: &'b AnagramDict,
-    stack: SmallVec<[(AnagramKey, AnagramKey); 5]>,
+    stack: SmallVec<[(AnagramKey, Bound<AnagramKey>); 5]>,
     used_words: SmallVec<[AnagramKey; 5]>,
     settings: SolveSettings,
 }
 
 impl<'b> AnagramIterator<'b> {
     pub fn create(dict: &'b AnagramDict, key: AnagramKey, settings: SolveSettings) -> Self {
-        let mut stack = SmallVec::<[(AnagramKey, AnagramKey); 5]>::new();
-        stack.push((key, AnagramKey::EMPTY));
+        let mut stack = SmallVec::<[(AnagramKey, Bound<AnagramKey>); 5]>::new();
+        stack.push((key, Bound::Included(key)));
 
         Self {
             dict,
@@ -112,54 +112,41 @@ impl<'b> Iterator for AnagramIterator<'b> {
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.stack.is_empty() {
-            let current_words = self.used_words.len();
-            let (current_key, previous) = self.stack.last_mut().unwrap();
-
-            if previous > current_key {
-                //todo check previous squared
-                self.stack.pop();
-                self.used_words.pop();
-                continue;
-            }
+            let top = self.stack.last_mut().unwrap();
 
             if let Some((remainder, next_key)) = self
                 .dict
                 .words
-                .range((Bound::Included(*previous), Bound::Included(*current_key)))
+                .range((Bound::Unbounded, top.1))
+                .rev()
                 .filter(|(&next_key, _)| self.settings.allow(&next_key))
                 .filter_map(|(&next_key, _)| {
-                    (*current_key - next_key).map(|remainder| (remainder, next_key))
+                    (top.0 - next_key).map(|remainder| (remainder, next_key))
                 })
                 .next()
-            {
+            {       
+                top.1 = Bound:: Excluded(next_key);
+                
                 if remainder.is_empty() {
                     let mut new_used = self.used_words.clone();
-                    new_used.push(next_key);
-                    self.used_words.pop();
-                    self.stack.pop();
+                    new_used.push(next_key);                    
                     return Some(new_used);
-                } else {
-                    previous.inner = next_key.inner + 1;
-                    previous.len = next_key.len;
+                } else if self.settings.allow(&remainder) {
+                    if self.settings.max_words == self.used_words.len() + 2 {
 
-                    if next_key <= remainder && self.settings.allow(&remainder) {
-                        if self.settings.max_words == current_words + 2 {
-                            if self.dict.words.contains_key(&remainder)
-                                && self.settings.allow(&remainder)
-                            {
-                                let mut new_used = self.used_words.clone();
-                                new_used.push(next_key);
-                                new_used.push(remainder);
-                                self.used_words.pop();
-                                self.stack.pop();
-                                return Some(new_used);
-                            }
-                            self.used_words.pop();
-                            self.stack.pop();
-                        } else {
-                            self.used_words.push(next_key);
-                            self.stack.push((remainder, next_key))
+                        if remainder <= next_key && self.dict.words.contains_key(&remainder)
+                            && self.settings.allow(&remainder)
+                        {
+                            let mut new_used = self.used_words.clone();
+                            new_used.push(next_key);
+                            new_used.push(remainder);
+                            return Some(new_used);
                         }
+                        self.used_words.pop();
+                        self.stack.pop();
+                    } else {
+                        self.used_words.push(next_key);
+                        self.stack.push((remainder, Bound::Included(next_key) ))
                     }
                 }
             } else {
@@ -206,17 +193,17 @@ mod tests {
             .take(10)
             .join("; ");
 
-        assert_eq!(solutions_string, "nit tec Oswaldo; tin tec Oswaldo; note tic Oswald; tone tic Oswald; diet cot Lawson; diet otc Lawson; diet cot Lawson; diet otc Lawson; edit cot Lawson; edit otc Lawson")
+        assert_eq!(solutions_string, "downscale Tito; wainscoted lot; colonised Watt; colonised twat; desolation cwt; lacewood stint; downcast Eliot; anecdotist Low; anecdotist owl; dislocate town")
     }
 
-    #[test_case("i react", "act ire cat", 3, 3, 10, "ire act; ire cat", name = "basic")]
+    #[test_case("i react", "act ire cat", 3, 3, 10, "act ire; cat ire", name = "basic")]
     #[test_case(
         "clint eastwood",
-        "Tito downscale",
+        "downscale Tito",
         3,
         2,
         10,
-        "Tito downscale",
+        "downscale Tito",
         name = "clint"
     )]
     #[test_case("chacha", "cha", 3, 3, 10, "cha cha", name = "repeat_word")]
@@ -226,7 +213,7 @@ mod tests {
         3,
         2,
         10,
-        "ire act; ire cat",
+        "act ire; cat ire",
         name = "two_words"
     )]
     #[test_case(
@@ -235,7 +222,7 @@ mod tests {
         3,
         2,
         10,
-        "ire act; ire cat",
+        "act ire; cat ire",
         name = "min_word_length"
     )]
     fn test_solve(
