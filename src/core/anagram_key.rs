@@ -111,10 +111,9 @@ impl Display for AnagramKey {
         let mut rem = self.inner;
 
         if rem > 1 {
-            let mut i = 0;
-            for p in AnagramKey::PRIMESBYLETTER {
+            for (p,i) in AnagramKey::PRIMESBYLETTER.into_iter().enumerate() {
                 while rem % (p as u128) == 0 {
-                    let c = ('a' as u8) + i;
+                    let c = ('a' as u8) + (i as u8);
                     f.write_char(c as char)?;
                     rem /= p as u128;
 
@@ -122,8 +121,6 @@ impl Display for AnagramKey {
                         return std::fmt::Result::Ok(());
                     }
                 }
-
-                i += 1;
             }
             unreachable!()
         } else {
