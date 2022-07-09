@@ -1,6 +1,7 @@
 use std::{collections::BTreeMap, default, str::FromStr};
 
 use crate::core::prelude::*;
+use crate::language::prelude::*;
 use itertools::Itertools;
 use num::traits::ops::inv;
 use pest::iterators::{Pairs, Pair};
@@ -67,8 +68,11 @@ pub enum WordQuery{
     Any,
     Range{min: usize, max: usize},
     Length(usize),
+    Pattern(Pattern)
     //TODO disjunction, conjunction, part of speech, tag
 }
+
+
 
 pub trait CanParse where Self: Sized {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String>;
@@ -134,6 +138,10 @@ impl CanParse for WordQuery{
 
                 Ok(WordQuery::Range { min, max})
             },
+            Rule::pattern =>{
+                let pattern = Pattern::try_parse(inner)?;
+                Ok(WordQuery::Pattern(pattern))
+            }
             _ => {
                 unreachable!("unexpected rule {:?}", rule)
             }

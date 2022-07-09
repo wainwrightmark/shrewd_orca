@@ -27,15 +27,17 @@ impl<'a> TermDict<'a>{
             let mut parts = line.split('\t');
             let pos_lit = parts.next().ok_or("Missing POS")?;
             let text =  parts.next().ok_or("Missing Term")?;
+            let a_key = parts.next().ok_or("Missing Deinition")?;
+            let definition = parts.next().ok_or("Missing Deinition")?;
 
-            let tags: BitFlags<WordTag> = match text {
+            let tags: BitFlags<WordTag> = match pos_lit {
                 "f" => WordTag::FirstName.into(),
                 "l" => WordTag::LastName.into(),
                 _ => Default::default()
             };
             
             let part_of_speech = PartOfSpeech::from_str(pos_lit)?;
-            let term = Term{part_of_speech, text: text, is_single_word: true, tags};
+            let term = Term{part_of_speech, text: text, is_single_word: true, tags, definition};
             terms.push(term);
         }
         Ok(TermDict{terms})

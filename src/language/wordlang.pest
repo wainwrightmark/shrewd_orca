@@ -4,11 +4,16 @@ COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 question = {equation | expression}
 equation = {expression ~ equality_operator ~ expression}
 expression = {word*}
-word = {literal | any | range | length  } //manyany
+word = ${ pattern | literal |  any | range | length  } //manyany
 literal = @{ASCII_ALPHA+}
+question_marks = @{"?"+}
+pattern = ${
+&(any? ~ (literal | question_marks) ) ~ 
+&(literal? ~ (any | question_marks) ) ~ 
+(literal | question_marks | any)+}
 //manyany = {"**"}
-any = {"*"}
+any = @{"*"+}
 length = @{ASCII_DIGIT+}
 range = ${length ~ ".." ~ length}
-//conjuction, disjunction, keyword, tag, length, range, wildcard
+//conjuction, disjunction, keyword, tag,  wildcard
 equality_operator = { "=a"}

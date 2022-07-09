@@ -24,6 +24,7 @@ yewdux = { git = "https://github.com/intendednull/yewdux.git" }
 rand = {version = "0.8"}
 getrandom = {version="0.2", features=["js"]}
 
+regex= {version="1.6", features=["std", "perf",  ]}
 wasm-logger = "0.2"
 wasm-bindgen-futures = "0.4"
 wasm-bindgen= { version = "0.2", features = ["serde"] }

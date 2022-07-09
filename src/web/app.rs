@@ -72,11 +72,23 @@ pub fn diplay_box() -> Html {
 }
 
 pub fn row(terms: &Vec<Term>) -> Html {
-    let str = terms.iter().map(|x| x.text).join(" ");
+
+    let spans = terms.iter().map(|t|term_display(t)).collect_vec();
+    
 
     html!(
         <tr>
-            <td>{str}</td>
+            <td>{spans}</td>
         </tr>
     )
+}
+
+pub fn term_display(term: &Term) -> Html{
+    let text = term.text.to_owned() + " ";
+    let definition = term.definition.to_owned();
+    html!(
+        <span style="border-bottom: none;" data-tooltip={definition}>{text} </span>
+    )
+    
+
 }

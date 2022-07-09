@@ -51,6 +51,7 @@ impl WordQuery{
             WordQuery::Any => true,
             WordQuery::Range { min, max } => term.text.len() >= *min && term.text.len() <= *max,
             WordQuery::Length(len) => term.text.len() == *len,
+            WordQuery::Pattern(p)=> p.allow(term)
         }
     }
 
@@ -88,6 +89,8 @@ mod tests {
     #[test_case("6 7", 2, "entity benthos; entity someone", name="two lengths")]
     #[test_case("red", 5, "red; red", name="literal")]
     #[test_case("6..7", 3, "entity; object; benthos", name="range")]
+    #[test_case("b?d", 6, "bid; bed; bad; bod; bud; bed", name="pattern")]
+    #[test_case("b*d", 6, "beachhead; bound; bloodshed; blend; backbend; backhand", name="pattern with any")]
 
     fn test_solve_with_term_dict(input:String, take: usize, expected: String) {
         let dict = TermDict::from_term_data().unwrap();

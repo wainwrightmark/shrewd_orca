@@ -8,7 +8,8 @@ pub struct Term<'a>{
     pub part_of_speech: PartOfSpeech,
     pub text: &'a str,
     pub tags: BitFlags<WordTag>,
-    pub is_single_word: bool
+    pub is_single_word: bool,
+    pub definition: &'a str
 }
 
 impl<'a> PartialOrd for Term<'a>{

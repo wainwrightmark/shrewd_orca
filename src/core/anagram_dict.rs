@@ -202,6 +202,7 @@ mod tests {
             text,
             tags: Default::default(),
             is_single_word: true,
+            definition: ""
         });
 
         let dict = AnagramDict::from(words);
@@ -224,6 +225,7 @@ mod tests {
             text,
             tags: Default::default(),
             is_single_word: true,
+            definition: ""
         });
 
         let dict = AnagramDict::from(words);
@@ -241,6 +243,7 @@ mod tests {
             text,
             tags: Default::default(),
             is_single_word: true,
+            definition: ""
         });
 
         let dict = AnagramDict::from(words);
