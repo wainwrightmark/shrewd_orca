@@ -72,7 +72,11 @@ pub enum WordQuery{
     //TODO disjunction, conjunction, part of speech, tag
 }
 
-
+impl WordQuery {
+    pub fn is_literal(&self)-> bool{
+        matches!(self, WordQuery:: Literal(_))
+    }
+}
 
 pub trait CanParse where Self: Sized {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String>;

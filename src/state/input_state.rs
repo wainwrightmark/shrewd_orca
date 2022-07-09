@@ -42,7 +42,7 @@ impl InputState {
             let r = word_lang_parse(&self.text); 
             match r {
                 Ok(question) => {                    
-                    let sol = question.solve(get_term_dict(), &Default::default()).clone();
+                    let sol = question.solve(get_solve_context(), &Default::default()).clone();
                     debug!("Question solved with {} solutions", sol.len());
                     
 

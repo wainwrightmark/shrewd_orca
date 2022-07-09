@@ -16,7 +16,7 @@ pub struct AnagramDict {
 
 impl From<TermDict> for AnagramDict {
     fn from(term_dict: TermDict) -> Self {
-        let terms = term_dict.terms;
+        let terms = term_dict.terms.clone();
 
         Self::from(terms.into_iter())
     }
@@ -36,7 +36,7 @@ impl<'a, T: Iterator<Item = Term>> From<T> for AnagramDict {
 }
 
 impl AnagramDict {
-    fn solve_for_word(
+    pub fn solve_for_word(
         &self,
         word: &str,
         settings: SolveSettings,
@@ -144,7 +144,7 @@ impl<'b> Iterator for AnagramIterator<'b> {
 
                     if next_key <= remainder && self.settings.allow(&remainder) {
 
-                        if self.settings.max_words == current_words + 1{
+                        if self.settings.max_words == current_words + 2{
                             if self.dict.words.contains_key(&remainder) && self.settings.allow(&remainder) {
                                 let mut new_used = self.used_words.clone();
                                 new_used.push(next_key);
@@ -153,9 +153,10 @@ impl<'b> Iterator for AnagramIterator<'b> {
                                 self.stack.pop();
                                 return Some(new_used);
                             }
-
+                            self.used_words.pop();
+                            self.stack.pop();
                         }
-                        else{
+                        else  {
                             self.used_words.push(next_key);
                             self.stack.push((remainder, next_key))
                         }                       
@@ -193,13 +194,13 @@ mod tests {
 
         let solutions_string = solutions
             .into_iter()
-            .sorted_by_key(|x| x.len())
+            //.sorted_by_key(|x| x.len())
             .map(|s| s.into_iter().map(|t| t.text).join(" "))
             .dedup()
             .take(10)
             .join("; ");
 
-        assert_eq!(solutions_string, "Tito downscale; lot wainscoted; Watt colonised; twat colonised; cwt desolation; stint lacewood; Eliot downcast; Low anecdotist; owl anecdotist; town dislocate")
+        assert_eq!(solutions_string, "nit tec Oswaldo; tin tec Oswaldo; note tic Oswald; tone tic Oswald; diet cot Lawson; diet otc Lawson; diet cot Lawson; diet otc Lawson; edit cot Lawson; edit otc Lawson")
     }
 
     #[test_case("i react", "act ire cat", 3, 3, 10, "ire act; ire cat", name = "basic")]

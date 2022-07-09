@@ -14,13 +14,28 @@ impl Default for SolveSettings{
     }
 }
 
+pub struct SolveContext
+{
+    pub term_dict: TermDict,
+    pub anagram_dict: AnagramDict
+}
+
+impl SolveContext{
+    pub fn from_data()-> SolveContext{
+        let term_dict = TermDict::from_term_data().unwrap();
+        let anagram_dict = AnagramDict::from(term_dict.terms.clone().into_iter());
+
+        SolveContext { term_dict, anagram_dict }
+    }
+}
+
 pub trait Solvable{
-    fn solve(&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Vec<Term>>;
+    fn solve(&self, dict: & SolveContext, settings: &SolveSettings) -> Vec<Vec<Term>>;
 }
 
 impl Solvable for Question
 {
-    fn solve(&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Vec<Term>>{
+    fn solve(&self, dict: & SolveContext, settings: &SolveSettings) -> Vec<Vec<Term>>{
         match self {
             Question::Expression(ex) => ex.solve(dict, settings),
             Question::Equation(eq) => eq.solve(dict, settings),
@@ -29,16 +44,30 @@ impl Solvable for Question
 }
 
 impl Solvable for Expression{
-    fn solve(&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Vec<Term>>{
-        let solutions =  self.words.iter().map(|w|w.solve(dict, settings)).multi_cartesian_product() 
-        .take(settings.max_solutions).collect_vec();
+    fn solve(&self, dict: & SolveContext, settings: &SolveSettings) -> Vec<Vec<Term>>{
 
-        solutions
+
+        if self.words.iter().all(|w|w.is_literal()){
+            let text = self.words.iter().map(|wq| match wq{
+                WordQuery::Literal(s)=> s,
+                _=>unreachable!()
+            }).join("sep");
+
+            dict.anagram_dict.solve_for_word(text.as_str(), Default::default()).take(settings.max_solutions).collect_vec()
+        }
+        else{
+            let solutions =  self.words.iter().map(|w|w.solve(&dict.term_dict, settings)).multi_cartesian_product() 
+            .take(settings.max_solutions).collect_vec();
+    
+            solutions
+        }
+
+        
     }
 }
 
 impl Solvable for Equation{
-    fn solve(&self, dict: & TermDict, settings: &SolveSettings) -> Vec<Vec<Term>>{
+    fn solve(&self, dict: & SolveContext, settings: &SolveSettings) -> Vec<Vec<Term>>{
         todo!()
     }
 }
@@ -93,11 +122,11 @@ mod tests {
     #[test_case("b*d", 6, "beachhead; bound; bloodshed; blend; backbend; backhand", name="pattern with any")]
 
     fn test_solve_with_term_dict(input:String, take: usize, expected: String) {
-        let dict = TermDict::from_term_data().unwrap();
+        let context = SolveContext::from_data();
 
         let p =  word_lang_parse(input).unwrap();
 
-        let solutions = p.solve(&dict, &Default::default());
+        let solutions = p.solve(&context, &Default::default());
 
         let solutions_string = solutions
             .into_iter()

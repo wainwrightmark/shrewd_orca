@@ -1,11 +1,13 @@
 use crate::core::prelude::*;
 use crate::state::prelude::*;
+use crate::language::prelude::*;
 use itertools::Itertools;
 use num::ToPrimitive;
 use once_cell::sync::OnceCell;
 use serde::*;
 use std::collections::BTreeMap;
 use std::default;
+use std::iter::Once;
 use std::rc::Rc;
 use yewdux::prelude::*;
 
@@ -16,8 +18,8 @@ pub struct ResultsState{
     pub warning: Option<String>
 }
 
-static TERMDICT : OnceCell<TermDict> = OnceCell::new();
+static SOLVECONTEXT : OnceCell<SolveContext> = OnceCell::new();
 
-pub fn get_term_dict() -> &'static TermDict {
-    TERMDICT.get_or_init(|| TermDict::from_term_data().unwrap())
+pub fn get_solve_context() -> &'static SolveContext {
+    SOLVECONTEXT.get_or_init(|| SolveContext::from_data())
 }
