@@ -21,5 +21,5 @@ pub struct ResultsState {
 static SOLVECONTEXT: OnceCell<SolveContext> = OnceCell::new();
 
 pub fn get_solve_context() -> &'static SolveContext {
-    SOLVECONTEXT.get_or_init(|| SolveContext::from_data())
+    SOLVECONTEXT.get_or_init(SolveContext::from_data)
 }

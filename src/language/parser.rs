@@ -17,8 +17,8 @@ pub fn word_lang_parse(input: &str) -> Result<Question, String> {
     let mut pairs = WordLangParser::parse(Rule::file, input).map_err(|e| e.to_string())?;
     let next = pairs.next().unwrap();
     let question = next.into_inner().next().unwrap();
-    let result = Question::try_parse(question);
-    result
+    
+    Question::try_parse(question)
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]

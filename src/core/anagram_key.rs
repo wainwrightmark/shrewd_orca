@@ -25,7 +25,7 @@ impl PartialOrd for AnagramKey {
 }
 
 impl AnagramKey {
-    pub fn is_empty(self: &Self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.inner == 1
     }
 
@@ -113,7 +113,7 @@ impl Display for AnagramKey {
         if rem > 1 {
             for (p,i) in AnagramKey::PRIMESBYLETTER.into_iter().enumerate() {
                 while rem % (p as u128) == 0 {
-                    let c = ('a' as u8) + (i as u8);
+                    let c = b'a' + (i as u8);
                     f.write_char(c as char)?;
                     rem /= p as u128;
 
@@ -124,7 +124,7 @@ impl Display for AnagramKey {
             }
             unreachable!()
         } else {
-            return f.write_char('!');
+            f.write_char('!')
         }
     }
 }

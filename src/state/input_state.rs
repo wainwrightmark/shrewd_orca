@@ -27,9 +27,9 @@ impl Default for InputState {
 }
 
 impl InputState {
-    pub fn change(self: &mut Self, s: String) {
+    pub fn change(&mut self, s: String) {
         if self.text == s {
-            return;
+            
         } else {
             self.text = s;
 
@@ -38,7 +38,7 @@ impl InputState {
                 Ok(question) => {
                     let sol = question
                         .solve(get_solve_context(), &Default::default())
-                        .clone();
+                        ;
                     debug!("Question solved with {} solutions", sol.len());
 
                     Dispatch::<ResultsState>::new().set(ResultsState {

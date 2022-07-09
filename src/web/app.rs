@@ -60,7 +60,7 @@ pub fn diplay_box() -> Html {
 
     log::debug!("Update Display box solved with {} solutions", terms.len());
 
-    let rows = terms.iter().map(|t| row(t)).collect_vec();
+    let rows = terms.iter().map(row).collect_vec();
 
     html!(
         <table>
@@ -72,7 +72,7 @@ pub fn diplay_box() -> Html {
 }
 
 pub fn row(terms: &Vec<Term>) -> Html {
-    let spans = terms.iter().map(|t| term_display(t)).collect_vec();
+    let spans = terms.iter().map(term_display).collect_vec();
 
     html!(
         <tr>

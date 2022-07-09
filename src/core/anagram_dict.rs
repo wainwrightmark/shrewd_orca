@@ -16,7 +16,7 @@ pub struct AnagramDict {
 
 impl From<TermDict> for AnagramDict {
     fn from(term_dict: TermDict) -> Self {
-        let terms = term_dict.terms.clone();
+        let terms = term_dict.terms;
 
         Self::from(terms.into_iter())
     }
@@ -52,14 +52,14 @@ impl AnagramDict {
     ) -> impl '_ + Iterator<Item = Vec<Term>> {
         let iterator = AnagramIterator::create(self, key, settings);
 
-        let solutions = iterator.flat_map(|solution| {
+        
+
+        iterator.flat_map(|solution| {
             solution
                 .into_iter()
                 .map(|k| self.words.get(&k).unwrap().clone()) //Note if terms with the same text, they will each be returned
                 .multi_cartesian_product()
-        });
-
-        solutions
+        })
     }
 }
 
@@ -168,7 +168,7 @@ impl<'b> Iterator for AnagramIterator<'b> {
             }
         }
 
-        return None;
+        None
     }
 }
 
@@ -297,7 +297,7 @@ mod tests {
         let terms = dict
             .words
             .values()
-            .flat_map(|x| x)
+            .flatten()
             .map(|x| x.text.clone())
             .join(";");
         assert_eq!(terms, "ire;ire;act;act;cat;cat")
