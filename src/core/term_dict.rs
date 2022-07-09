@@ -1,13 +1,15 @@
 use std::str::FromStr;
 
 use enumflags2::BitFlags;
+use itertools::Itertools;
 use serde::Deserialize;
+use smallvec::SmallVec;
 
-use super::term::{PartOfSpeech, Term, WordTag};
+use crate::core::prelude::*;
 
 #[derive(Debug)]
 pub struct TermDict {
-    pub terms: Vec<Term>,
+    pub homographs: Vec<Homograph>,
 }
 
 impl TermDict {
@@ -17,7 +19,7 @@ impl TermDict {
     }
 
     pub fn from_csv(s: &str) -> Result<Self, String> {
-        let mut terms = Vec::new();
+        let mut terms: Vec<(&str, Meaning)> = Vec::new();
 
         for line in s.split_terminator('\n') {
             let mut parts = line.split('\t');
@@ -33,16 +35,27 @@ impl TermDict {
             };
 
             let part_of_speech = PartOfSpeech::from_str(pos_lit)?;
-            let term = Term {
+            let term =
+            (text,
+            Meaning{
                 part_of_speech,
-                text: text.to_string(),
-                is_single_word: true,
                 tags,
                 definition: definition.to_string(),
-            };
+            }
+            );
             terms.push(term);
         }
-        Ok(TermDict { terms })
+
+        terms.sort_by_key(|x|x.0);
+        let homographs = terms.into_iter().group_by(|a|a.0).into_iter().map(|x| Homograph{
+            text: x.0.to_string(),
+            is_single_word: true,
+            meanings: SmallVec::from_iter(x.1.map(|p|p.1))
+
+        }).collect_vec()
+        ;
+
+        Ok(TermDict { homographs })
     }
 }
 

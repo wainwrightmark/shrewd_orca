@@ -2,33 +2,31 @@ use std::str::FromStr;
 
 use enumflags2::{bitflags, make_bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
+use smallvec::SmallVec;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Term {
-    pub part_of_speech: PartOfSpeech,
+pub struct Homograph{
     pub text: String,
-    pub tags: BitFlags<WordTag>,
     pub is_single_word: bool,
+    pub meanings: SmallVec<[Meaning; 2]>
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Meaning {
+    pub part_of_speech: PartOfSpeech,    
+    pub tags: BitFlags<WordTag>,    
     pub definition: String,
 }
 
-impl PartialOrd for Term {
+impl PartialOrd for Homograph {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match self.text.partial_cmp(&other.text) {
-            Some(core::cmp::Ordering::Equal) => {}
-            ord => return ord,
-        }
-        self.is_single_word.partial_cmp(&other.is_single_word)
+        self.text.partial_cmp(&other.text)
     }
 }
 
-impl Ord for Term {
+impl Ord for Homograph {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match self.text.cmp(&other.text) {
-            core::cmp::Ordering::Equal => {}
-            ord => return ord,
-        }
-        self.is_single_word.cmp(&other.is_single_word)
+        self.text.cmp(&other.text)
     }
 }
 

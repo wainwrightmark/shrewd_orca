@@ -71,7 +71,7 @@ pub fn diplay_box() -> Html {
     )
 }
 
-pub fn row(terms: &Vec<Term>) -> Html {
+pub fn row(terms: &Vec<Homograph>) -> Html {
     let spans = terms.iter().map(term_display).collect_vec();
 
     html!(
@@ -81,10 +81,18 @@ pub fn row(terms: &Vec<Term>) -> Html {
     )
 }
 
-pub fn term_display(term: &Term) -> Html {
+pub fn term_display(term: &Homograph) -> Html {
     let text = term.text.to_owned() + " ";
-    let definition = term.definition.to_owned();
-    html!(
-        <span style="border-bottom: none;" data-tooltip={definition}>{text} </span>
-    )
+
+    if let Some(definition) = term.meanings.first().map(|x|x.definition.clone()){
+        html!(
+            <span style="border-bottom: none;" data-tooltip={definition}>{text} </span>
+        )
+    }
+    else{
+        html!(
+            <span style="border-bottom: none;" >{text} </span>
+        )
+    }
+    
 }

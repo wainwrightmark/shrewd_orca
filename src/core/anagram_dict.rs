@@ -11,18 +11,18 @@ use std::{
 use crate::core::prelude::*;
 
 pub struct AnagramDict {
-    pub words: BTreeMap<AnagramKey, Vec<Term>>,
+    pub words: BTreeMap<AnagramKey, Vec<Homograph>>,
 }
 
 impl From<TermDict> for AnagramDict {
     fn from(term_dict: TermDict) -> Self {
-        let terms = term_dict.terms;
+        let terms = term_dict.homographs;
 
         Self::from(terms.into_iter())
     }
 }
 
-impl<'a, T: Iterator<Item = Term>> From<T> for AnagramDict {
+impl<'a, T: Iterator<Item = Homograph>> From<T> for AnagramDict {
     fn from(iter: T) -> Self {
         let groups = iter
             .sorted()
@@ -40,7 +40,7 @@ impl AnagramDict {
         &self,
         word: &str,
         settings: SolveSettings,
-    ) -> impl '_ + Iterator<Item = Vec<Term>> {
+    ) -> impl '_ + Iterator<Item = Vec<Homograph>> {
         let key = AnagramKey::from_str(word).unwrap();
         self.solve(key, settings)
     }
@@ -49,7 +49,7 @@ impl AnagramDict {
         &self,
         key: AnagramKey,
         settings: SolveSettings,
-    ) -> impl '_ + Iterator<Item = Vec<Term>> {
+    ) -> impl '_ + Iterator<Item = Vec<Homograph>> {
         let iterator = AnagramIterator::create(self, key, settings);
 
         
@@ -233,12 +233,10 @@ mod tests {
         take: usize,
         expect: String,
     ) {
-        let words = terms.split_ascii_whitespace().map(|text| Term {
-            part_of_speech: PartOfSpeech::Noun,
+        let words = terms.split_ascii_whitespace().map(|text| Homograph {
             text: text.to_string(),
-            tags: Default::default(),
             is_single_word: true,
-            definition: "".to_string(),
+            meanings: Default::default()
         });
 
         let dict = AnagramDict::from(words);
@@ -266,16 +264,10 @@ mod tests {
         let words = "act ire cat act ire cat"
             .split_ascii_whitespace()
             .enumerate()
-            .map(|(position, text)| Term {
-                part_of_speech: if position < 3 {
-                    PartOfSpeech::Noun
-                } else {
-                    PartOfSpeech::Verb
-                },
+            .map(|(position, text)| Homograph {
                 text: text.to_string(),
-                tags: Default::default(),
                 is_single_word: true,
-                definition: "".to_string(),
+                meanings: Default::default()
             });
 
         let dict = AnagramDict::from(words);

@@ -14,7 +14,7 @@ use yewdux::prelude::*;
 #[derive(Store, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[store(storage = "local")] // can also be "session"
 pub struct ResultsState {
-    pub data: Rc<Vec<Vec<Term>>>,
+    pub data: Rc<Vec<Vec<Homograph>>>,
     pub warning: Option<String>,
 }
 

@@ -22,7 +22,7 @@ pub struct SolveContext {
 impl SolveContext {
     pub fn from_data() -> SolveContext {
         let term_dict = TermDict::from_term_data().unwrap();
-        let anagram_dict = AnagramDict::from(term_dict.terms.clone().into_iter());
+        let anagram_dict = AnagramDict::from(term_dict.homographs.clone().into_iter());
 
         SolveContext {
             term_dict,
@@ -32,11 +32,11 @@ impl SolveContext {
 }
 
 pub trait Solvable {
-    fn solve(&self, dict: &SolveContext, settings: &SolveSettings) -> Vec<Vec<Term>>;
+    fn solve(&self, dict: &SolveContext, settings: &SolveSettings) -> Vec<Vec<Homograph>>;
 }
 
 impl Solvable for Question {
-    fn solve(&self, dict: &SolveContext, settings: &SolveSettings) -> Vec<Vec<Term>> {
+    fn solve(&self, dict: &SolveContext, settings: &SolveSettings) -> Vec<Vec<Homograph>> {
         match self {
             Question::Expression(ex) => ex.solve(dict, settings),
             Question::Equation(eq) => eq.solve(dict, settings),
@@ -45,7 +45,7 @@ impl Solvable for Question {
 }
 
 impl Solvable for Expression {
-    fn solve(&self, dict: &SolveContext, settings: &SolveSettings) -> Vec<Vec<Term>> {
+    fn solve(&self, dict: &SolveContext, settings: &SolveSettings) -> Vec<Vec<Homograph>> {
         if self.words.iter().all(|w| w.is_literal()) {
             let text = self
                 .words
@@ -75,13 +75,13 @@ impl Solvable for Expression {
 }
 
 impl Solvable for Equation {
-    fn solve(&self, dict: &SolveContext, settings: &SolveSettings) -> Vec<Vec<Term>> {
+    fn solve(&self, dict: &SolveContext, settings: &SolveSettings) -> Vec<Vec<Homograph>> {
         todo!()
     }
 }
 
 impl WordQuery {
-    pub fn allow(&self, term: &Term) -> bool {
+    pub fn allow(&self, term: &Homograph) -> bool {
         match self {
             WordQuery::Literal(l) => term.text.eq_ignore_ascii_case(l),
             WordQuery::Any => true,
@@ -92,15 +92,15 @@ impl WordQuery {
     }
 
     ///Find the solution of there is a single solution
-    pub fn find(&self, dict: &TermDict) -> Option<Term> {
+    pub fn find(&self, dict: &TermDict) -> Option<Homograph> {
         None //TODO implement for Literal
     }
 
-    pub fn solve(&self, dict: &TermDict, settings: &SolveSettings) -> Vec<Term> {
+    pub fn solve(&self, dict: &TermDict, settings: &SolveSettings) -> Vec<Homograph> {
         if let Some(solution) = self.find(dict) {
             vec![solution]
         } else {
-            dict.terms
+            dict.homographs
                 .iter()
                 .filter(|t| self.allow(t))
                 .take(settings.max_solutions)

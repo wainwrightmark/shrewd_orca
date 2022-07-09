@@ -40,7 +40,7 @@ impl CanParse for Pattern {
 }
 
 impl Pattern {
-    pub fn allow(&self, term: &Term) -> bool {
+    pub fn allow(&self, term: &Homograph) -> bool {
         self.regex.is_match(&term.text)
     }
 }
