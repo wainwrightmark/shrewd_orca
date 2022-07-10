@@ -7,11 +7,19 @@ use num::traits::ops::inv;
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest_derive::Parser;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
 #[grammar = "language/wordlang.pest"]
 pub struct WordLangParser;
+
+pub trait CanParse
+where
+    Self: Sized,
+{
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, String>;
+}
 
 pub fn word_lang_parse(input: &str) -> Result<Question, String> {
     let mut pairs = WordLangParser::parse(Rule::file, input).map_err(|e| e.to_string())?;
@@ -21,11 +29,33 @@ pub fn word_lang_parse(input: &str) -> Result<Question, String> {
     Question::try_parse(question)
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub enum Question {
-    Expression(Expression),
-    Equation(Equation),
+impl CanParse for Pattern {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+        let components: Vec<PatternComponent> = pair
+            .into_inner()
+            .map(PatternComponent::try_parse)
+            .try_collect()?;
+
+        let regex_str = "^".to_owned() + &components.iter().map(|x| x.regex_str()).join("") + "$";
+
+        let regex = Regex::new(regex_str.as_str()).unwrap();
+
+        Ok(Pattern { components, regex })
+    }
 }
+
+impl CanParse for PatternComponent {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+        match pair.as_rule() {
+            Rule::question_marks => Ok(PatternComponent::AnyChar(pair.as_str().len())),
+            Rule::any => Ok(PatternComponent::Any),
+
+            Rule::literal => Ok(PatternComponent::Literal(pair.as_str().to_string())),
+            _ => unreachable!(),
+        }
+    }
+}
+
 
 impl CanParse for Question {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
@@ -38,47 +68,19 @@ impl CanParse for Question {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub struct Equation {
-    left: Expression,
-    operator: EqualityOperator,
-    right: Expression,
-}
+impl CanParse for Expression {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+        let words_result: Result<Vec<WordQuery>, String> =
+            pair.into_inner().map(WordQuery::try_parse).collect();
+        let words = words_result?;
 
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub struct Expression {
-    pub words: Vec<WordQuery>,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum EqualityOperator {
-    Anagram,
-}
-
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub enum WordQuery {
-    Literal(String),
-    PartOfSpeech(PartOfSpeech),
-    Tag(WordTag),
-    //ManyAny,
-    Any,
-    Range { min: usize, max: usize },
-    Length(usize),
-    Pattern(Pattern), //TODO disjunction, conjunction, part of speech, tag
-}
-
-impl WordQuery {
-    pub fn is_literal(&self) -> bool {
-        matches!(self, WordQuery::Literal(_))
+        Ok(Expression { words })
     }
 }
 
-pub trait CanParse
-where
-    Self: Sized,
-{
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String>;
-}
+
+
+
 
 impl FromStr for EqualityOperator {
     type Err = String;
@@ -110,15 +112,8 @@ impl CanParse for EqualityOperator {
         EqualityOperator::from_str(pair.as_str())
     }
 }
-impl CanParse for Expression {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
-        let words_result: Result<Vec<WordQuery>, String> =
-            pair.into_inner().map(WordQuery::try_parse).collect();
-        let words = words_result?;
 
-        Ok(Expression { words })
-    }
-}
+
 impl CanParse for WordQuery {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let inner = pair.into_inner().next().unwrap();

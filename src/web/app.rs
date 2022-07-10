@@ -71,8 +71,8 @@ pub fn diplay_box() -> Html {
     )
 }
 
-pub fn row(terms: &Vec<Homograph>) -> Html {
-    let spans = terms.iter().map(term_display).collect_vec();
+pub fn row(solution: &Solution) -> Html {
+    let spans = solution.homographs .iter().map(term_display).collect_vec();
 
     html!(
         <tr>

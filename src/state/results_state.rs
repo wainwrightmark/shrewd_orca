@@ -14,12 +14,12 @@ use yewdux::prelude::*;
 #[derive(Store, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[store(storage = "local")] // can also be "session"
 pub struct ResultsState {
-    pub data: Rc<Vec<Vec<Homograph>>>,
+    pub data: Rc<Vec<Solution>>,
     pub warning: Option<String>,
 }
 
-static SOLVECONTEXT: OnceCell<SolveContext> = OnceCell::new();
+static SOLVECONTEXT: OnceCell<WordContext> = OnceCell::new();
 
-pub fn get_solve_context() -> &'static SolveContext {
-    SOLVECONTEXT.get_or_init(SolveContext::from_data)
+pub fn get_solve_context() -> &'static WordContext {
+    SOLVECONTEXT.get_or_init(WordContext::from_data)
 }
