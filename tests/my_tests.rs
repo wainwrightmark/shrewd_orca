@@ -12,6 +12,10 @@ use word_playground::language::prelude::*;
     #[test_case("6..7")]
     #[test_case("b?d")]
     #[test_case("b*d")]
+    #[test_case("!n")]
+    #[test_case("!v")]
+    #[test_case("!a")]
+    #[test_case("!j")]
 
     fn test_solve_with_term_dict(input: String    ) {
         let context = WordContext::from_data();
