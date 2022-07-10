@@ -16,15 +16,6 @@ pub struct Expression {
     pub words: Vec<WordQuery>,
 }
 
-
-
-impl Expression{
-    pub fn allow(solution: &Vec<Homograph>)-> bool{
-        todo!()
-    }
-}
-
-
 impl Expression {
     pub fn solve<'a> (&'a self, dict: &'a WordContext) -> impl Iterator<Item = ExpressionSolution> +'a {
         let solutions = self
@@ -43,7 +34,31 @@ impl Expression {
     }
 
 
-    pub fn accept(&self, solution: &ExpressionSolution) -> bool{
+    pub fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution>{
+        if solution.homographs.len() != self.words.len(){
+            return None;
+        }
+
+        if self.allow(&solution){
+            return Some(solution);
+        }
+
+        if !self.words.iter().all(|w|  solution.homographs.iter().any(|h| w.allow(h))){
+            return None;
+        }
+
+        for combination in solution.homographs.into_iter().combinations(self.words.len()){
+            for (w, h) in self.words.iter().zip(combination.iter()){
+                if !w.allow(&h){
+                    continue;
+                }
+            }
+            return Some(ExpressionSolution{homographs: SmallVec::from_vec(combination)})
+        }
+        return None;
+    }
+
+    fn allow(&self, solution: &ExpressionSolution) -> bool{
         if solution.homographs.len() == self.words.len(){
 
             for (w, h) in self.words.iter().zip(solution.homographs.iter()){

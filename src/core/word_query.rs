@@ -1,18 +1,19 @@
+use auto_enums::auto_enum;
 use itertools::{Itertools, MultiProduct};
 use smallvec::SmallVec;
 use std::{
     collections::{BTreeMap, HashMap},
     future::Future,
-    iter::{FlatMap, Once},
+    iter::{self, FlatMap, Once},
     ops::Bound,
     str::FromStr,
 };
 
-use crate::{core::prelude::*};
+use crate::core::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum WordQuery {
-    Literal(String),
+    Literal(Homograph),
     PartOfSpeech(PartOfSpeech),
     Tag(WordTag),
     //ManyAny,
@@ -31,30 +32,34 @@ impl WordQuery {
 impl WordQuery {
     pub fn allow(&self, term: &Homograph) -> bool {
         match self {
-            WordQuery::Literal(l) => term.text.eq_ignore_ascii_case(l),
+            WordQuery::Literal(l) => term.text.eq_ignore_ascii_case(&l.text),
             WordQuery::Any => true,
             WordQuery::Range { min, max } => term.text.len() >= *min && term.text.len() <= *max,
             WordQuery::Length(len) => term.text.len() == *len,
             WordQuery::Pattern(p) => p.allow(term),
-            WordQuery::PartOfSpeech(pos) => term.meanings.iter().any(|m|m.part_of_speech == *pos),
-            WordQuery::Tag(tag) => term.meanings.iter().any(|m|m.tags.contains(*tag)),
+            WordQuery::PartOfSpeech(pos) => term.meanings.iter().any(|m| m.part_of_speech == *pos),
+            WordQuery::Tag(tag) => term.meanings.iter().any(|m| m.tags.contains(*tag)),
         }
     }
 
-    pub fn solve<'a> (&'a self, dict: &'a TermDict) -> impl Iterator<Item = &'a Homograph>  +'a + Clone
+    #[auto_enum(Iterator, Clone)]
+
+    pub fn solve<'a>(&'a self, dict: &'a TermDict) -> impl Iterator<Item = &'a Homograph> + 'a + Clone
     {
-        //TODO use indexes in some cases
+        //TODO use indexes in some case
+        match self {
+            WordQuery::Literal(l) => {
+                //let h = Homograph { text: l.clone(), is_single_word: true, meanings: Default::default() };
+                std::iter::once( l)
+                //std::iter::empty()
+            }
+            _ => {
+                let homographs = dict.homographs.iter().filter(|t| self.allow(t));
 
-        let homographs = dict.homographs
-        .iter()
-        .filter(|t| self.allow(t));
-
-        homographs
+                homographs
+            }
+        }
     }
 }
 
-
-pub struct WordQueryIter{
-
-}
-
+pub struct WordQueryIter {}

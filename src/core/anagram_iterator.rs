@@ -69,8 +69,6 @@ impl<'b> Iterator for AnagramIterator<'b> {
                             new_used.push(remainder);
                             return Some(new_used);
                         }
-                        self.used_words.pop();
-                        self.stack.pop();
                     } else {
                         self.used_words.push(next_key);
                         self.stack.push((remainder, Bound::Included(next_key) ))

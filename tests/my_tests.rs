@@ -4,7 +4,12 @@ use word_playground::language::prelude::*;
 
  use ntest::test_case;
 
-     #[test_case("5")]
+    
+ 
+ #[test_case("clint eastwood =a !n !j")]
+ #[test_case("clint eastwood =a * *")]
+  
+ #[test_case("5")]
     #[test_case("6 7")]
     #[test_case("red")]
     #[test_case("c?t fl?p")]
@@ -16,8 +21,10 @@ use word_playground::language::prelude::*;
     #[test_case("!v")]
     #[test_case("!a")]
     #[test_case("!j")]
+    #[test_case("cat =a *")]
+    
 
-    fn test_solve_with_term_dict(input: String    ) {
+    fn test(input: String    ) {
         let context = WordContext::from_data();
 
         let p = word_lang_parse(input).unwrap();

@@ -40,7 +40,7 @@ impl ExpressionSolution{
 impl AnagramSolution{
     pub fn get_text(&self)-> String{
         (self.left .homographs.iter().map(|x|x.text.as_str()).join(" ")
-         + " :: " +
+         + " : " +
          self.right .homographs.iter().map(|x|x.text.as_str()).join(" ").as_str()) 
     }
 }

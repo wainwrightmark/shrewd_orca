@@ -23,7 +23,7 @@ impl Question {
                     let text = ex.words                        
                         .iter()
                         .map(|wq| match wq {
-                            WordQuery::Literal(s) => s,
+                            WordQuery::Literal(s) => s.text.clone(),
                             _ => unreachable!(),
                         })
                         .join("");

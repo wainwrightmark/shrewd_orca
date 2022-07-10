@@ -121,7 +121,7 @@ impl CanParse for WordQuery {
         let s = inner.as_str();
 
         match rule {
-            Rule::literal => Ok(WordQuery::Literal(s.to_string())),
+            Rule::literal => Ok(WordQuery::Literal(Homograph{text: s.to_string(), is_single_word: true, meanings: Default::default()})),
             //Rule::manyany => Ok(WordQuery::ManyAny),
             Rule::any => Ok(WordQuery::Any),
             Rule::length => Ok(WordQuery::Length(usize::from_str(s).unwrap())),

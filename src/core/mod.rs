@@ -2,7 +2,7 @@ mod anagram_dict;
 mod anagram_key;
 mod anagram_iterator;
 mod anagram_settings;
-mod term;
+mod homograph;
 mod term_dict;
 mod solution;
 mod word_context;
@@ -18,7 +18,7 @@ pub mod prelude {
     pub use crate::core::anagram_key::*;
     pub use crate::core::anagram_iterator::*;
     pub use crate::core::anagram_settings::*;
-    pub use crate::core::term::*;
+    pub use crate::core::homograph::*;
     pub use crate::core::term_dict::*;
     pub use crate::core::solution::*;
     pub use crate::core::word_context::*;
