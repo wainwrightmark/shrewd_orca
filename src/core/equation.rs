@@ -26,12 +26,19 @@ pub enum EqualityOperator {
 
 
 impl  Equation {
-    pub fn solve<'a> (&'a self, dict: &'a WordContext) -> impl Iterator<Item = Solution> +'a {
-        // match self.operator {
-        //     EqualityOperator::Anagram => {
+    pub fn solve<'a> (&'a self, dict: &'a WordContext) -> impl Iterator<Item = AnagramSolution> +'a {
+        match self.operator {
+            EqualityOperator::Anagram => {
+                let lefts = self.left.solve(dict);
+
+                lefts.flat_map(|left| dict.anagram_dict.solve_for_word(&left.get_text(), self.left.anagram_settings())
                 
-        //     },
-        // }
-        self.left.solve(dict) //TODO
+                .filter(|s| self.right.accept(&s))
+
+                .map(move |right| AnagramSolution{left: left.clone(), right})
+                )
+            },
+        }
+         //TODO
     }
 }

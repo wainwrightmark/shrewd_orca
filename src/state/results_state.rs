@@ -14,7 +14,7 @@ use yewdux::prelude::*;
 #[derive(Store, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[store(storage = "local")] // can also be "session"
 pub struct ResultsState {
-    pub data: Rc<Vec<Solution>>,
+    pub data: Rc<Vec<QuestionSolution>>,
     pub warning: Option<String>,
 }
 

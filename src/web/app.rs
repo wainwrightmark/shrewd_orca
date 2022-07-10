@@ -71,20 +71,38 @@ pub fn diplay_box() -> Html {
     )
 }
 
-pub fn row(solution: &Solution) -> Html {
-    let spans = solution.homographs .iter().map(term_display).collect_vec();
+pub fn row(solution: &QuestionSolution) -> Html {
+    
+    match solution{
+        QuestionSolution::Expression(expression) =>{
+            let spans = expression.homographs .iter().map(homograph_display).collect_vec();
 
     html!(
         <tr>
             <td>{spans}</td>
         </tr>
     )
+        },
+        QuestionSolution::Anagram(anagram) =>{
+            let left_spans = anagram.left.homographs .iter().map(homograph_display).collect_vec();
+            let right_spans = anagram.right.homographs .iter().map(homograph_display).collect_vec();
+
+    html!(
+        <tr>
+            <td>{left_spans}</td>
+            <td>{right_spans}</td>
+        </tr>
+    )
+        },
+    }
+
+    
 }
 
-pub fn term_display(term: &Homograph) -> Html {
-    let text = term.text.to_owned() + " ";
+fn homograph_display(homograph: &Homograph) -> Html {
+    let text = homograph.text.to_owned() + " ";
 
-    if let Some(definition) = term.meanings.first().map(|x|x.definition.clone()){
+    if let Some(definition) = homograph.meanings.first().map(|x|x.definition.clone()){
         html!(
             <span style="border-bottom: none;" data-tooltip={definition}>{text} </span>
         )
@@ -93,6 +111,5 @@ pub fn term_display(term: &Homograph) -> Html {
         html!(
             <span style="border-bottom: none;" >{text} </span>
         )
-    }
-    
+    }    
 }

@@ -40,7 +40,7 @@ impl AnagramDict {
         &self,
         word: &str,
         settings: AnagramSettings,
-    ) -> impl '_ + Iterator<Item = Solution> {
+    ) -> impl '_ + Iterator<Item = ExpressionSolution> {
         let key = AnagramKey::from_str(word).unwrap();
         self.solve(key, settings)
     }
@@ -49,7 +49,7 @@ impl AnagramDict {
         &self,
         key: AnagramKey,
         settings: AnagramSettings,
-    ) -> impl '_ + Iterator<Item = Solution> {
+    ) -> impl '_ + Iterator<Item = ExpressionSolution> {
         let iterator = AnagramIterator::create(self, key, settings);
 
         
@@ -58,7 +58,7 @@ impl AnagramDict {
             solution
                 .into_iter()
                 .map(|k| self.words.get(&k).unwrap().clone()) //Note if terms with the same text, they will each be returned
-                .multi_cartesian_product().map(|x| Solution{homographs: SmallVec::from_vec(x)})
+                .multi_cartesian_product().map(|x| ExpressionSolution{homographs: SmallVec::from_vec(x)})
         })
     }
 }
