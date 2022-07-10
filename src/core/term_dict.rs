@@ -28,11 +28,7 @@ impl TermDict {
             let a_key = parts.next().ok_or("Missing Deinition")?;
             let definition = parts.next().ok_or("Missing Deinition")?;
 
-            let tags: BitFlags<WordTag> = match pos_lit {
-                "f" => WordTag::FirstName.into(),
-                "l" => WordTag::LastName.into(),
-                _ => Default::default(),
-            };
+            let tags: BitFlags<WordTag> = Default::default();
 
             let part_of_speech = PartOfSpeech::from_str(pos_lit)?;
             let term =

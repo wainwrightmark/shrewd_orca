@@ -38,6 +38,8 @@ pub enum PartOfSpeech {
     Adverb,
     Article,
     Preposition,
+    FirstName,
+    LastName,
 }
 
 #[bitflags]
@@ -46,8 +48,8 @@ pub enum PartOfSpeech {
 pub enum WordTag {
     Masculine,
     Feminine,
-    FirstName,
-    LastName,
+    Positive,
+    Negative,
 }
 
 
@@ -58,8 +60,8 @@ impl FromStr for WordTag {
         match s.to_ascii_lowercase().as_str() {
             "masculine" => Ok(WordTag::Masculine),
             "feminine" => Ok(WordTag::Feminine),
-            "firstname" => Ok(WordTag::FirstName),
-            "lastname" => Ok(WordTag::LastName),
+            "positive" => Ok(WordTag::Positive),
+            "negative" => Ok(WordTag::Negative),
 
             _ => Err(format!("Could not parse {} as tag", s)),
         }
@@ -78,8 +80,8 @@ impl FromStr for PartOfSpeech {
             "t" => Ok(PartOfSpeech::Article),
             "p" => Ok(PartOfSpeech::Preposition),
 
-            "l" => Ok(PartOfSpeech::Noun), //TODO remove
-            "f" => Ok(PartOfSpeech::Noun), //TODO remove
+            "l" => Ok(PartOfSpeech::LastName), //TODO remove
+            "f" => Ok(PartOfSpeech::FirstName), //TODO remove
 
             "noun" => Ok(PartOfSpeech::Noun),
             "verb" => Ok(PartOfSpeech::Verb),
@@ -87,6 +89,8 @@ impl FromStr for PartOfSpeech {
             "adverb" => Ok(PartOfSpeech::Adverb),
             "article" => Ok(PartOfSpeech::Article),
             "preposition" => Ok(PartOfSpeech::Preposition),
+            "firstname" => Ok(PartOfSpeech::FirstName),
+            "lastname" => Ok(PartOfSpeech::LastName),
 
             _ => Err(format!("Could not parse {} as part of speech", s)),
         }
