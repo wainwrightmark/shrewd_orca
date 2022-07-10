@@ -1,0 +1,5 @@
+---
+source: tests/my_tests.rs
+expression: solutions_string
+---
+cat flap; cat flip; cat flop; cot flap; cot flip; cot flop; cut flap; cut flip; cut flop; cwt flap

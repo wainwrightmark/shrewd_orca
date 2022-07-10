@@ -1,60 +1,29 @@
-// use convext::core::prelude::*;
+use itertools::Itertools;
+use word_playground::core::prelude::*;
+use word_playground::language::prelude::*;
 
-// use ntest::test_case;
-// use rand::SeedableRng;
-// // use rand::{prelude::StdRng, Rng};
+ use ntest::test_case;
 
-// pub const EXAMPLES: [&str; 8] = [
-//     "Circle",
-//     "Circle p0.5",
-//     "Circle p0.5..0.8",
-//     "let myvar 100
-// square h ?myvar",
-//     "circle circle p 0.5 h 120",
-//     "myshape
-// rul myshape
-// circle
-// myshape p 0.75 h 40
-// end",
-//     "
-// blackshape
-// rul blackshape
-// square h 120
-// whiteshape p 0.5 x sub 0.5 y sub 0.5
-// whiteshape p 0.5 x 0.5 y 0.5
-// end
+     #[test_case("5")]
+    #[test_case("6 7")]
+    #[test_case("red")]
+    #[test_case("c?t fl?p")]
+    #[test_case("clint eastwood")]
+    #[test_case("6..7")]
+    #[test_case("b?d")]
+    #[test_case("b*d")]
 
-// rul whiteshape
-// square
-// blackshape p 0.5 x sub 0.5 y sub 0.5
-// blackshape p 0.5 x 0.5 y 0.5
-// end",
-//     "myshape
-// let alpha 0.9
-// rul myshape ?h lt 320
-// square v 0.5 r?h
-// myshape p 0.75 h 10 a?alpha
-// end",
-// ];
+    fn test_solve_with_term_dict(input: String    ) {
+        let context = WordContext::from_data();
 
-// #[test_case(0)]
-// #[test_case(1)]
-// #[test_case(2)]
-// #[test_case(3)]
-// #[test_case(4)]
-// #[test_case(5)]
-// #[test_case(6)]
-// #[test_case(7)]
-// fn test_svg(index: usize) {
-//     let input = EXAMPLES[index];
-//     let grammar = parse(input).unwrap();
+        let p = word_lang_parse(input).unwrap();
 
-//     let mut rng = SeedableRng::seed_from_u64(100);
+        let solutions = p.solve(&context, &Default::default());
 
-//     let node = grammar.expand(&ExpandSettings::default(), &mut rng);
+        let solutions_string = solutions
+            .into_iter()
+            .map(|s| s.get_text())
+            .join("; ");
 
-//     let svg = node.to_svg(&grammar, &mut rng);
-
-//     assert!(!svg.is_empty());
-//     //print!("\r\n{svg}\r\n");
-// }
+        insta::assert_snapshot!(solutions_string);
+    }
