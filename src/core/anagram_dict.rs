@@ -36,6 +36,9 @@ impl<'a, T: Iterator<Item = Homograph>> From<T> for AnagramDict {
 }
 
 impl AnagramDict {
+
+    
+
     pub fn solve_for_word(
         &self,
         word: &str,
