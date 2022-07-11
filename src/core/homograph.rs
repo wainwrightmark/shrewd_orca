@@ -15,7 +15,7 @@ pub struct Homograph{
 pub struct Meaning {
     pub part_of_speech: PartOfSpeech,    
     pub tags: BitFlags<WordTag>,    
-    pub definition: String,
+    pub definition: Option<String>,
 }
 
 impl PartialOrd for Homograph {

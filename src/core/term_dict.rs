@@ -26,7 +26,8 @@ impl TermDict {
             let pos_lit = parts.next().ok_or("Missing POS")?;
             let text = parts.next().ok_or("Missing Term")?;
             let a_key = parts.next().ok_or("Missing Deinition")?;
-            let definition = parts.next().ok_or("Missing Deinition")?;
+            let definition_str = parts.next().ok_or("Missing Deinition")?;
+            let definition = if definition_str == "" {None}else{Some(definition_str.to_string())};
 
             let tags: BitFlags<WordTag> = Default::default();
 
@@ -36,7 +37,7 @@ impl TermDict {
             Meaning{
                 part_of_speech,
                 tags,
-                definition: definition.to_string(),
+                definition
             }
             );
             terms.push(term);

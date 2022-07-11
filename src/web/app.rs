@@ -116,7 +116,7 @@ pub fn row(solution: &QuestionSolution) -> Html {
 fn homograph_display(homograph: &Homograph) -> Html {
     let text = homograph.text.to_owned() + " ";
 
-    if let Some(definition) = homograph.meanings.first().map(|x|x.definition.clone()){
+    if let Some(definition) = homograph.meanings.iter().filter_map(|x|x.definition.clone()).next(){
         html!(
             <span style="border-bottom: none;" data-tooltip={definition}>{text} </span>
         )
