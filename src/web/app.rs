@@ -18,7 +18,7 @@ pub fn app() -> Html {
         <InputBox />
         <ErrorBox />
         <DisplayBox/>
-
+        <LoadMoreButton/>
         </div>
     }
 }
@@ -69,6 +69,16 @@ pub fn diplay_box() -> Html {
         </tbody>
         </table>
     )
+}
+
+#[function_component(LoadMoreButton)]
+pub fn load_more_button()->Html{
+
+    let onclick = Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: MouseEvent| {        
+        s.load_more()
+    });
+
+ html!(<button {onclick}>{"Load More"}</button>)   
 }
 
 pub fn row(solution: &QuestionSolution) -> Html {

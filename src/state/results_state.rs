@@ -15,7 +15,7 @@ use yewdux::prelude::*;
 #[store(storage = "local")] // can also be "session"
 pub struct ResultsState {
     pub data: Rc<Vec<QuestionSolution>>,
-    pub warning: Option<String>,
+    pub warning: Option<String>,    
 }
 
 static SOLVECONTEXT: OnceCell<WordContext> = OnceCell::new();
