@@ -35,6 +35,10 @@ impl ExpressionSolution{
     pub fn get_text(&self)-> String{
         self.homographs.iter().map(|x|x.text.as_str()).join(" ")
     }
+
+    pub fn contains_word(&self, word: &Homograph)-> bool{
+        self.homographs.iter().any(|x|x.text == word.text)
+    }
 }
 
 impl AnagramSolution{
@@ -54,5 +58,13 @@ pub struct AnagramSolution{
 impl AnagramSolution{
     pub fn flip(self)-> Self{
         AnagramSolution { left:self.right, right: self.left }
+    }
+
+    pub fn is_trivial(&self) -> bool{
+        self.left.homographs.len() == self.right.homographs.len()&&
+        self.left.homographs.iter()        
+        .sorted_by_key(|x|x.text.clone())
+        .zip(self.right.homographs.iter().sorted_by_key(|x|x.text.clone()))
+        .all(|(x,y)| x.text == y.text)
     }
 }

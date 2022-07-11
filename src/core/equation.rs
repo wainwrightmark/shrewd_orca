@@ -55,7 +55,7 @@ impl Equation {
                         left: left.clone(),
                         right,
                     })
-            });
+            }).filter(|x|!x.is_trivial());
             return s;
         } else {
             let new_right = Expression {
@@ -83,7 +83,10 @@ impl Equation {
             )
             .unwrap(); //todo handle this potential error
 
+            //let right_homographs = right_literals.iter().map(|(x,_)|x).cloned().collect_vec();
+
             return lefts
+            //.filter(move |left| !right_homographs.iter() .any(|r| left.contains_word(r)))
                 .flat_map(move |left| {
                     AnagramKey::from_str(left.get_text().as_str())
                         .ok()
@@ -95,11 +98,15 @@ impl Equation {
                         .solve(key, settings.clone())
                         .map(move |r| (left.clone(), r))
                 })
+                
+
                 .filter_map(move |(left, s)| new_right.order_to_allow(s).map(|r| (left, r)))
                 .map(move |(left, extra_rights)| AnagramSolution {
                     left,
                     right: Equation::hydrate(extra_rights, &right_literals),
-                });
+                })
+                .filter(|x|!x.is_trivial())
+                ;
         };
     }
 
