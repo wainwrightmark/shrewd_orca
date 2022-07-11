@@ -19,13 +19,10 @@ impl Question {
     pub fn solve(&self, dict: &WordContext, settings: &SolveSettings) -> Vec<QuestionSolution> {
         match self {
             Question::Expression(ex) => {
-                if ex.words.iter().all(|w| w.is_literal()) {
+                if ex.words.iter().all(|w| w.as_literal().is_some()) {
                     let text = ex.words                        
                         .iter()
-                        .map(|wq| match wq {
-                            WordQuery::Literal(s) => s.text.clone(),
-                            _ => unreachable!(),
-                        })
+                        .map(|wq| wq.as_literal().unwrap().text.clone())
                         .join("");
 
                     if text.is_empty() {

@@ -8,7 +8,7 @@ use word_playground::language::prelude::*;
  
  #[test_case("clint eastwood =a !n !j")]
  #[test_case("clint eastwood =a * *")]
-  
+ #[test_case("name * =a anagram *")] 
  #[test_case("5")]
     #[test_case("6 7")]
     #[test_case("red")]

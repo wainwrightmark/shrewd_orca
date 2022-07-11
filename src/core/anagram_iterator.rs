@@ -69,7 +69,7 @@ impl<'b> Iterator for AnagramIterator<'b> {
                             new_used.push(remainder);
                             return Some(new_used);
                         }
-                    } else {
+                    } else if self.settings.max_words > self.used_words.len() + 2 {
                         self.used_words.push(next_key);
                         self.stack.push((remainder, Bound::Included(next_key) ))
                     }

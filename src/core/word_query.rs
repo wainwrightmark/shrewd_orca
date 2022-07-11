@@ -24,8 +24,11 @@ pub enum WordQuery {
 }
 
 impl WordQuery {
-    pub fn is_literal(&self) -> bool {
-        matches!(self, WordQuery::Literal(_))
+    pub fn as_literal(&self)-> Option<&Homograph>{
+        match self {
+            WordQuery::Literal(h) => Some(h),
+            _=>None
+        }   
     }
 }
 
