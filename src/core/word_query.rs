@@ -12,7 +12,12 @@ use std::{
 use crate::core::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub enum WordQuery {
+pub struct WordQuery{
+    pub terms: SmallVec<[WordQueryTerm; 2]>
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum WordQueryTerm {
     Literal(Homograph),
     PartOfSpeech(PartOfSpeech),
     Tag(WordTag),
@@ -23,54 +28,64 @@ pub enum WordQuery {
     Pattern(Pattern), //TODO disjunction, conjunction, part of speech, tag
 }
 
-impl WordQuery {
-    pub fn as_literal(&self)-> Option<&Homograph>{
-        match self {
-            WordQuery::Literal(h) => Some(h),
-            _=>None
-        }   
-    }
-}
+impl WordQuery{
 
-impl WordQuery {
-    pub fn allow(&self, term: &Homograph) -> bool {
-        match self {
-            WordQuery::Literal(l) => term.text.eq_ignore_ascii_case(&l.text),
-            WordQuery::Any => true,
-            WordQuery::Range { min, max } => term.text.len() >= *min && term.text.len() <= *max,
-            WordQuery::Length(len) => term.text.len() == *len,
-            WordQuery::Pattern(p) => p.allow(term),
-            WordQuery::PartOfSpeech(pos) => term.meanings.iter().any(|m| m.part_of_speech == *pos),
-            WordQuery::Tag(tag) => term.meanings.iter().any(|m| m.tags.contains(*tag)),
+    #[auto_enum(Iterator, Clone)]
+    pub fn solve<'a>(&'a self, dict: &'a TermDict) -> impl Iterator<Item = &'a Homograph> + 'a + Clone
+    {
+        //TODO use indexes in some cases
+        if let Some(l) = self.as_literal(){
+            return std::iter::once( l);
         }
+
+        return dict.homographs.iter().filter(|t| self.allow(t));
+    }
+
+    pub fn allow(&self, term: &Homograph) -> bool {
+        self.terms.iter().all(|t| t.allow(term))
+    }
+
+    pub fn as_literal(&self)-> Option<&Homograph>{
+
+
+        if let Ok(term) = self.terms.iter().exactly_one(){
+            return term.as_literal();
+        }
+        None
     }
 
     pub fn count_options(&self, dict: &WordContext ) -> usize{
-        match self {
-            WordQuery::Literal(_) => 1,
-            WordQuery::Any => dict.term_dict.homographs.len(),
-            _=> dict.term_dict.homographs.iter().map(|x|self.allow(x)).count()
-        }
-    }
 
-    #[auto_enum(Iterator, Clone)]
-
-    pub fn solve<'a>(&'a self, dict: &'a TermDict) -> impl Iterator<Item = &'a Homograph> + 'a + Clone
-    {
-        //TODO use indexes in some case
-        match self {
-            WordQuery::Literal(l) => {
-                //let h = Homograph { text: l.clone(), is_single_word: true, meanings: Default::default() };
-                std::iter::once( l)
-                //std::iter::empty()
-            }
-            _ => {
-                let homographs = dict.homographs.iter().filter(|t| self.allow(t));
-
-                homographs
+        if let Ok(term) = self.terms.iter().exactly_one(){
+            match term {
+                WordQueryTerm::Literal(_) => return 1,
+                WordQueryTerm::Any => return dict.term_dict.homographs.len(),
+                _=> {}
             }
         }
+        dict.term_dict.homographs.iter().map(|x|self.allow(x)).count()
+        
     }
 }
 
-pub struct WordQueryIter {}
+impl WordQueryTerm {
+
+    pub fn as_literal(&self)-> Option<&Homograph>{
+        match self {
+            WordQueryTerm::Literal(h) => Some(h),
+            _=>None
+        }   
+    }
+
+    pub fn allow(&self, term: &Homograph) -> bool {
+        match self {
+            WordQueryTerm::Literal(l) => term.text.eq_ignore_ascii_case(&l.text),
+            WordQueryTerm::Any => true,
+            WordQueryTerm::Range { min, max } => term.text.len() >= *min && term.text.len() <= *max,
+            WordQueryTerm::Length(len) => term.text.len() == *len,
+            WordQueryTerm::Pattern(p) => p.allow(term),
+            WordQueryTerm::PartOfSpeech(pos) => term.meanings.iter().any(|m| m.part_of_speech == *pos),
+            WordQueryTerm::Tag(tag) => term.meanings.iter().any(|m| m.tags.contains(*tag)),
+        }
+    }
+}

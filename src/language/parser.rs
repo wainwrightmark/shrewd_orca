@@ -9,6 +9,7 @@ use pest::Parser;
 use pest_derive::Parser;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use smallvec::SmallVec;
 
 #[derive(Parser)]
 #[grammar = "language/wordlang.pest"]
@@ -68,6 +69,8 @@ impl CanParse for Question {
     }
 }
 
+
+
 impl CanParse for Expression {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let words_result: Result<Vec<WordQuery>, String> =
@@ -77,10 +80,6 @@ impl CanParse for Expression {
         Ok(Expression { words })
     }
 }
-
-
-
-
 
 impl FromStr for EqualityOperator {
     type Err = String;
@@ -113,18 +112,29 @@ impl CanParse for EqualityOperator {
     }
 }
 
+impl CanParse for WordQuery{
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+        let inner = pair.into_inner();
 
-impl CanParse for WordQuery {
+        let terms_vec: Vec<WordQueryTerm> = inner.map(|p| WordQueryTerm::try_parse(p))
+        .try_collect()?;
+        let terms = SmallVec::from_vec(terms_vec);
+
+        Ok(WordQuery{terms})
+    }
+}
+
+impl CanParse for WordQueryTerm {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let inner = pair.into_inner().next().unwrap();
         let rule = inner.as_rule();
         let s = inner.as_str();
 
         match rule {
-            Rule::literal => Ok(WordQuery::Literal(Homograph{text: s.to_string(), is_single_word: true, meanings: Default::default()})),
+            Rule::literal => Ok(WordQueryTerm::Literal(Homograph{text: s.to_string(), is_single_word: true, meanings: Default::default()})),
             //Rule::manyany => Ok(WordQuery::ManyAny),
-            Rule::any => Ok(WordQuery::Any),
-            Rule::length => Ok(WordQuery::Length(usize::from_str(s).unwrap())),
+            Rule::any => Ok(WordQueryTerm::Any),
+            Rule::length => Ok(WordQueryTerm::Length(usize::from_str(s).unwrap())),
             Rule::range => {
                 let mut range_inner = inner.into_inner();
 
@@ -134,7 +144,7 @@ impl CanParse for WordQuery {
                 let min = usize::from_str(start.as_str()).unwrap();
                 let max = usize::from_str(end.as_str()).unwrap();
 
-                Ok(WordQuery::Range { min, max })
+                Ok(WordQueryTerm::Range { min, max })
             },
             Rule::tag =>{
                 let mut tag_inner = inner.into_inner();
@@ -142,11 +152,11 @@ impl CanParse for WordQuery {
                 let lit = tag_inner.next().unwrap().as_str();
 
                 if let Ok(pos) =  PartOfSpeech::from_str(lit){
-                    return Ok(WordQuery::PartOfSpeech(pos));
+                    return Ok(WordQueryTerm::PartOfSpeech(pos));
                 }
 
                 if let Ok(wordtag) = WordTag::from_str(lit){
-                    return Ok(WordQuery::Tag(wordtag))
+                    return Ok(WordQueryTerm::Tag(wordtag))
                 }
 
                 Err(format!("'!{}' in not a valid tag", lit))
@@ -155,7 +165,7 @@ impl CanParse for WordQuery {
 
             Rule::pattern => {
                 let pattern = Pattern::try_parse(inner)?;
-                Ok(WordQuery::Pattern(pattern))
+                Ok(WordQueryTerm::Pattern(pattern))
             }
             _ => {
                 unreachable!("unexpected rule {:?}", rule)
