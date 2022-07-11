@@ -11,6 +11,8 @@ use std::{
 
 use crate::core::prelude::*;
 
+use super::homograph;
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Equation {
     pub left: Expression,
@@ -41,7 +43,8 @@ impl Equation {
             right
             .words
             .iter()
-            .filter_map(|x| x.as_literal())
+            .enumerate()
+            .filter_map(|(i, query)| query.as_literal().map(|l|(l,i)) )
             .collect_vec();
 
         if right_literals.is_empty() {
@@ -77,7 +80,7 @@ impl Equation {
             let key_to_subtract = AnagramKey::from_str(
                 right_literals.clone()
                     .into_iter()
-                    .map(|x| x.text.clone())
+                    .map(|(x,i)| x.text.clone())
                     .join("")
                     .as_str(),
             )
@@ -101,13 +104,23 @@ impl Equation {
                 
                     AnagramSolution {
                         left,
-                        right : ExpressionSolution{homographs: 
-                            SmallVec::from_iter(
-                                extra_rights.homographs.into_iter().chain(right_literals.clone().into_iter().cloned())) },
+                        right :
+                        Equation::hydrate(extra_rights, &right_literals)
                     }
                 )
                 ;
         };
+    }
+
+    fn hydrate(mut dehydrated: ExpressionSolution, literals: &Vec<(&Homograph, usize)> )-> ExpressionSolution{
+
+
+        for (element, index) in literals{
+            dehydrated.homographs.insert(index.clone(), element.clone().clone())
+        }      
+
+    
+        dehydrated
     }
 
     

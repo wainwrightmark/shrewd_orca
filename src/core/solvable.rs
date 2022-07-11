@@ -13,6 +13,6 @@ pub struct SolveSettings {
 
 impl Default for SolveSettings{
     fn default() -> Self {
-        Self { max_solutions: 20 }
+        Self { max_solutions: 10 }
     }
 }
