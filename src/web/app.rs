@@ -78,7 +78,11 @@ pub fn load_more_button()->Html{
         s.load_more()
     });
 
- html!(<button {onclick}>{"Load More"}</button>)   
+    let total_results = use_selector(|s : &ResultsState| s.data.len());
+    let max_results = use_selector(|s: &InputState| s.max_solutions);
+    let disabled = total_results < max_results;
+
+ html!(<button {onclick} {disabled}>{"Load More"}</button>)
 }
 
 pub fn row(solution: &QuestionSolution) -> Html {
