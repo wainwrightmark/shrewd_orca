@@ -51,3 +51,8 @@ pub struct AnagramSolution{
     pub right: ExpressionSolution
 }
 
+impl AnagramSolution{
+    pub fn flip(self)-> Self{
+        AnagramSolution { left:self.right, right: self.left }
+    }
+}

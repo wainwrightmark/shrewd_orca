@@ -45,6 +45,14 @@ impl WordQuery {
         }
     }
 
+    pub fn count_options(&self, dict: &WordContext ) -> usize{
+        match self {
+            WordQuery::Literal(_) => 1,
+            WordQuery::Any => dict.term_dict.homographs.len(),
+            _=> dict.term_dict.homographs.iter().map(|x|self.allow(x)).count()
+        }
+    }
+
     #[auto_enum(Iterator, Clone)]
 
     pub fn solve<'a>(&'a self, dict: &'a TermDict) -> impl Iterator<Item = &'a Homograph> + 'a + Clone

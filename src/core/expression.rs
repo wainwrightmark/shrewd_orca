@@ -33,6 +33,14 @@ impl Expression {
         AnagramSettings { min_word_length: 3, max_words: self.words.len() }
     }
 
+    pub fn count_options(&self, dict: &WordContext ) -> usize{
+        self.words.iter().map(|x|x.count_options(dict)) .fold(1, |a,b| a * b)
+    }
+
+    pub fn count_literal_chars(&self)->usize{
+        self.words.iter().filter_map(|x|x.as_literal()).map(|x|x.text.len()).count()
+    }
+
 
     pub fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution>{
         if solution.homographs.len() != self.words.len(){

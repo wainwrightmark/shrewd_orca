@@ -1,3 +1,4 @@
+use auto_enums::auto_enum;
 use itertools::{Itertools, MultiProduct};
 use smallvec::SmallVec;
 use std::{
@@ -37,13 +38,19 @@ impl<'a, T: Iterator<Item = Homograph>> From<T> for AnagramDict {
 
 impl AnagramDict {
 
+    #[auto_enum(Iterator)]
     pub fn solve_for_word(
         &self,
         word: &str,
         settings: AnagramSettings,
     ) -> impl '_ + Iterator<Item = ExpressionSolution> {
-        let key = AnagramKey::from_str(word).unwrap();
-        self.solve(key, settings)
+
+        if let Ok(key) = AnagramKey::from_str(word){
+            self.solve(key, settings)
+        }
+        else{
+            std::iter::empty()
+        }        
     }
 
     pub fn solve(

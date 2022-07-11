@@ -147,7 +147,11 @@ impl FromStr for AnagramKey {
 
             match r {
                 Some(p) => inner = p,
-                None => return Err(AnagramKeyErr::WordTooBig),
+                None => {
+                    log::debug!("Word Too Big for anagram: '{}'", s);
+                    return Err(AnagramKeyErr::WordTooBig);
+                }
+
             }
             len += 1;
         }
