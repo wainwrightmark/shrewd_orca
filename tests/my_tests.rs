@@ -1,6 +1,6 @@
 use itertools::Itertools;
-use word_playground::core::prelude::*;
-use word_playground::language::prelude::*;
+use shrewd_orca::core::prelude::*;
+use shrewd_orca::language::prelude::*;
 
  use ntest::test_case;
 

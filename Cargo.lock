@@ -998,6 +998,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "shrewd-orca"
+version = "0.1.0"
+dependencies = [
+ "array-const-fn-init",
+ "auto_enums",
+ "bencher",
+ "enumflags2",
+ "getrandom",
+ "insta",
+ "itertools",
+ "js-sys",
+ "log",
+ "ntest",
+ "num",
+ "once_cell",
+ "pest",
+ "pest_derive",
+ "rand",
+ "regex",
+ "serde",
+ "smallvec",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "yew",
+ "yewdux",
+]
+
+[[package]]
 name = "similar"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1248,36 +1278,6 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
-
-[[package]]
-name = "word-playground"
-version = "0.1.0"
-dependencies = [
- "array-const-fn-init",
- "auto_enums",
- "bencher",
- "enumflags2",
- "getrandom",
- "insta",
- "itertools",
- "js-sys",
- "log",
- "ntest",
- "num",
- "once_cell",
- "pest",
- "pest_derive",
- "rand",
- "regex",
- "serde",
- "smallvec",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
- "web-sys",
- "yew",
- "yewdux",
-]
 
 [[package]]
 name = "yaml-rust"
