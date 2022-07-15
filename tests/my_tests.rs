@@ -26,6 +26,9 @@ use shrewd_orca::language::prelude::*;
     #[test_case("cat =a *")]
     #[test_case("c@vt")]
     #[test_case("#n + #v + #j + #a + 3")]
+    #[test_case("(world)")]
+    #[test_case("(world / earth)")]
+    #[test_case("w* + (world / earth)")]
     
 
     fn test(input: String    ) {

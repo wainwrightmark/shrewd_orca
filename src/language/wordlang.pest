@@ -3,9 +3,11 @@ WHITESPACE = _{ " "| "\t" | NEWLINE }
 COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 question = {equation | expression}
 equation = {expression ~ equality_operator ~ expression}
-expression = {word_query+}
-word_query = {query_term ~("+" ~ query_term)*}
-query_term = ${ pattern | literal |  any | range | length | tag  } //manyany
+expression = {word_query_conjunction+}
+word_query_conjunction = {word_query_disjunction ~("+" ~ word_query_disjunction)*}
+word_query_disjunction = {query_term ~("/" ~ query_term)*}
+bracketed_conjunction = {"(" ~ word_query_conjunction ~ ")"}
+query_term = { pattern | literal |  any | range | length | tag | bracketed_conjunction  } //manyany
 literal = @{ASCII_ALPHA+}
 question_marks = @{"?"+}
 tag = ${"#" ~ literal}
@@ -18,5 +20,5 @@ any = @{"*"+}
 character_class = ${"@" ~ ASCII_ALPHA}
 length = @{ASCII_DIGIT+}
 range = ${length ~ ".." ~ length}
-//conjuction, disjunction, keyword, tag,  wildcard
+//disjunction
 equality_operator = { "=a"}

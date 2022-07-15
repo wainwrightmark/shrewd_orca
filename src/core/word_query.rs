@@ -13,7 +13,12 @@ use crate::core::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct WordQuery{
-    pub terms: SmallVec<[WordQueryTerm; 2]>
+    pub terms: SmallVec<[WordQueryDisjunction; 1]>
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct WordQueryDisjunction{
+    pub terms: SmallVec<[WordQueryTerm; 1]>
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -25,7 +30,32 @@ pub enum WordQueryTerm {
     Any,
     Range { min: usize, max: usize },
     Length(usize),
-    Pattern(Pattern), //TODO disjunction, conjunction, part of speech, tag
+    Pattern(Pattern), 
+    Nested(Box<WordQuery>)
+}
+
+impl WordQueryDisjunction{
+    pub fn allow(&self, term: &Homograph) -> bool {
+        self.terms.iter().any(|t| t.allow(term))
+    }
+
+    pub fn as_literal(&self)-> Option<&Homograph>{
+        if let Ok(term) = self.terms.iter().exactly_one(){
+            return term.as_literal();
+        }
+        None
+    }
+
+    pub fn count_options(&self, dict: &WordContext ) -> usize{
+        if let Ok(term) = self.terms.iter().exactly_one(){
+            match term {
+                WordQueryTerm::Literal(_) => return 1,
+                WordQueryTerm::Any => return dict.term_dict.homographs.len(),
+                _=> {}
+            }
+        }
+        dict.term_dict.homographs.iter().map(|x|self.allow(x)).count()
+    }
 }
 
 impl WordQuery{
@@ -57,11 +87,7 @@ impl WordQuery{
     pub fn count_options(&self, dict: &WordContext ) -> usize{
 
         if let Ok(term) = self.terms.iter().exactly_one(){
-            match term {
-                WordQueryTerm::Literal(_) => return 1,
-                WordQueryTerm::Any => return dict.term_dict.homographs.len(),
-                _=> {}
-            }
+            return term.count_options(dict);
         }
         dict.term_dict.homographs.iter().map(|x|self.allow(x)).count()
         
@@ -86,6 +112,7 @@ impl WordQueryTerm {
             WordQueryTerm::Pattern(p) => p.allow(term),
             WordQueryTerm::PartOfSpeech(pos) => term.meanings.iter().any(|m| m.part_of_speech == *pos),
             WordQueryTerm::Tag(tag) => term.meanings.iter().any(|m| m.tags.contains(*tag)),
+            WordQueryTerm::Nested(nested) => nested.allow(term),
         }
     }
 }

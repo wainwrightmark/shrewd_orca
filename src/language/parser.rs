@@ -116,11 +116,23 @@ impl CanParse for WordQuery{
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let inner = pair.into_inner();
 
-        let terms_vec: Vec<WordQueryTerm> = inner.map(|p| WordQueryTerm::try_parse(p))
+        let disjunction: Vec<WordQueryDisjunction> = inner.map(|p| WordQueryDisjunction::try_parse(p))
         .try_collect()?;
-        let terms = SmallVec::from_vec(terms_vec);
+        let terms = SmallVec::from_vec(disjunction);
 
         Ok(WordQuery{terms})
+    }
+}
+
+impl CanParse for WordQueryDisjunction{
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+        let inner = pair.into_inner();
+
+        let word_query_terms: Vec<WordQueryTerm> = inner.map(|p| WordQueryTerm::try_parse(p))
+        .try_collect()?;
+        let terms = SmallVec::from_vec(word_query_terms);
+
+        Ok(WordQueryDisjunction{terms})
     }
 }
 
@@ -166,10 +178,27 @@ impl CanParse for WordQueryTerm {
             Rule::pattern => {
                 let pattern = Pattern::try_parse(inner)?;
                 Ok(WordQueryTerm::Pattern(pattern))
-            }
+            },
+            
+            Rule::bracketed_conjunction => {
+                let mut nested_inner = inner.into_inner();
+                //let open = nested_inner.next();
+                let c = nested_inner.next().unwrap();
+                let conj = WordQuery::try_parse(c)?;
+
+                if let Ok(d) = conj.terms.iter().exactly_one(){
+                    if let Ok(t) = d.terms.iter().exactly_one(){
+                        return Ok(t.clone());
+                    }
+                }
+
+                Ok(WordQueryTerm::Nested(Box::new(conj)))
+
+
+            },
             _ => {
                 unreachable!("unexpected rule {:?}", rule)
-            }
+            },
         }
     }
 }
