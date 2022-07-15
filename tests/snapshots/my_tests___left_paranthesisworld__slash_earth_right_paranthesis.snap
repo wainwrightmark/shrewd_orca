@@ -2,4 +2,4 @@
 source: tests/my_tests.rs
 expression: solutions_string
 ---
-earth; world
+world; earth

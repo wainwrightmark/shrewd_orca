@@ -43,16 +43,34 @@ impl TermDict {
             terms.push(term);
         }
 
-        terms.sort_by_key(|x|x.0.to_ascii_lowercase());
-        let homographs = terms
+        
+        let homographs = terms        
         .into_iter()
-        .group_by(|a|a.0.to_ascii_lowercase())
-        .into_iter().map(|x| Homograph{
-            text: x.0,
-            is_single_word: true,
-            meanings: SmallVec::from_iter(x.1.map(|p|p.1))
+        .enumerate()
+        .sorted_by_key(|x|x.1.0.to_ascii_lowercase())
+        .group_by(|a|a.1.0.to_ascii_lowercase())
+        .into_iter()    
+        .map(|(text, group)|{
+            let mut i:Option<usize> = None;
+            let  meanings = SmallVec::from_iter(group.inspect(|x| {
+                if i == None{
+                    i = Some(x.0)
+                }
+            }) .map(|p|p.1.1));
+            let homograph = 
+            Homograph{
+                text,
+                is_single_word: true,
+                meanings    
+            };
 
-        }).collect_vec()
+            (i.unwrap(), homograph)
+
+
+        }  )
+        .sorted_by_key(|(i,_)|i.clone())
+        .map(|(_,x)|x)
+        .collect_vec()
         ;
 
         Ok(TermDict { homographs })

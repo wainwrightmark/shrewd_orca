@@ -2,4 +2,4 @@
 source: tests/my_tests.rs
 expression: solutions_string
 ---
-bad; bed; bid; bod; bud
+bid; bed; bad; bod; bud

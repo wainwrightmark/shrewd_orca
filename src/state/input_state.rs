@@ -32,30 +32,32 @@ impl InputState {
 
     pub fn load_more(&mut self){
         self.max_solutions += 10;
+        self.update();       
+    }
 
+    fn update(&mut self){
         let r = word_lang_parse(&self.text);
-            match r {
-                Ok(question) => {
-                    let sol = question
-                        .solve(get_solve_context(), &SolveSettings { max_solutions:self.max_solutions })
-                        ;
-                    debug!("Question solved with {} solutions", sol.len());
+        match r {
+            Ok(question) => {
+                let sol = question
+                    .solve(get_solve_context(), &SolveSettings { max_solutions:self.max_solutions })
+                    ;
+                debug!("Question solved with {} solutions", sol.len());
 
-                    Dispatch::<ResultsState>::new().set(ResultsState {
-                        data: sol.into(),
-                        warning: Default::default(),
-                    })
-                }
-                Err(warning) => {
-                    debug!("Warning {}", warning);
-
-                    Dispatch::<ResultsState>::new().set(ResultsState {
-                        data: Default::default(),
-                        warning: Some(warning),
-                    })
-                }
+                Dispatch::<ResultsState>::new().set(ResultsState {
+                    data: sol.into(),
+                    warning: Default::default(),
+                })
             }
+            Err(warning) => {
+                debug!("Warning {}", warning);
 
+                Dispatch::<ResultsState>::new().set(ResultsState {
+                    data: Default::default(),
+                    warning: Some(warning),
+                })
+            }
+        }
     }
 
     pub fn change(&mut self, s: String) {
@@ -65,28 +67,7 @@ impl InputState {
             self.text = s;
             self.max_solutions = 10;
 
-            let r = word_lang_parse(&self.text);
-            match r {
-                Ok(question) => {
-                    let sol = question
-                        .solve(get_solve_context(), &SolveSettings { max_solutions:self.max_solutions })
-                        ;
-                    debug!("Question solved with {} solutions", sol.len());
-
-                    Dispatch::<ResultsState>::new().set(ResultsState {
-                        data: sol.into(),
-                        warning: Default::default(),
-                    })
-                }
-                Err(warning) => {
-                    debug!("Warning {}", warning);
-
-                    Dispatch::<ResultsState>::new().set(ResultsState {
-                        data: Default::default(),
-                        warning: Some(warning),
-                    })
-                }
-            }
+            self.update();
         }
     }
 }

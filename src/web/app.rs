@@ -58,8 +58,6 @@ pub fn diplay_box() -> Html {
         .as_ref()
         .clone();
 
-    log::debug!("Update Display box solved with {} solutions", terms.len());
-
     let rows = terms.iter().map(row).collect_vec();
 
     html!(
