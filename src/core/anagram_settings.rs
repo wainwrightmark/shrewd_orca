@@ -14,6 +14,7 @@ use crate::{core::prelude::*};
 pub struct AnagramSettings {
     pub min_word_length: u8,
     pub max_words: usize,
+    //pub allow: Option<WordQuery> 
 }
 
 impl Default for AnagramSettings {
