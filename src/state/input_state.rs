@@ -12,6 +12,7 @@ use std::default;
 use std::rc::Rc;
 use yewdux::prelude::*;
 
+
 #[derive(PartialEq, Store, Clone, Serialize, Deserialize)]
 #[store(storage = "local")] // can also be "session"
 pub struct InputState {
@@ -36,13 +37,16 @@ impl InputState {
     }
 
     fn update(&mut self){
-        let r = word_lang_parse(&self.text);
+        let r = question_parse(&self.text);
         match r {
             Ok(question) => {
+                let start_instant = instant::Instant::now();
                 let sol = question
                     .solve(get_solve_context(), &SolveSettings { max_solutions:self.max_solutions })
                     ;
-                debug!("Question solved with {} solutions", sol.len());
+
+                let diff = instant::Instant::now() - start_instant;
+                debug!("Question solved with {} solutions in {:?}", sol.len(), diff);
 
                 Dispatch::<ResultsState>::new().set(ResultsState {
                     data: sol.into(),

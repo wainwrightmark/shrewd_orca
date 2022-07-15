@@ -6,6 +6,7 @@ use shrewd_orca::language::prelude::*;
 
     
  
+ #[test_case("davis ephanie  =a")]
  #[test_case("clint eastwood =a #n #j")]
  #[test_case("clint eastwood =a * *")]
  #[test_case("name * =a anagram *")] 
@@ -32,9 +33,9 @@ use shrewd_orca::language::prelude::*;
     
 
     fn test(input: String    ) {
-        let context = WordContext::from_data();
+        let context = WordContext::from_data(get_phrase_expressions());
 
-        let p = word_lang_parse(input).unwrap();
+        let p = question_parse(input).unwrap();
 
         let solutions = p.solve(&context, &Default::default());
 

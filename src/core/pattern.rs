@@ -15,6 +15,16 @@ pub struct Pattern {
     pub regex: Regex,
 }
 
+impl From<Vec<PatternComponent>> for Pattern{
+    fn from(components: Vec<PatternComponent>) -> Self {
+        let regex_str = "^(?i)".to_owned() + &components.iter().map(|x| x.regex_str()).join("") + "$";
+
+        let regex = Regex::new(regex_str.as_str()).unwrap();
+
+        Pattern { components, regex }
+    }
+}
+
 impl PartialEq for Pattern {
     fn eq(&self, other: &Self) -> bool {
         self.components == other.components
@@ -26,7 +36,9 @@ impl Eq for Pattern {}
 
 impl Pattern {
     pub fn allow(&self, term: &Homograph) -> bool {
-        self.regex.is_match(&term.text)
+        let r = self.regex.is_match(&term.text);
+
+        r
     }
 }
 

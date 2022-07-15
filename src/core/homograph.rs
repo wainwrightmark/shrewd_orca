@@ -11,6 +11,7 @@ pub struct Homograph{
     pub meanings: SmallVec<[Meaning; 2]>
 }
 
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Meaning {
     pub part_of_speech: PartOfSpeech,    
@@ -36,8 +37,10 @@ pub enum PartOfSpeech {
     Verb,
     Adjective,
     Adverb,
-    Article,
     Preposition,
+    Interjection,
+    Conjunction,
+    Pronoun,
     FirstName,
     LastName,
 }
@@ -77,7 +80,6 @@ impl FromStr for PartOfSpeech {
             "v" => Ok(PartOfSpeech::Verb),
             "j" => Ok(PartOfSpeech::Adjective),
             "a" => Ok(PartOfSpeech::Adverb),
-            "t" => Ok(PartOfSpeech::Article),
             "p" => Ok(PartOfSpeech::Preposition),
 
             "l" => Ok(PartOfSpeech::LastName), //TODO remove
@@ -87,7 +89,6 @@ impl FromStr for PartOfSpeech {
             "verb" => Ok(PartOfSpeech::Verb),
             "adjective" => Ok(PartOfSpeech::Adjective),
             "adverb" => Ok(PartOfSpeech::Adverb),
-            "article" => Ok(PartOfSpeech::Article),
             "preposition" => Ok(PartOfSpeech::Preposition),
             "firstname" => Ok(PartOfSpeech::FirstName),
             "lastname" => Ok(PartOfSpeech::LastName),

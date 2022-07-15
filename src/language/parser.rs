@@ -22,13 +22,14 @@ where
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String>;
 }
 
-pub fn word_lang_parse(input: &str) -> Result<Question, String> {
+pub fn question_parse(input: &str) -> Result<Question, String> {
     let mut pairs = WordLangParser::parse(Rule::file, input).map_err(|e| e.to_string())?;
     let next = pairs.next().unwrap();
     let question = next.into_inner().next().unwrap();
-    
+
     Question::try_parse(question)
 }
+
 
 impl CanParse for Pattern {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
@@ -37,11 +38,7 @@ impl CanParse for Pattern {
             .map(PatternComponent::try_parse)
             .try_collect()?;
 
-        let regex_str = "^(?i)".to_owned() + &components.iter().map(|x| x.regex_str()).join("") + "$";
-
-        let regex = Regex::new(regex_str.as_str()).unwrap();
-
-        Ok(Pattern { components, regex })
+        Ok(components.into())
     }
 }
 
@@ -51,12 +48,13 @@ impl CanParse for PatternComponent {
             Rule::question_marks => Ok(PatternComponent::AnyChar(pair.as_str().len())),
             Rule::any => Ok(PatternComponent::Any),
             Rule::literal => Ok(PatternComponent::Literal(pair.as_str().to_string())),
-            Rule::character_class => Ok(PatternComponent::CharacterClass(CharacterClass::from_str(pair.as_str())?)),
+            Rule::character_class => Ok(PatternComponent::CharacterClass(
+                CharacterClass::from_str(pair.as_str())?,
+            )),
             _ => unreachable!(),
         }
     }
 }
-
 
 impl CanParse for Question {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
@@ -68,8 +66,6 @@ impl CanParse for Question {
         }
     }
 }
-
-
 
 impl CanParse for Expression {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
@@ -112,27 +108,28 @@ impl CanParse for EqualityOperator {
     }
 }
 
-impl CanParse for WordQuery{
+impl CanParse for WordQuery {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let inner = pair.into_inner();
 
-        let disjunction: Vec<WordQueryDisjunction> = inner.map(|p| WordQueryDisjunction::try_parse(p))
-        .try_collect()?;
+        let disjunction: Vec<WordQueryDisjunction> = inner
+            .map(|p| WordQueryDisjunction::try_parse(p))
+            .try_collect()?;
         let terms = SmallVec::from_vec(disjunction);
 
-        Ok(WordQuery{terms})
+        Ok(WordQuery { terms })
     }
 }
 
-impl CanParse for WordQueryDisjunction{
+impl CanParse for WordQueryDisjunction {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let inner = pair.into_inner();
 
-        let word_query_terms: Vec<WordQueryTerm> = inner.map(|p| WordQueryTerm::try_parse(p))
-        .try_collect()?;
+        let word_query_terms: Vec<WordQueryTerm> =
+            inner.map(|p| WordQueryTerm::try_parse(p)).try_collect()?;
         let terms = SmallVec::from_vec(word_query_terms);
 
-        Ok(WordQueryDisjunction{terms})
+        Ok(WordQueryDisjunction { terms })
     }
 }
 
@@ -143,7 +140,11 @@ impl CanParse for WordQueryTerm {
         let s = inner.as_str();
 
         match rule {
-            Rule::literal => Ok(WordQueryTerm::Literal(Homograph{text: s.to_string(), is_single_word: true, meanings: Default::default()})),
+            Rule::literal => Ok(WordQueryTerm::Literal(Homograph {
+                text: s.to_string(),
+                is_single_word: true,
+                meanings: Default::default(),
+            })),
             //Rule::manyany => Ok(WordQuery::ManyAny),
             Rule::any => Ok(WordQueryTerm::Any),
             Rule::length => Ok(WordQueryTerm::Length(usize::from_str(s).unwrap())),
@@ -157,48 +158,45 @@ impl CanParse for WordQueryTerm {
                 let max = usize::from_str(end.as_str()).unwrap();
 
                 Ok(WordQueryTerm::Range { min, max })
-            },
-            Rule::tag =>{
+            }
+            Rule::tag => {
                 let mut tag_inner = inner.into_inner();
                 //tag_inner.next().unwrap();
                 let lit = tag_inner.next().unwrap().as_str();
 
-                if let Ok(pos) =  PartOfSpeech::from_str(lit){
+                if let Ok(pos) = PartOfSpeech::from_str(lit) {
                     return Ok(WordQueryTerm::PartOfSpeech(pos));
                 }
 
-                if let Ok(wordtag) = WordTag::from_str(lit){
-                    return Ok(WordQueryTerm::Tag(wordtag))
+                if let Ok(wordtag) = WordTag::from_str(lit) {
+                    return Ok(WordQueryTerm::Tag(wordtag));
                 }
 
                 Err(format!("'!{}' in not a valid tag", lit))
-            },
-
+            }
 
             Rule::pattern => {
                 let pattern = Pattern::try_parse(inner)?;
                 Ok(WordQueryTerm::Pattern(pattern))
-            },
-            
+            }
+
             Rule::bracketed_conjunction => {
                 let mut nested_inner = inner.into_inner();
                 //let open = nested_inner.next();
                 let c = nested_inner.next().unwrap();
                 let conj = WordQuery::try_parse(c)?;
 
-                if let Ok(d) = conj.terms.iter().exactly_one(){
-                    if let Ok(t) = d.terms.iter().exactly_one(){
+                if let Ok(d) = conj.terms.iter().exactly_one() {
+                    if let Ok(t) = d.terms.iter().exactly_one() {
                         return Ok(t.clone());
                     }
                 }
 
                 Ok(WordQueryTerm::Nested(Box::new(conj)))
-
-
-            },
+            }
             _ => {
                 unreachable!("unexpected rule {:?}", rule)
-            },
+            }
         }
     }
 }

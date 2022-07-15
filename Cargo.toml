@@ -32,6 +32,8 @@ wasm-bindgen-futures = "0.4"
 wasm-bindgen= { version = "0.2", features = ["serde"] }
 js-sys = "0.3"
 
+instant = { version = "0.1", features = [ "wasm-bindgen", "inaccurate" ] }
+
 [dependencies.web-sys]
 version = "0.3"
 features = [

@@ -16,6 +16,13 @@ pub struct Expression {
     pub words: Vec<WordQuery>,
 }
 
+impl From<ExpressionSolution> for Expression{
+    fn from(es: ExpressionSolution) -> Self {
+        let words = es.homographs.into_iter().map(|h| WordQueryTerm::Literal(h).into()).collect_vec();
+        Expression { words }
+    }
+}
+
 impl Expression {
     pub fn solve<'a> (&'a self, dict: &'a WordContext) -> impl Iterator<Item = ExpressionSolution> +'a {
         let solutions = self

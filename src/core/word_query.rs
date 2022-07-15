@@ -16,9 +16,22 @@ pub struct WordQuery{
     pub terms: SmallVec<[WordQueryDisjunction; 1]>
 }
 
+impl From<WordQueryTerm> for WordQuery{
+    fn from(term: WordQueryTerm) -> Self {
+        let disj = term.into();
+        WordQuery { terms: smallvec::smallvec!(disj) }
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct WordQueryDisjunction{
     pub terms: SmallVec<[WordQueryTerm; 1]>
+}
+
+impl From<WordQueryTerm> for WordQueryDisjunction{
+    fn from(term: WordQueryTerm) -> Self {
+        WordQueryDisjunction{terms: smallvec::smallvec!(term)}
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
