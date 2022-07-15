@@ -62,10 +62,10 @@ impl Expression {
             return None;
         }
 
-        for combination in solution.homographs.into_iter().combinations(self.words.len()){
+        'outer: for combination in solution.homographs.into_iter().permutations(self.words.len()){
             for (w, h) in self.words.iter().zip(combination.iter()){
                 if !w.allow(&h){
-                    continue;
+                    continue 'outer;
                 }
             }
             return Some(ExpressionSolution{homographs: SmallVec::from_vec(combination)})
