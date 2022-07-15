@@ -37,7 +37,7 @@ impl CanParse for Pattern {
             .map(PatternComponent::try_parse)
             .try_collect()?;
 
-        let regex_str = "^".to_owned() + &components.iter().map(|x| x.regex_str()).join("") + "$";
+        let regex_str = "^(?i)".to_owned() + &components.iter().map(|x| x.regex_str()).join("") + "$";
 
         let regex = Regex::new(regex_str.as_str()).unwrap();
 
@@ -50,8 +50,8 @@ impl CanParse for PatternComponent {
         match pair.as_rule() {
             Rule::question_marks => Ok(PatternComponent::AnyChar(pair.as_str().len())),
             Rule::any => Ok(PatternComponent::Any),
-
             Rule::literal => Ok(PatternComponent::Literal(pair.as_str().to_string())),
+            Rule::character_class => Ok(PatternComponent::CharacterClass(CharacterClass::from_str(pair.as_str())?)),
             _ => unreachable!(),
         }
     }

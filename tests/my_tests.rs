@@ -24,6 +24,7 @@ use shrewd_orca::language::prelude::*;
     #[test_case("#a")]
     #[test_case("#j")]
     #[test_case("cat =a *")]
+    #[test_case("c@vt")]
     #[test_case("#n + #v + #j + #a + 3")]
     
 

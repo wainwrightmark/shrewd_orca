@@ -35,6 +35,7 @@ pub enum PatternComponent {
     Any,
     AnyChar(usize),
     Literal(String),
+    CharacterClass(CharacterClass)
 }
 
 impl PatternComponent {
@@ -43,8 +44,33 @@ impl PatternComponent {
             PatternComponent::Any => "[[:alpha:]]*".to_string(),
             PatternComponent::AnyChar(len) => format!("[[:alpha:]]{{{}}}", len),
             PatternComponent::Literal(s) => s.clone(),
+            PatternComponent::CharacterClass(c)=>c.regex_char()
         }
     }
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum CharacterClass{
+    Vowel,
+    Consonant
+}
+impl CharacterClass{
+    pub fn regex_char(&self)-> String{
+        match self{
+            CharacterClass::Vowel => "[aeiou]".to_string(),
+            CharacterClass::Consonant => "[bcdfghjklmnpqrstvwxyz]".to_string(),
+        }
+    }
+}
 
+impl FromStr for CharacterClass{
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "@v"=> Ok(CharacterClass::Vowel),
+            "@c" => Ok(CharacterClass::Consonant),
+            _=> Err("The only valid character classes are @v and @c".to_string())
+        }
+    }
+}
