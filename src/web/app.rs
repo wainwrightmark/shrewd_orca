@@ -4,6 +4,7 @@ use crate::core::prelude::*;
 use crate::state::{self, prelude::*};
 use crate::web::prelude::*;
 use itertools::Itertools;
+use shrewd_orca::language::prelude::Example;
 use web_sys::{HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement};
 use yew::prelude::*;
 use yewdux::prelude::*;
@@ -14,8 +15,9 @@ pub fn app() -> Html {
 
         <div class="container" style="display: flex; flex-direction: column;">
 
-
+        <Examples />
         <InputBox />
+        
         <ErrorBox />
         <DisplayBox/>
         <LoadMoreButton/>
@@ -66,6 +68,29 @@ pub fn diplay_box() -> Html {
             {rows}
         </tbody>
         </table>
+    )
+}
+
+#[function_component(Examples)]
+pub fn examples_dropdown()->Html{
+    let onchange = Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: Event| {        
+
+        let input: HtmlSelectElement = e.target_unchecked_into();
+        let value = input.value();
+        s.change(value);
+    });
+
+let options = Example::list().into_iter().map(|example| 
+html!(  <option value={example.text}>{example.description}</option>
+)
+).collect_vec();
+
+    html!(
+        <select {onchange}>
+        <option value="" disabled={true} selected={true}>{"Examples"}</option>
+
+            {options}
+        </select>
     )
 }
 
