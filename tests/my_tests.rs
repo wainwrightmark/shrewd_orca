@@ -6,12 +6,12 @@ use shrewd_orca::language::prelude::*;
 
     
  
- #[test_case("clint eastwood =a !n !j")]
+ #[test_case("clint eastwood =a #n #j")]
  #[test_case("clint eastwood =a * *")]
  #[test_case("name * =a anagram *")] 
  #[test_case("5")]
- #[test_case("5 + !n")]
- #[test_case("3 + !n + !v +!j + !a")]
+ #[test_case("5 + #n")]
+ #[test_case("3 + #n + #v +#j + #a")]
     #[test_case("6 7")]
     #[test_case("red")]
     #[test_case("c?t fl?p")]
@@ -19,11 +19,12 @@ use shrewd_orca::language::prelude::*;
     #[test_case("6..7")]
     #[test_case("b?d")]
     #[test_case("b*d")]
-    #[test_case("!n")]
-    #[test_case("!v")]
-    #[test_case("!a")]
-    #[test_case("!j")]
+    #[test_case("#n")]
+    #[test_case("#v")]
+    #[test_case("#a")]
+    #[test_case("#j")]
     #[test_case("cat =a *")]
+    #[test_case("#n + #v + #j + #a + 3")]
     
 
     fn test(input: String    ) {

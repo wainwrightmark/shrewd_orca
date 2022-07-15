@@ -8,7 +8,7 @@ word_query = {query_term ~("+" ~ query_term)*}
 query_term = ${ pattern | literal |  any | range | length | tag  } //manyany
 literal = @{ASCII_ALPHA+}
 question_marks = @{"?"+}
-tag = ${"!" ~ literal}
+tag = ${"#" ~ literal}
 pattern = ${
 &(any? ~ (literal | question_marks) ) ~ 
 &(literal? ~ (any | question_marks) ) ~ 
