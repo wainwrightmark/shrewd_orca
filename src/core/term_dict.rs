@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{collections::BTreeMap, str::FromStr};
 
 use enumflags2::BitFlags;
 use itertools::Itertools;
@@ -10,6 +10,8 @@ use crate::core::prelude::*;
 #[derive(Debug)]
 pub struct TermDict {
     pub homographs: Vec<Homograph>,
+
+    pub homographs_by_part_of_speech: BTreeMap<PartOfSpeech, Vec<Homograph>>,
 }
 
 impl TermDict {
@@ -47,10 +49,11 @@ impl TermDict {
         }
 
         let homographs = terms
-            .into_iter()
+            .iter()
+            .cloned()
             .enumerate()
-            .sorted_by_key(|x| x.1 .0.to_ascii_lowercase())
-            .group_by(|a| a.1 .0.to_ascii_lowercase())
+            .sorted_by_key(|x| x.1 .0)
+            .group_by(|a| a.1 .0)
             .into_iter()
             .map(|(text, group)| {
                 let mut i: Option<usize> = None;
@@ -64,7 +67,7 @@ impl TermDict {
                         .map(|p| p.1 .1),
                 );
                 let homograph = Homograph {
-                    text,
+                    text: text.to_string(),
                     is_single_word: true,
                     meanings,
                 };
@@ -75,7 +78,49 @@ impl TermDict {
             .map(|(_, x)| x)
             .collect_vec();
 
-        Ok(TermDict { homographs })
+        let homographs_by_part_of_speech = terms
+            .into_iter()
+            .group_by(|x| x.1.part_of_speech)
+            .into_iter()
+            .map(|(pos, group)| {
+                (
+                    pos,
+                    group
+                        .into_iter()
+                        .enumerate()
+                        .sorted_by_key(|x| x.1 .0)
+                        .group_by(|a| a.1 .0)
+                        .into_iter()
+                        .map(|(text, group)| {
+                            let mut i: Option<usize> = None;
+                            let meanings = SmallVec::from_iter(
+                                group
+                                    .inspect(|x| {
+                                        if i == None {
+                                            i = Some(x.0)
+                                        }
+                                    })
+                                    .map(|p| p.1 .1),
+                            );
+                            let homograph = Homograph {
+                                text: text.to_string(),
+                                is_single_word: true,
+                                meanings,
+                            };
+
+                            (i.unwrap(), homograph)
+                        })
+                        .sorted_by_key(|(i, _)| *i)
+                        .map(|(_, x)| x)
+                        .collect_vec(),
+                )
+            })
+            .collect();
+
+        Ok(TermDict {
+            homographs,
+            homographs_by_part_of_speech,
+        })
     }
 }
 

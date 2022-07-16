@@ -59,46 +59,27 @@ pub enum WordQueryTerm {
     Nested(Box<WordQuery>),
 }
 
-impl WordQueryDisjunction {
-    pub fn allow(&self, term: &Homograph) -> bool {
-        self.terms.iter().any(|t| t.allow(term))
-    }
-
-    pub fn as_literal(&self) -> Option<&Homograph> {
-        if let Ok(term) = self.terms.iter().exactly_one() {
-            return term.as_literal();
-        }
-        None
-    }
-
-    pub fn count_options(&self, dict: &WordContext) -> usize {
-        if let Ok(term) = self.terms.iter().exactly_one() {
-            match term {
-                WordQueryTerm::Literal(_) => return 1,
-                WordQueryTerm::Any => return dict.term_dict.homographs.len(),
-                _ => {}
-            }
-        }
-        dict.term_dict
-            .homographs
-            .iter()
-            .filter(|x| self.allow(x))
-            .count()
-    }
-}
-
 impl WordQuery {
     #[auto_enum(Iterator, Clone)]
     pub fn solve<'a>(
         &'a self,
         dict: &'a TermDict,
     ) -> impl Iterator<Item = &'a Homograph> + 'a + Clone {
-        //TODO use indexes in some cases
-        if let Some(l) = self.as_literal() {
-            return std::iter::once(l);
+        if self.terms.is_empty(){
+            return std::iter::empty();
         }
 
+        if let Ok(term) = self.terms.iter().exactly_one() {
+            return term.solve(dict);
+        }
+        
         return dict.homographs.iter().filter(|t| self.allow(t));
+        //let result = dict.homographs.iter().filter(|t| self.terms.iter().all(|r|r.allow(t)));
+        //result
+
+        // let initial = self.terms[0].solve(dict);
+        // let filtered = initial.filter(|x| self.terms.iter().skip(1).all(|r|r.allow(x)) );
+        // return filtered;
     }
 
     pub fn allow(&self, term: &Homograph) -> bool {
@@ -122,18 +103,64 @@ impl WordQuery {
     }
 
     pub fn count_options(&self, dict: &WordContext) -> usize {
-        if let Ok(term) = self.terms.iter().exactly_one() {
-            return term.count_options(dict);
-        }
-        dict.term_dict
-            .homographs
-            .iter()
-            .map(|x| self.allow(x))
-            .count()
+        self.solve(&dict.term_dict).count()
     }
 }
 
+impl WordQueryDisjunction {
+    pub fn allow(&self, term: &Homograph) -> bool {
+        self.terms.iter().any(|t| t.allow(term))
+    }
+
+    pub fn as_literal(&self) -> Option<&Homograph> {
+        if let Ok(term) = self.terms.iter().exactly_one() {
+            return term.as_literal();
+        }
+        None
+    }
+
+    #[auto_enum(Iterator, Clone)]
+    pub fn solve<'a>(
+        &'a self,
+        dict: &'a TermDict,
+    ) -> impl Iterator<Item = &'a Homograph> + 'a + Clone {
+           if let Ok(term) = self.terms.iter().exactly_one() {
+            return term.solve(dict);
+        }        
+        return dict.homographs.iter().filter(|t| self.allow(t));
+    }
+
+    // pub fn count_options(&self, dict: &WordContext) -> usize {
+    //     if let Ok(term) = self.terms.iter().exactly_one() {
+    //         match term {
+    //             WordQueryTerm::Literal(_) => return 1,
+    //             WordQueryTerm::Any => return dict.term_dict.homographs.len(),
+    //             _ => {}
+    //         }
+    //     }
+    //     dict.term_dict
+    //         .homographs
+    //         .iter()
+    //         .filter(|x| self.allow(x))
+    //         .count()
+    // }
+}
+
 impl WordQueryTerm {
+    #[auto_enum(Iterator, Clone)]
+    pub fn solve<'a>(
+        &'a self,
+        dict: &'a TermDict,
+    ) -> impl Iterator<Item = &'a Homograph> + 'a + Clone {
+        match self {
+            WordQueryTerm::Literal(l) => return std::iter::once(l),
+            WordQueryTerm::PartOfSpeech(pos) => dict.homographs_by_part_of_speech[pos].iter(),
+            WordQueryTerm::Any => dict.homographs.iter(),
+            //WordQueryTerm::Nested(n) => n.solve(dict), - using this causes a compilation error
+            _ => dict.homographs.iter().filter(|t| self.allow(t)),
+        }
+    }
+
     pub fn as_literal(&self) -> Option<&Homograph> {
         match self {
             WordQueryTerm::Literal(h) => Some(h),

@@ -2,4 +2,4 @@
 source: tests/my_tests.rs
 expression: solutions_string
 ---
-name agromania : anagram anomie; name cladogram : anagram mcleod; name cartilaginous : anagram licentious; name laggard : anagram geld; name gardant : anagram dent; name gardant : anagram tend; name vagrant : anagram vent; name ravaging : anagram given; name marginal : anagram limen; name gradable : anagram bleed
+name agromania : anagram anomie; name cladogram : anagram Mcleod; name cartilaginous : anagram licentious; name laggard : anagram geld; name gardant : anagram dent; name gardant : anagram Dent; name gardant : anagram tend; name vagrant : anagram vent; name ravaging : anagram given; name marginal : anagram limen
