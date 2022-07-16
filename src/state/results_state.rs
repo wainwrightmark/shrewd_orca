@@ -15,11 +15,11 @@ use yewdux::prelude::*;
 #[store(storage = "local")] // can also be "session"
 pub struct ResultsState {
     pub data: Rc<Vec<QuestionSolution>>,
-    pub warning: Option<String>,    
+    pub warning: Option<String>,
 }
 
 static SOLVECONTEXT: OnceCell<WordContext> = OnceCell::new();
 
 pub fn get_solve_context() -> &'static WordContext {
-    SOLVECONTEXT.get_or_init(||WordContext::from_data(get_phrase_expressions()))
+    SOLVECONTEXT.get_or_init(|| WordContext::from_data(get_phrase_expressions()))
 }

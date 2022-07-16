@@ -9,7 +9,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{core::prelude::*};
+use crate::core::prelude::*;
 
 pub struct AnagramDict {
     pub words: BTreeMap<AnagramKey, SmallVec<[Homograph; 1]>>,
@@ -30,28 +30,25 @@ impl<'a, T: Iterator<Item = Homograph>> From<T> for AnagramDict {
             .dedup()
             .filter_map(|term| AnagramKey::from_str(&term.text).ok().map(|key| (key, term)))
             .into_group_map();
-        let words = BTreeMap::from_iter(groups.into_iter().map(|(k,g)|(k, SmallVec::from_vec(g)) ) );
-        
+        let words =
+            BTreeMap::from_iter(groups.into_iter().map(|(k, g)| (k, SmallVec::from_vec(g))));
 
         AnagramDict { words }
     }
 }
 
 impl AnagramDict {
-
     #[auto_enum(Iterator)]
     pub fn solve_for_word(
         &self,
         word: &str,
         settings: AnagramSettings,
     ) -> impl '_ + Iterator<Item = ExpressionSolution> {
-
-        if let Ok(key) = AnagramKey::from_str(word){
+        if let Ok(key) = AnagramKey::from_str(word) {
             self.solve(key, settings)
-        }
-        else{
+        } else {
             std::iter::empty()
-        }        
+        }
     }
 
     pub fn solve(
@@ -61,17 +58,17 @@ impl AnagramDict {
     ) -> impl '_ + Iterator<Item = ExpressionSolution> {
         let iterator = AnagramIterator::create(self, key, settings);
 
-        
-
         iterator.flat_map(|solution| {
             solution
                 .into_iter()
                 .map(|k| self.words.get(&k).unwrap().clone()) //Note if terms with the same text, they will each be returned
-                .multi_cartesian_product().map(|x| ExpressionSolution{homographs: SmallVec::from_vec(x)})
+                .multi_cartesian_product()
+                .map(|x| ExpressionSolution {
+                    homographs: SmallVec::from_vec(x),
+                })
         })
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -103,7 +100,7 @@ mod tests {
         let solutions_string = solutions
             .into_iter()
             //.sorted_by_key(|x| x.len())
-            .map(|s| s.get_text())            
+            .map(|s| s.get_text())
             .take(10)
             .join("; ");
 
@@ -150,7 +147,7 @@ mod tests {
         let words = terms.split_ascii_whitespace().map(|text| Homograph {
             text: text.to_string(),
             is_single_word: true,
-            meanings: Default::default()
+            meanings: Default::default(),
         });
 
         let dict = AnagramDict::from(words);
@@ -173,5 +170,4 @@ mod tests {
 
         assert_eq!(solutions_string, expect);
     }
-    
 }

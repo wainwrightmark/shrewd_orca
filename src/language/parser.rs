@@ -30,7 +30,6 @@ pub fn question_parse(input: &str) -> Result<Question, String> {
     Question::try_parse(question)
 }
 
-
 impl CanParse for Pattern {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let components: Vec<PatternComponent> = pair

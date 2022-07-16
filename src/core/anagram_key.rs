@@ -111,7 +111,7 @@ impl Display for AnagramKey {
         let mut rem = self.inner;
 
         if rem > 1 {
-            for (p,i) in AnagramKey::PRIMESBYLETTER.into_iter().enumerate() {
+            for (p, i) in AnagramKey::PRIMESBYLETTER.into_iter().enumerate() {
                 while rem % (p as u128) == 0 {
                     let c = b'a' + (i as u8);
                     f.write_char(c as char)?;
@@ -151,7 +151,6 @@ impl FromStr for AnagramKey {
                     log::debug!("Word Too Big for anagram: '{}'", s);
                     return Err(AnagramKeyErr::WordTooBig);
                 }
-
             }
             len += 1;
         }

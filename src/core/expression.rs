@@ -8,46 +8,54 @@ use std::{
     str::FromStr,
 };
 
-use crate::{core::prelude::*};
-
+use crate::core::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Expression {
     pub words: Vec<WordQuery>,
 }
 
-impl From<ExpressionSolution> for Expression{
+impl From<ExpressionSolution> for Expression {
     fn from(es: ExpressionSolution) -> Self {
-        let words = es.homographs.into_iter().map(|h| WordQueryTerm::Literal(h).into()).collect_vec();
+        let words = es
+            .homographs
+            .into_iter()
+            .map(|h| WordQueryTerm::Literal(h).into())
+            .collect_vec();
         Expression { words }
     }
 }
 
 impl Expression {
-    pub fn solve<'a> (&'a self, dict: &'a WordContext) -> impl Iterator<Item = ExpressionSolution> +'a {
+    pub fn solve<'a>(
+        &'a self,
+        dict: &'a WordContext,
+    ) -> impl Iterator<Item = ExpressionSolution> + 'a {
         let solutions = self
-                .words
-                .iter()
-                .map(|w| w.solve(&dict.term_dict))
-                .multi_cartesian_product()
-                .map(|homographs| ExpressionSolution{homographs: SmallVec::from_iter(homographs.into_iter().cloned()) })
-                ;
+            .words
+            .iter()
+            .map(|w| w.solve(&dict.term_dict))
+            .multi_cartesian_product()
+            .map(|homographs| ExpressionSolution {
+                homographs: SmallVec::from_iter(homographs.into_iter().cloned()),
+            });
 
-            solutions
+        solutions
     }
 
-    pub fn as_anagram_settings(&self,
+    pub fn as_anagram_settings(
+        &self,
         // context: &WordContext
-    )
-    
-    -> AnagramSettings{
-        AnagramSettings { min_word_length: 3, max_words: self.words.len(),
-             //filter: self.as_filter(context) 
-            }
+    ) -> AnagramSettings {
+        AnagramSettings {
+            min_word_length: 3,
+            max_words: self.words.len(),
+            //filter: self.as_filter(context)
+        }
     }
 
     // pub fn as_filter(&self, context: &WordContext)-> Option<WordQuery>{
-        
+
     //     if self.words.iter().any(|x|x.is_any()){
     //         return None;
     //     }
@@ -61,48 +69,62 @@ impl Expression {
     //     .dedup()
     //     .map(|x|x.clone().into()));
 
-
     //     Some(WordQuery{terms: SmallVec::from_elem(WordQueryDisjunction{terms}, 1)})
     // }
 
-    pub fn count_options(&self, dict: &WordContext ) -> usize{
-        self.words.iter().map(|x|x.count_options(dict)) .fold(1, |a,b| a * b)
+    pub fn count_options(&self, dict: &WordContext) -> usize {
+        self.words
+            .iter()
+            .map(|x| x.count_options(dict))
+            .fold(1, |a, b| a * b)
     }
 
-    pub fn count_literal_chars(&self)->usize{
-        self.words.iter().filter_map(|x|x.as_literal()).map(|x|x.text.len()).count()
+    pub fn count_literal_chars(&self) -> usize {
+        self.words
+            .iter()
+            .filter_map(|x| x.as_literal())
+            .map(|x| x.text.len())
+            .count()
     }
 
-
-    pub fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution>{
-        if solution.homographs.len() != self.words.len(){
+    pub fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution> {
+        if solution.homographs.len() != self.words.len() {
             return None;
         }
 
-        if self.allow(&solution){
+        if self.allow(&solution) {
             return Some(solution);
         }
 
-        if !self.words.iter().all(|w|  solution.homographs.iter().any(|h| w.allow(h))){
+        if !self
+            .words
+            .iter()
+            .all(|w| solution.homographs.iter().any(|h| w.allow(h)))
+        {
             return None;
         }
 
-        'outer: for combination in solution.homographs.into_iter().permutations(self.words.len()){
-            for (w, h) in self.words.iter().zip(combination.iter()){
-                if !w.allow(&h){
+        'outer: for combination in solution
+            .homographs
+            .into_iter()
+            .permutations(self.words.len())
+        {
+            for (w, h) in self.words.iter().zip(combination.iter()) {
+                if !w.allow(&h) {
                     continue 'outer;
                 }
             }
-            return Some(ExpressionSolution{homographs: SmallVec::from_vec(combination)})
+            return Some(ExpressionSolution {
+                homographs: SmallVec::from_vec(combination),
+            });
         }
         return None;
     }
 
-    fn allow(&self, solution: &ExpressionSolution) -> bool{
-        if solution.homographs.len() == self.words.len(){
-
-            for (w, h) in self.words.iter().zip(solution.homographs.iter()){
-                if !w.allow(h){
+    fn allow(&self, solution: &ExpressionSolution) -> bool {
+        if solution.homographs.len() == self.words.len() {
+            for (w, h) in self.words.iter().zip(solution.homographs.iter()) {
+                if !w.allow(h) {
                     return false;
                 }
             }

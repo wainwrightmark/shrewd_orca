@@ -20,7 +20,8 @@ impl Question {
         match self {
             Question::Expression(ex) => {
                 if ex.words.iter().all(|w| w.as_literal().is_some()) {
-                    let text = ex.words                        
+                    let text = ex
+                        .words
                         .iter()
                         .map(|wq| wq.as_literal().unwrap().text.clone())
                         .join("");
@@ -29,20 +30,23 @@ impl Question {
                         return Default::default();
                     }
                     dict.anagram_dict
-                            .solve_for_word(text.as_str(), Default::default())
-                            .take(settings.max_solutions)
-                            .map(|x| QuestionSolution::Expression(x))
-                            .collect_vec()
+                        .solve_for_word(text.as_str(), Default::default())
+                        .take(settings.max_solutions)
+                        .map(|x| QuestionSolution::Expression(x))
+                        .collect_vec()
                 } else {
-                    ex.solve(dict).take(settings.max_solutions)
-                    .map(|x| QuestionSolution::Expression(x))
-                    .collect_vec()
+                    ex.solve(dict)
+                        .take(settings.max_solutions)
+                        .map(|x| QuestionSolution::Expression(x))
+                        .collect_vec()
                 }
             }
 
-            Question::Equation(eq) => eq.solve(dict).take(settings.max_solutions)
-            .map(|x| QuestionSolution::Anagram(x))
-            .collect_vec(),
+            Question::Equation(eq) => eq
+                .solve(dict)
+                .take(settings.max_solutions)
+                .map(|x| QuestionSolution::Anagram(x))
+                .collect_vec(),
         }
     }
 }

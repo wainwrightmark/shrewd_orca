@@ -8,20 +8,18 @@ use std::{
     str::FromStr,
 };
 
-use crate::{core::prelude::*};
+use crate::core::prelude::*;
 
 use super::term_dict;
 pub struct WordContext {
     pub term_dict: TermDict,
     pub anagram_dict: AnagramDict,
-    pub phrase_expressions: Vec<Expression>
+    pub phrase_expressions: Vec<Expression>,
 }
 
 impl WordContext {
-
-
-    pub fn try_get(&self, word: &str)-> Option<&Homograph>{
-        self.term_dict.homographs.iter().find(|x|x.text == word)
+    pub fn try_get(&self, word: &str) -> Option<&Homograph> {
+        self.term_dict.homographs.iter().find(|x| x.text == word)
     }
 
     pub fn from_data(phrase_expressions: Vec<Expression>) -> WordContext {
@@ -31,7 +29,7 @@ impl WordContext {
         WordContext {
             term_dict,
             anagram_dict,
-            phrase_expressions
+            phrase_expressions,
         }
     }
 }

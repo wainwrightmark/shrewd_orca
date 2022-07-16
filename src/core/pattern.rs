@@ -15,9 +15,10 @@ pub struct Pattern {
     pub regex: Regex,
 }
 
-impl From<Vec<PatternComponent>> for Pattern{
+impl From<Vec<PatternComponent>> for Pattern {
     fn from(components: Vec<PatternComponent>) -> Self {
-        let regex_str = "^(?i)".to_owned() + &components.iter().map(|x| x.regex_str()).join("") + "$";
+        let regex_str =
+            "^(?i)".to_owned() + &components.iter().map(|x| x.regex_str()).join("") + "$";
 
         let regex = Regex::new(regex_str.as_str()).unwrap();
 
@@ -33,7 +34,6 @@ impl PartialEq for Pattern {
 
 impl Eq for Pattern {}
 
-
 impl Pattern {
     pub fn allow(&self, term: &Homograph) -> bool {
         let r = self.regex.is_match(&term.text);
@@ -47,7 +47,7 @@ pub enum PatternComponent {
     Any,
     AnyChar(usize),
     Literal(String),
-    CharacterClass(CharacterClass)
+    CharacterClass(CharacterClass),
 }
 
 impl PatternComponent {
@@ -56,33 +56,33 @@ impl PatternComponent {
             PatternComponent::Any => "[[:alpha:]]*".to_string(),
             PatternComponent::AnyChar(len) => format!("[[:alpha:]]{{{}}}", len),
             PatternComponent::Literal(s) => s.clone(),
-            PatternComponent::CharacterClass(c)=>c.regex_char()
+            PatternComponent::CharacterClass(c) => c.regex_char(),
         }
     }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub enum CharacterClass{
+pub enum CharacterClass {
     Vowel,
-    Consonant
+    Consonant,
 }
-impl CharacterClass{
-    pub fn regex_char(&self)-> String{
-        match self{
+impl CharacterClass {
+    pub fn regex_char(&self) -> String {
+        match self {
             CharacterClass::Vowel => "[aeiou]".to_string(),
             CharacterClass::Consonant => "[bcdfghjklmnpqrstvwxyz]".to_string(),
         }
     }
 }
 
-impl FromStr for CharacterClass{
+impl FromStr for CharacterClass {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().as_str() {
-            "@v"=> Ok(CharacterClass::Vowel),
+            "@v" => Ok(CharacterClass::Vowel),
             "@c" => Ok(CharacterClass::Consonant),
-            _=> Err("The only valid character classes are @v and @c".to_string())
+            _ => Err("The only valid character classes are @v and @c".to_string()),
         }
     }
 }

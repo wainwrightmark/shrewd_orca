@@ -27,51 +27,54 @@ impl TermDict {
             let text = parts.next().ok_or("Missing Term")?;
             let a_key = parts.next().ok_or("Missing Deinition")?;
             let definition_str = parts.next().ok_or("Missing Deinition")?;
-            let definition = if definition_str == "" {None}else{Some(definition_str.to_string())};
+            let definition = if definition_str == "" {
+                None
+            } else {
+                Some(definition_str.to_string())
+            };
 
             let tags: BitFlags<WordTag> = Default::default();
 
             let part_of_speech = PartOfSpeech::from_str(pos_lit)?;
-            let term =
-            (text,
-            Meaning{
-                part_of_speech,
-                tags,
-                definition
-            }
+            let term = (
+                text,
+                Meaning {
+                    part_of_speech,
+                    tags,
+                    definition,
+                },
             );
             terms.push(term);
         }
 
-        
-        let homographs = terms        
-        .into_iter()
-        .enumerate()
-        .sorted_by_key(|x|x.1.0.to_ascii_lowercase())
-        .group_by(|a|a.1.0.to_ascii_lowercase())
-        .into_iter()    
-        .map(|(text, group)|{
-            let mut i:Option<usize> = None;
-            let  meanings = SmallVec::from_iter(group.inspect(|x| {
-                if i == None{
-                    i = Some(x.0)
-                }
-            }) .map(|p|p.1.1));
-            let homograph = 
-            Homograph{
-                text,
-                is_single_word: true,
-                meanings    
-            };
+        let homographs = terms
+            .into_iter()
+            .enumerate()
+            .sorted_by_key(|x| x.1 .0.to_ascii_lowercase())
+            .group_by(|a| a.1 .0.to_ascii_lowercase())
+            .into_iter()
+            .map(|(text, group)| {
+                let mut i: Option<usize> = None;
+                let meanings = SmallVec::from_iter(
+                    group
+                        .inspect(|x| {
+                            if i == None {
+                                i = Some(x.0)
+                            }
+                        })
+                        .map(|p| p.1 .1),
+                );
+                let homograph = Homograph {
+                    text,
+                    is_single_word: true,
+                    meanings,
+                };
 
-            (i.unwrap(), homograph)
-
-
-        }  )
-        .sorted_by_key(|(i,_)|i.clone())
-        .map(|(_,x)|x)
-        .collect_vec()
-        ;
+                (i.unwrap(), homograph)
+            })
+            .sorted_by_key(|(i, _)| i.clone())
+            .map(|(_, x)| x)
+            .collect_vec();
 
         Ok(TermDict { homographs })
     }

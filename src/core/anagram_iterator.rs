@@ -47,7 +47,7 @@ impl<'b> Iterator for AnagramIterator<'b> {
                 .rev()
                 .filter(|(&next_key, possible_homographs)| {
                     self.settings.allow_key(&next_key)
-                        //&& self.settings.allow_word(possible_homographs)
+                    //&& self.settings.allow_word(possible_homographs)
                 })
                 .filter_map(|(&next_key, _)| {
                     (top.0 - next_key).map(|remainder| (remainder, next_key))
@@ -63,8 +63,7 @@ impl<'b> Iterator for AnagramIterator<'b> {
                 } else if self.settings.allow_key(&remainder) {
                     if self.settings.max_words == self.used_words.len() + 2 {
                         if remainder <= next_key {
-
-                            if let Some(l) = self.dict.words.get(&remainder){
+                            if let Some(l) = self.dict.words.get(&remainder) {
                                 //if(self.settings.allow_word(l))
                                 {
                                     let mut new_used = self.used_words.clone();

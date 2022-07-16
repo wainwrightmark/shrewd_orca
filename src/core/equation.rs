@@ -160,17 +160,15 @@ impl Equation {
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
         expression.solve(dict).flat_map(move |solution| {
-            dict.phrase_expressions
-                .iter()
-                .flat_map(move |right| {
-                    Equation {
-                        left: solution.clone().into(),
-                        right: right.clone(),
-                        operator: EqualityOperator::Anagram,
-                    }
-                    .solve(dict)
-                    .collect_vec()
-                })
+            dict.phrase_expressions.iter().flat_map(move |right| {
+                Equation {
+                    left: solution.clone().into(),
+                    right: right.clone(),
+                    operator: EqualityOperator::Anagram,
+                }
+                .solve(dict)
+                .collect_vec()
+            })
         })
     }
 }

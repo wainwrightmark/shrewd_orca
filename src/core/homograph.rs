@@ -5,29 +5,32 @@ use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Homograph{
+pub struct Homograph {
     pub text: String,
     pub is_single_word: bool,
-    pub meanings: SmallVec<[Meaning; 2]>
+    pub meanings: SmallVec<[Meaning; 2]>,
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Meaning {
-    pub part_of_speech: PartOfSpeech,    
-    pub tags: BitFlags<WordTag>,    
+    pub part_of_speech: PartOfSpeech,
+    pub tags: BitFlags<WordTag>,
     pub definition: Option<String>,
 }
 
 impl PartialOrd for Homograph {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.text.to_ascii_lowercase().partial_cmp(&other.text.to_ascii_lowercase())
+        self.text
+            .to_ascii_lowercase()
+            .partial_cmp(&other.text.to_ascii_lowercase())
     }
 }
 
 impl Ord for Homograph {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.text.to_ascii_lowercase().cmp(&other.text.to_ascii_lowercase())
+        self.text
+            .to_ascii_lowercase()
+            .cmp(&other.text.to_ascii_lowercase())
     }
 }
 
@@ -55,7 +58,6 @@ pub enum WordTag {
     Negative,
 }
 
-
 impl FromStr for WordTag {
     type Err = String;
 
@@ -82,7 +84,7 @@ impl FromStr for PartOfSpeech {
             "a" => Ok(PartOfSpeech::Adverb),
             "p" => Ok(PartOfSpeech::Preposition),
 
-            "l" => Ok(PartOfSpeech::LastName), //TODO remove
+            "l" => Ok(PartOfSpeech::LastName),  //TODO remove
             "f" => Ok(PartOfSpeech::FirstName), //TODO remove
 
             "noun" => Ok(PartOfSpeech::Noun),

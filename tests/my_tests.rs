@@ -46,9 +46,7 @@ fn test(input: String) {
 #[test_case("an #j + @v* #n", "an dishwasher ingrown", "an ingrown dishwasher")]
 
 fn test_order_to_allow(query: String, text: String, expected: String) {
-
     let dict = WordContext::from_data(get_phrase_expressions());
-    
 
     let q = question_parse(query).unwrap();
     let expression = match q {

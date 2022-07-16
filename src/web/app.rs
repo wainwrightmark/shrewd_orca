@@ -17,7 +17,7 @@ pub fn app() -> Html {
 
         <Examples />
         <InputBox />
-        
+
         <ErrorBox />
         <DisplayBox/>
         <LoadMoreButton/>
@@ -72,18 +72,20 @@ pub fn diplay_box() -> Html {
 }
 
 #[function_component(Examples)]
-pub fn examples_dropdown()->Html{
-    let onchange = Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: Event| {        
-
+pub fn examples_dropdown() -> Html {
+    let onchange = Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: Event| {
         let input: HtmlSelectElement = e.target_unchecked_into();
         let value = input.value();
         s.change(value);
     });
 
-let options = Example::list().into_iter().map(|example| 
-html!(  <option value={example.text}>{example.description}</option>
-)
-).collect_vec();
+    let options = Example::list()
+        .into_iter()
+        .map(|example| {
+            html!(  <option value={example.text}>{example.description}</option>
+            )
+        })
+        .collect_vec();
 
     html!(
         <select {onchange}>
@@ -95,58 +97,71 @@ html!(  <option value={example.text}>{example.description}</option>
 }
 
 #[function_component(LoadMoreButton)]
-pub fn load_more_button()->Html{
+pub fn load_more_button() -> Html {
+    let onclick =
+        Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: MouseEvent| s.load_more());
 
-    let onclick = Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: MouseEvent| {        
-        s.load_more()
-    });
-
-    let total_results = use_selector(|s : &ResultsState| s.data.len());
+    let total_results = use_selector(|s: &ResultsState| s.data.len());
     let max_results = use_selector(|s: &InputState| s.max_solutions);
     let disabled = total_results < max_results;
 
- html!(<button {onclick} {disabled}>{"Load More"}</button>)
+    html!(<button {onclick} {disabled}>{"Load More"}</button>)
 }
 
 pub fn row(solution: &QuestionSolution) -> Html {
-    
-    match solution{
-        QuestionSolution::Expression(expression) =>{
-            let spans = expression.homographs .iter().map(homograph_display).collect_vec();
+    match solution {
+        QuestionSolution::Expression(expression) => {
+            let spans = expression
+                .homographs
+                .iter()
+                .map(homograph_display)
+                .collect_vec();
 
-    html!(
-        <tr>
-            <td>{spans}</td>
-        </tr>
-    )
-        },
-        QuestionSolution::Anagram(anagram) =>{
-            let left_spans = anagram.left.homographs .iter().map(homograph_display).collect_vec();
-            let right_spans = anagram.right.homographs .iter().map(homograph_display).collect_vec();
+            html!(
+                <tr>
+                    <td>{spans}</td>
+                </tr>
+            )
+        }
+        QuestionSolution::Anagram(anagram) => {
+            let left_spans = anagram
+                .left
+                .homographs
+                .iter()
+                .map(homograph_display)
+                .collect_vec();
+            let right_spans = anagram
+                .right
+                .homographs
+                .iter()
+                .map(homograph_display)
+                .collect_vec();
 
-    html!(
-        <tr>
-            <td>{left_spans}</td>
-            <td>{right_spans}</td>
-        </tr>
-    )
-        },
+            html!(
+                <tr>
+                    <td>{left_spans}</td>
+                    <td>{right_spans}</td>
+                </tr>
+            )
+        }
     }
-
-    
 }
 
 fn homograph_display(homograph: &Homograph) -> Html {
     let text = homograph.text.to_owned() + " ";
 
-    if let Some(definition) = homograph.meanings.iter().filter_map(|x|x.definition.clone()).next(){
+    if let Some(definition) = homograph
+        .meanings
+        .iter()
+        .filter_map(|x| x.definition.clone())
+        .next()
+    {
         html!(
             <span style="border-bottom: none;" data-tooltip={definition}>{text} </span>
         )
-    }
-    else{
+    } else {
         html!(
             <span style="border-bottom: none;" >{text} </span>
         )
-    }    
+    }
 }
