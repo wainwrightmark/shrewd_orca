@@ -29,7 +29,7 @@ wasm-logger = "0.2"
 wasm-bindgen-futures = "0.4"
 wasm-bindgen= { version = "0.2", features = ["serde"] }
 js-sys = "0.3"
-
+quick-xml = { version = "0.23", features = [ "serialize" ] }
 instant = { version = "0.1", features = [ "wasm-bindgen", "inaccurate" ] }
 
 [dependencies.web-sys]
@@ -54,3 +54,8 @@ opt-level = 3
 criterion = "0.3"
 ntest = "0.8"
 insta = "1.15.0"
+
+
+
+[[bin]]
+name="dict-generator"

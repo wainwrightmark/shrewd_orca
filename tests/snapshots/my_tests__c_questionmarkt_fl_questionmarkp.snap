@@ -2,4 +2,4 @@
 source: tests/my_tests.rs
 expression: solutions_string
 ---
-cut flip; cut flop; cut flap; cat flip; cat flop; cat flap; cot flip; cot flop; cot flap; cwt flip
+cut flip; cut flap; cut flop; cat flip; cat flap; cat flop; cot flip; cot flap; cot flop; cwt flip
