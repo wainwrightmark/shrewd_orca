@@ -8,7 +8,6 @@ edition= "2021"
 
 [dependencies]
 itertools = "0.10.3"
-num = "0.4"
 serde = { version = "1.0", features = ["derive", "rc"] }
 pest = "2.1"
 pest_derive = "2.1"
@@ -23,8 +22,7 @@ auto_enums = {version = "0.7", features=["std"]}
 log = "0.4"
 yew = { git = "https://github.com/yewstack/yew.git", features = ["csr",] }
 yewdux = { git = "https://github.com/intendednull/yewdux.git" }
-rand = {version = "0.8"}
-getrandom = {version="0.2", features=["js"]}
+
 
 regex= {version="1.6", features=["std", "perf",  ]}
 wasm-logger = "0.2"
