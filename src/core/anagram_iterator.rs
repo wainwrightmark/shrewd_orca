@@ -10,18 +10,17 @@ use std::{
 
 use crate::core::prelude::*;
 
-pub struct AnagramIterator<'b>
-//TODO const N
+pub struct AnagramIterator<'b, const N: usize>
 {
     dict: &'b AnagramDict,
-    stack: SmallVec<[(AnagramKey, Bound<AnagramKey>); 5]>,
-    used_words: SmallVec<[AnagramKey; 5]>,
+    stack: SmallVec<[(AnagramKey, Bound<AnagramKey>); N]>,
+    used_words: SmallVec<[AnagramKey; N]>,
     settings: AnagramSettings,
 }
 
-impl<'b> AnagramIterator<'b> {
+impl<'b, const N : usize> AnagramIterator<'b, N> {
     pub fn create(dict: &'b AnagramDict, key: AnagramKey, settings: AnagramSettings) -> Self {
-        let mut stack = SmallVec::<[(AnagramKey, Bound<AnagramKey>); 5]>::new();
+        let mut stack = SmallVec::<[(AnagramKey, Bound<AnagramKey>); N]>::new();
         stack.push((key, Bound::Included(key)));
 
         Self {
@@ -33,8 +32,8 @@ impl<'b> AnagramIterator<'b> {
     }
 }
 
-impl<'b> Iterator for AnagramIterator<'b> {
-    type Item = SmallVec<[AnagramKey; 5]>;
+impl<'b, const N : usize> Iterator for AnagramIterator<'b, N> {
+    type Item = SmallVec<[AnagramKey; N]>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.stack.is_empty() {

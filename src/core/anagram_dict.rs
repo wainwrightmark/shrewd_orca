@@ -56,7 +56,7 @@ impl AnagramDict {
         key: AnagramKey,
         settings: AnagramSettings,
     ) -> impl '_ + Iterator<Item = ExpressionSolution> {
-        let iterator = AnagramIterator::create(self, key, settings);
+        let iterator = AnagramIterator::<4>:: create(self, key, settings);
 
         iterator.flat_map(|solution| {
             solution
