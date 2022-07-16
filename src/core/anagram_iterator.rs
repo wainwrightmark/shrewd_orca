@@ -8,8 +8,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{core::prelude::*};
-
+use crate::core::prelude::*;
 
 pub struct AnagramIterator<'b>
 //TODO const N
@@ -46,32 +45,38 @@ impl<'b> Iterator for AnagramIterator<'b> {
                 .words
                 .range((Bound::Unbounded, top.1))
                 .rev()
-                .filter(|(&next_key, _)| self.settings.allow(&next_key))
+                .filter(|(&next_key, possible_homographs)| {
+                    self.settings.allow_key(&next_key)
+                        //&& self.settings.allow_word(possible_homographs)
+                })
                 .filter_map(|(&next_key, _)| {
                     (top.0 - next_key).map(|remainder| (remainder, next_key))
                 })
                 .next()
-            {       
-                top.1 = Bound:: Excluded(next_key);
-                
+            {
+                top.1 = Bound::Excluded(next_key);
+
                 if remainder.is_empty() {
                     let mut new_used = self.used_words.clone();
-                    new_used.push(next_key);                    
+                    new_used.push(next_key);
                     return Some(new_used);
-                } else if self.settings.allow(&remainder) {
+                } else if self.settings.allow_key(&remainder) {
                     if self.settings.max_words == self.used_words.len() + 2 {
+                        if remainder <= next_key {
 
-                        if remainder <= next_key && self.dict.words.contains_key(&remainder)
-                            && self.settings.allow(&remainder)
-                        {
-                            let mut new_used = self.used_words.clone();
-                            new_used.push(next_key);
-                            new_used.push(remainder);
-                            return Some(new_used);
+                            if let Some(l) = self.dict.words.get(&remainder){
+                                //if(self.settings.allow_word(l))
+                                {
+                                    let mut new_used = self.used_words.clone();
+                                    new_used.push(next_key);
+                                    new_used.push(remainder);
+                                    return Some(new_used);
+                                }
+                            }
                         }
                     } else if self.settings.max_words > self.used_words.len() + 2 {
                         self.used_words.push(next_key);
-                        self.stack.push((remainder, Bound::Included(next_key) ))
+                        self.stack.push((remainder, Bound::Included(next_key)))
                     }
                 }
             } else {

@@ -45,12 +45,12 @@ impl Equation {
             .collect_vec();
 
         if right_literals.is_empty() {
-            let settings = right.anagram_settings();
+            let settings = right.as_anagram_settings();
 
             let s = lefts
                 .flat_map(move |left| {
                     dict.anagram_dict
-                        .solve_for_word(&left.get_text(), settings)
+                        .solve_for_word(&left.get_text(), settings.clone())
                         .filter_map(|s| right.order_to_allow(s))
                         .map(move |right| AnagramSolution {
                             left: left.clone(),
@@ -73,7 +73,7 @@ impl Equation {
                 return std::iter::empty();
             }
 
-            let settings = new_right.anagram_settings();
+            let settings = new_right.as_anagram_settings();
 
             if let Ok(key_to_subtract) = AnagramKey::from_str(
                 right_literals

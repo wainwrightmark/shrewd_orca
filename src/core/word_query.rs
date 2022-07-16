@@ -23,6 +23,17 @@ impl From<WordQueryTerm> for WordQuery{
     }
 }
 
+impl From<WordQuery> for WordQueryTerm{
+    fn from(query: WordQuery) -> Self {
+        if let Ok(term) = query.terms.iter().flat_map(|x|x.terms.iter()).exactly_one(){
+            return term.clone();
+        }
+        else{
+            return WordQueryTerm::Nested(Box::new(query));
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct WordQueryDisjunction{
     pub terms: SmallVec<[WordQueryTerm; 1]>
@@ -95,6 +106,14 @@ impl WordQuery{
             return term.as_literal();
         }
         None
+    }
+
+    pub fn is_any(&self)-> bool{
+        self.terms.iter().all(|x| x.terms.iter().any(|x| match x{
+            
+            WordQueryTerm::Any => true,
+            _=> false
+        }))
     }
 
     pub fn count_options(&self, dict: &WordContext ) -> usize{

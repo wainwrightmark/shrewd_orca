@@ -12,7 +12,7 @@ use std::{
 use crate::{core::prelude::*};
 
 pub struct AnagramDict {
-    pub words: BTreeMap<AnagramKey, Vec<Homograph>>,
+    pub words: BTreeMap<AnagramKey, SmallVec<[Homograph; 1]>>,
 }
 
 impl From<TermDict> for AnagramDict {
@@ -30,7 +30,8 @@ impl<'a, T: Iterator<Item = Homograph>> From<T> for AnagramDict {
             .dedup()
             .filter_map(|term| AnagramKey::from_str(&term.text).ok().map(|key| (key, term)))
             .into_group_map();
-        let words = BTreeMap::from_iter(groups);
+        let words = BTreeMap::from_iter(groups.into_iter().map(|(k,g)|(k, SmallVec::from_vec(g)) ) );
+        
 
         AnagramDict { words }
     }
@@ -95,6 +96,7 @@ mod tests {
             AnagramSettings {
                 min_word_length: 3,
                 max_words: 3,
+                //filter: None
             },
         );
 
@@ -158,6 +160,7 @@ mod tests {
             AnagramSettings {
                 min_word_length,
                 max_words,
+                //filter:None
             },
         );
 

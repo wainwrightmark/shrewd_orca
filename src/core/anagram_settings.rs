@@ -10,11 +10,11 @@ use std::{
 
 use crate::{core::prelude::*};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct AnagramSettings {
     pub min_word_length: u8,
     pub max_words: usize,
-    //pub allow: Option<WordQuery> 
+    //pub filter: Option<WordQuery> 
 }
 
 impl Default for AnagramSettings {
@@ -22,12 +22,21 @@ impl Default for AnagramSettings {
         Self {
             min_word_length: 3,
             max_words: 3,
+            //filter: None
         }
     }
 }
 
 impl AnagramSettings {
-    pub fn allow(&self, key: &AnagramKey) -> bool {
+    // pub fn allow_word(&self, terms: &[Homograph]) -> bool {
+        
+    //     match &self.filter {
+    //         Some(x) => terms.iter().any(|t| x.allow(t)),
+    //         None => true,
+    //     }
+    // }
+    
+    pub fn allow_key(&self, key: &AnagramKey) -> bool {
         key.len >= self.min_word_length
     }
 }
