@@ -89,7 +89,7 @@ impl WordQueryDisjunction {
         dict.term_dict
             .homographs
             .iter()
-            .map(|x| self.allow(x))
+            .filter(|x| self.allow(x))
             .count()
     }
 }

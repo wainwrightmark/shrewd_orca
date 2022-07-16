@@ -8,7 +8,7 @@ use smallvec::SmallVec;
 pub struct Homograph {
     pub text: String,
     pub is_single_word: bool,
-    pub meanings: SmallVec<[Meaning; 2]>,
+    pub meanings: SmallVec<[Meaning; 1]>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
