@@ -34,20 +34,20 @@ pub fn main(){
             PartOfSpeech::LastName => "l",
         };
 
-        write!(output, "{}\t{}\t_\t{}\n", part_of_speech, text, definition).expect("Could not write line");
+        write!(output, "{}\t{}\t{}\n", part_of_speech, text, definition).expect("Could not write line");
     }
 
     let first_names = include_str!("first-names.txt").split_ascii_whitespace().take(2500);
 
     for name in first_names{
-        write!(output, "{}\t{}\t_\t{}\n", "f", name, "").expect("Could not write line");
+        write!(output, "{}\t{}\t{}\n", "f", name, "").expect("Could not write line");
     }
 
 
     let last_names = include_str!("last-names.txt").split_ascii_whitespace().take(2500);
 
     for name in last_names{
-        write!(output, "{}\t{}\t_\t{}\n", "l", name, "").expect("Could not write line");
+        write!(output, "{}\t{}\t{}\n", "l", name, "").expect("Could not write line");
     }
     
 }
