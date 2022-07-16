@@ -111,9 +111,7 @@ impl Equation {
         literals: &Vec<(&Homograph, usize)>,
     ) -> ExpressionSolution {
         for (element, index) in literals {
-            dehydrated
-                .homographs
-                .insert(*index, element.clone().clone())
+            dehydrated.homographs.insert(*index, (*element).clone())
         }
 
         dehydrated
@@ -132,21 +130,17 @@ impl Equation {
             return Equation::solve_phrase(&self.right, dict).map(|x| x.flip());
         }
 
-        let left_first: bool;
-
         let left_options = self.left.count_options(dict);
         let left_literal_count = self.left.count_literal_chars();
 
         let right_options = self.right.count_options(dict);
         let right_literal_count = self.right.count_literal_chars();
 
-        if left_options < right_options {
-            left_first = true;
-        } else if right_options < left_options {
-            left_first = false;
-        } else {
-            left_first = right_literal_count >= left_literal_count;
-        }
+        let left_first = match left_options.cmp(&right_options) {
+            std::cmp::Ordering::Less => true,
+            std::cmp::Ordering::Equal => right_literal_count >= left_literal_count,
+            std::cmp::Ordering::Greater => false,
+        };
 
         if left_first {
             Equation::solve_anagram(&self.left, &self.right, dict)
