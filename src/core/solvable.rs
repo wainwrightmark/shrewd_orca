@@ -1,11 +1,3 @@
-use std::path::Iter;
-
-use itertools::Itertools;
-use smallvec::{smallvec, SmallVec};
-
-use crate::core::prelude::*;
-use crate::language::prelude::*;
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SolveSettings {
     pub max_solutions: usize,

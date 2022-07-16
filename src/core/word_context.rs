@@ -1,16 +1,4 @@
-use itertools::{Itertools, MultiProduct};
-use smallvec::SmallVec;
-use std::{
-    collections::{BTreeMap, HashMap},
-    future::Future,
-    iter::{FlatMap, Once},
-    ops::Bound,
-    str::FromStr,
-};
-
 use crate::core::prelude::*;
-
-use super::term_dict;
 pub struct WordContext {
     pub term_dict: TermDict,
     pub anagram_dict: AnagramDict,

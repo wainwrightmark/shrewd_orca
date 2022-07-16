@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 

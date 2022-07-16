@@ -1,7 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused_imports)]
-#![allow(unused_parens)]
 use crate::web::prelude::*;
 pub mod core;
 pub mod language;

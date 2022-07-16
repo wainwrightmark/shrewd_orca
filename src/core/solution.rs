@@ -1,14 +1,8 @@
 use crate::core::prelude::*;
-use crate::language::prelude::*;
+
 use itertools::Itertools;
 use smallvec::SmallVec;
-use std::{collections::BTreeMap, default, str::FromStr};
 
-use crate::language::prelude::*;
-use num::traits::ops::inv;
-use pest::iterators::{Pair, Pairs};
-use pest::Parser;
-use pest_derive::Parser;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -43,8 +37,7 @@ impl ExpressionSolution {
 
 impl AnagramSolution {
     pub fn get_text(&self) -> String {
-        (self
-            .left
+        self.left
             .homographs
             .iter()
             .map(|x| x.text.as_str())
@@ -56,7 +49,7 @@ impl AnagramSolution {
                 .iter()
                 .map(|x| x.text.as_str())
                 .join(" ")
-                .as_str())
+                .as_str()
     }
 }
 

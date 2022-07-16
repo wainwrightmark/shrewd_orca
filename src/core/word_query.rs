@@ -1,13 +1,6 @@
 use auto_enums::auto_enum;
-use itertools::{Itertools, MultiProduct};
+use itertools::Itertools;
 use smallvec::SmallVec;
-use std::{
-    collections::{BTreeMap, HashMap},
-    future::Future,
-    iter::{self, FlatMap, Once},
-    ops::Bound,
-    str::FromStr,
-};
 
 use crate::core::prelude::*;
 

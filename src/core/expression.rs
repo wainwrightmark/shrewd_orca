@@ -1,12 +1,5 @@
-use itertools::{Itertools, MultiProduct};
+use itertools::Itertools;
 use smallvec::SmallVec;
-use std::{
-    collections::{BTreeMap, HashMap},
-    future::Future,
-    iter::{FlatMap, Once},
-    ops::{Bound, Index},
-    str::FromStr,
-};
 
 use crate::core::prelude::*;
 
@@ -43,7 +36,7 @@ impl Expression {
         solutions
     }
 
-    pub fn as_anagram_settings(
+    pub fn to_anagram_settings(
         &self,
         // context: &WordContext
     ) -> AnagramSettings {
@@ -73,10 +66,7 @@ impl Expression {
     // }
 
     pub fn count_options(&self, dict: &WordContext) -> usize {
-        self.words
-            .iter()
-            .map(|x| x.count_options(dict))
-            .product()
+        self.words.iter().map(|x| x.count_options(dict)).product()
     }
 
     pub fn count_literal_chars(&self) -> usize {

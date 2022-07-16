@@ -1,24 +1,16 @@
-use itertools::{Itertools, MultiProduct};
 use smallvec::SmallVec;
-use std::{
-    collections::{BTreeMap, HashMap},
-    future::Future,
-    iter::{FlatMap, Once},
-    ops::Bound,
-    str::FromStr,
-};
+use std::ops::Bound;
 
 use crate::core::prelude::*;
 
-pub struct AnagramIterator<'b, const N: usize>
-{
+pub struct AnagramIterator<'b, const N: usize> {
     dict: &'b AnagramDict,
     stack: SmallVec<[(AnagramKey, Bound<AnagramKey>); N]>,
     used_words: SmallVec<[AnagramKey; N]>,
     settings: AnagramSettings,
 }
 
-impl<'b, const N : usize> AnagramIterator<'b, N> {
+impl<'b, const N: usize> AnagramIterator<'b, N> {
     pub fn create(dict: &'b AnagramDict, key: AnagramKey, settings: AnagramSettings) -> Self {
         let mut stack = SmallVec::<[(AnagramKey, Bound<AnagramKey>); N]>::new();
         stack.push((key, Bound::Included(key)));
@@ -32,7 +24,7 @@ impl<'b, const N : usize> AnagramIterator<'b, N> {
     }
 }
 
-impl<'b, const N : usize> Iterator for AnagramIterator<'b, N> {
+impl<'b, const N: usize> Iterator for AnagramIterator<'b, N> {
     type Item = SmallVec<[AnagramKey; N]>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -44,7 +36,7 @@ impl<'b, const N : usize> Iterator for AnagramIterator<'b, N> {
                 .words
                 .range((Bound::Unbounded, top.1))
                 .rev()
-                .filter(|(&next_key, possible_homographs)| {
+                .filter(|(&next_key, _)| {
                     self.settings.allow_key(&next_key)
                     //&& self.settings.allow_word(possible_homographs)
                 })
@@ -62,7 +54,9 @@ impl<'b, const N : usize> Iterator for AnagramIterator<'b, N> {
                 } else if self.settings.allow_key(&remainder) {
                     if self.settings.max_words == self.used_words.len() + 2 {
                         if remainder <= next_key {
-                            if let Some(l) = self.dict.words.get(&remainder) {
+                            if self.dict.words.contains_key(&remainder)
+                            //let Some(l) = self.dict.words.get(&remainder)
+                            {
                                 //if(self.settings.allow_word(l))
                                 {
                                     let mut new_used = self.used_words.clone();

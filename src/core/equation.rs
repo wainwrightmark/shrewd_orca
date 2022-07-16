@@ -1,17 +1,9 @@
 use auto_enums::auto_enum;
-use itertools::{Itertools, MultiProduct};
-use smallvec::SmallVec;
-use std::{
-    collections::{BTreeMap, HashMap},
-    future::Future,
-    iter::{FlatMap, Once},
-    ops::Bound,
-    str::FromStr,
-};
+use itertools::Itertools;
+
+use std::str::FromStr;
 
 use crate::core::prelude::*;
-
-use super::homograph;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Equation {
@@ -45,7 +37,7 @@ impl Equation {
             .collect_vec();
 
         if right_literals.is_empty() {
-            let settings = right.as_anagram_settings();
+            let settings = right.to_anagram_settings();
 
             let s = lefts
                 .flat_map(move |left| {
@@ -73,13 +65,13 @@ impl Equation {
                 return std::iter::empty();
             }
 
-            let settings = new_right.as_anagram_settings();
+            let settings = new_right.to_anagram_settings();
 
             if let Ok(key_to_subtract) = AnagramKey::from_str(
                 right_literals
                     .clone()
                     .into_iter()
-                    .map(|(x, i)| x.text.clone())
+                    .map(|(x, _)| x.text.clone())
                     .join("")
                     .as_str(),
             ) {

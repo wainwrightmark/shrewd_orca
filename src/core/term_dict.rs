@@ -25,7 +25,7 @@ impl TermDict {
             let mut parts = line.split('\t');
             let pos_lit = parts.next().ok_or("Missing POS")?;
             let text = parts.next().ok_or("Missing Term")?;
-            let a_key = parts.next().ok_or("Missing Deinition")?;
+            let _ = parts.next().ok_or("Missing Deinition")?;
             let definition_str = parts.next().ok_or("Missing Deinition")?;
             let definition = if definition_str.is_empty() {
                 None

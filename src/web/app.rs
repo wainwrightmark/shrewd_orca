@@ -1,11 +1,8 @@
-use std::rc::Rc;
-
 use crate::core::prelude::*;
-use crate::state::{self, prelude::*};
-use crate::web::prelude::*;
+use crate::state::prelude::*;
 use itertools::Itertools;
 use shrewd_orca::language::prelude::Example;
-use web_sys::{HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement};
+use web_sys::{HtmlSelectElement, HtmlTextAreaElement};
 use yew::prelude::*;
 use yewdux::prelude::*;
 
@@ -99,7 +96,7 @@ pub fn examples_dropdown() -> Html {
 #[function_component(LoadMoreButton)]
 pub fn load_more_button() -> Html {
     let onclick =
-        Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: MouseEvent| s.load_more());
+        Dispatch::<InputState>::new().reduce_mut_callback_with(|s, _: MouseEvent| s.load_more());
 
     let total_results = use_selector(|s: &ResultsState| s.data.len());
     let max_results = use_selector(|s: &InputState| s.max_solutions);

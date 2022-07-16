@@ -1,7 +1,5 @@
-use itertools::{self, Itertools};
 use std::{
     fmt::{Debug, Display, Write},
-    num,
     ops::{Add, Sub},
     str::FromStr,
 };

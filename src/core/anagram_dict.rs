@@ -1,13 +1,7 @@
 use auto_enums::auto_enum;
-use itertools::{Itertools, MultiProduct};
+use itertools::Itertools;
 use smallvec::SmallVec;
-use std::{
-    collections::{BTreeMap, HashMap},
-    future::Future,
-    iter::{FlatMap, Once},
-    ops::Bound,
-    str::FromStr,
-};
+use std::{collections::BTreeMap, str::FromStr};
 
 use crate::core::prelude::*;
 
@@ -56,7 +50,7 @@ impl AnagramDict {
         key: AnagramKey,
         settings: AnagramSettings,
     ) -> impl '_ + Iterator<Item = ExpressionSolution> {
-        let iterator = AnagramIterator::<4>:: create(self, key, settings);
+        let iterator = AnagramIterator::<4>::create(self, key, settings);
 
         iterator.flat_map(|solution| {
             solution
@@ -72,13 +66,11 @@ impl AnagramDict {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
 
     use itertools::Itertools;
 
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::AnagramDict;
-    use super::AnagramKey;
     use crate::core::prelude::*;
     use ntest::test_case;
 

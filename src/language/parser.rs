@@ -1,14 +1,10 @@
-use std::{collections::BTreeMap, default, str::FromStr};
+use std::str::FromStr;
 
 use crate::core::prelude::*;
-use crate::language::prelude::*;
 use itertools::Itertools;
-use num::traits::ops::inv;
-use pest::iterators::{Pair, Pairs};
+use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
-use regex::Regex;
-use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 
 #[derive(Parser)]
@@ -111,9 +107,8 @@ impl CanParse for WordQuery {
     fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
         let inner = pair.into_inner();
 
-        let disjunction: Vec<WordQueryDisjunction> = inner
-            .map(WordQueryDisjunction::try_parse)
-            .try_collect()?;
+        let disjunction: Vec<WordQueryDisjunction> =
+            inner.map(WordQueryDisjunction::try_parse).try_collect()?;
         let terms = SmallVec::from_vec(disjunction);
 
         Ok(WordQuery { terms })

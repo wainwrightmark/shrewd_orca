@@ -1,17 +1,3 @@
-use std::{collections::BTreeMap, default, str::FromStr};
-
-use crate::core::prelude::*;
-use crate::language::prelude::*;
-use itertools::Itertools;
-use num::traits::ops::inv;
-use pest::iterators::{Pair, Pairs};
-use pest::Parser;
-use pest_derive::Parser;
-use regex::Regex;
-use serde::__private::de;
-use serde::{Deserialize, Serialize};
-use smallvec::SmallVec;
-
 pub struct Example {
     pub text: String,
     pub description: String,
