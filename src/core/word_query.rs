@@ -33,9 +33,9 @@ impl From<WordQuery> for WordQueryTerm {
             .flat_map(|x| x.terms.iter())
             .exactly_one()
         {
-            return term.clone();
+            term.clone()
         } else {
-            return WordQueryTerm::Nested(Box::new(query));
+            WordQueryTerm::Nested(Box::new(query))
         }
     }
 }

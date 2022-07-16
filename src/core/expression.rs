@@ -76,7 +76,7 @@ impl Expression {
         self.words
             .iter()
             .map(|x| x.count_options(dict))
-            .fold(1, |a, b| a * b)
+            .product()
     }
 
     pub fn count_literal_chars(&self) -> usize {
@@ -110,7 +110,7 @@ impl Expression {
             .permutations(self.words.len())
         {
             for (w, h) in self.words.iter().zip(combination.iter()) {
-                if !w.allow(&h) {
+                if !w.allow(h) {
                     continue 'outer;
                 }
             }
@@ -118,7 +118,7 @@ impl Expression {
                 homographs: SmallVec::from_vec(combination),
             });
         }
-        return None;
+        None
     }
 
     fn allow(&self, solution: &ExpressionSolution) -> bool {

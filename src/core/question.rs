@@ -32,12 +32,12 @@ impl Question {
                     dict.anagram_dict
                         .solve_for_word(text.as_str(), Default::default())
                         .take(settings.max_solutions)
-                        .map(|x| QuestionSolution::Expression(x))
+                        .map(QuestionSolution::Expression)
                         .collect_vec()
                 } else {
                     ex.solve(dict)
                         .take(settings.max_solutions)
-                        .map(|x| QuestionSolution::Expression(x))
+                        .map(QuestionSolution::Expression)
                         .collect_vec()
                 }
             }
@@ -45,7 +45,7 @@ impl Question {
             Question::Equation(eq) => eq
                 .solve(dict)
                 .take(settings.max_solutions)
-                .map(|x| QuestionSolution::Anagram(x))
+                .map(QuestionSolution::Anagram)
                 .collect_vec(),
         }
     }

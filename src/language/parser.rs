@@ -112,7 +112,7 @@ impl CanParse for WordQuery {
         let inner = pair.into_inner();
 
         let disjunction: Vec<WordQueryDisjunction> = inner
-            .map(|p| WordQueryDisjunction::try_parse(p))
+            .map(WordQueryDisjunction::try_parse)
             .try_collect()?;
         let terms = SmallVec::from_vec(disjunction);
 
@@ -125,7 +125,7 @@ impl CanParse for WordQueryDisjunction {
         let inner = pair.into_inner();
 
         let word_query_terms: Vec<WordQueryTerm> =
-            inner.map(|p| WordQueryTerm::try_parse(p)).try_collect()?;
+            inner.map(WordQueryTerm::try_parse).try_collect()?;
         let terms = SmallVec::from_vec(word_query_terms);
 
         Ok(WordQueryDisjunction { terms })

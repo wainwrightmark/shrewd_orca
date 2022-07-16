@@ -27,7 +27,7 @@ impl TermDict {
             let text = parts.next().ok_or("Missing Term")?;
             let a_key = parts.next().ok_or("Missing Deinition")?;
             let definition_str = parts.next().ok_or("Missing Deinition")?;
-            let definition = if definition_str == "" {
+            let definition = if definition_str.is_empty() {
                 None
             } else {
                 Some(definition_str.to_string())
@@ -72,7 +72,7 @@ impl TermDict {
 
                 (i.unwrap(), homograph)
             })
-            .sorted_by_key(|(i, _)| i.clone())
+            .sorted_by_key(|(i, _)| *i)
             .map(|(_, x)| x)
             .collect_vec();
 

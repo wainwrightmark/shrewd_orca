@@ -32,7 +32,7 @@ impl Equation {
         right: &'a Expression,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
-        if right.words.len() == 0 {
+        if right.words.is_empty() {
             return std::iter::empty();
         }
 
@@ -113,7 +113,7 @@ impl Equation {
         for (element, index) in literals {
             dehydrated
                 .homographs
-                .insert(index.clone(), element.clone().clone())
+                .insert(*index, element.clone().clone())
         }
 
         dehydrated

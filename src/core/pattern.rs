@@ -36,9 +36,9 @@ impl Eq for Pattern {}
 
 impl Pattern {
     pub fn allow(&self, term: &Homograph) -> bool {
-        let r = self.regex.is_match(&term.text);
+        
 
-        r
+        self.regex.is_match(&term.text)
     }
 }
 
