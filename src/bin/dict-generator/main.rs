@@ -2,12 +2,10 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Write};
 use serde::Deserialize;
-use quick_xml::de::{from_str};
+use quick_xml::de::{from_reader};
 pub fn main(){
-    log::info!("hello world");
-
-    let xml = include_str!("english-wordnet-2021.xml");
-    let resource: LexicalResource = from_str(xml).unwrap();    
+    let reader = quick_xml::Reader::from_file("src\\bin\\dict-generator\\english-wordnet-2021.xml").unwrap();
+    let resource: LexicalResource = from_reader(reader.into_inner()).unwrap();    
     
     let synset_dic: HashMap<_,_> = resource.lexicon.synsets.iter().map(|s| (s.id.clone(), s) ).collect();
 

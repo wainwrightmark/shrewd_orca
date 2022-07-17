@@ -15,7 +15,7 @@ use smallvec::SmallVec;
 #[test_case("6 7")]
 #[test_case("red")]
 #[test_case("c?t fl?p")]
-#[test_case("clint eastwood")]
+#[test_case("clint eastwood =a")]
 #[test_case("6..7")]
 #[test_case("b?d")]
 #[test_case("b*d")]
@@ -43,7 +43,6 @@ fn test(input: String) {
 }
 
 #[test_case("#j #n", "dishwasher ingrown", "ingrown dishwasher")]
-#[test_case("an #j + @v* #n", "an dishwasher ingrown", "an ingrown dishwasher")]
 
 fn test_order_to_allow(query: String, text: String, expected: String) {
     let dict = WordContext::from_data(get_phrase_expressions());
