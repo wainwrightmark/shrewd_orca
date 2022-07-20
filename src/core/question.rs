@@ -37,8 +37,7 @@ impl Question {
 
             Question::Equation(eq) => eq
                 .solve(dict)
-                .take(settings.max_solutions)
-                .map(QuestionSolution::Anagram)
+                .take(settings.max_solutions)                
                 .collect_vec(),
         }
     }

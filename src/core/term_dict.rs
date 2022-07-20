@@ -15,6 +15,12 @@ pub struct TermDict {
 }
 
 impl TermDict {
+
+    pub fn try_find(&self, s: &str)-> Option<Homograph>{
+        self.homographs.iter().filter(|x|x.text == s).cloned().next()
+    }
+
+
     pub fn from_term_data() -> Result<Self, String> {
         let txt = include_str!("WordData.tsv");
         Self::from_csv(txt)

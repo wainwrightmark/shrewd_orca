@@ -78,6 +78,7 @@ impl FromStr for EqualityOperator {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().as_str() {
             "=a" => Ok(EqualityOperator::Anagram),
+            "=s" => Ok(EqualityOperator::Spoonerism),
             _ => Err(format!("Could not parse {} as equality operator", s)),
         }
     }

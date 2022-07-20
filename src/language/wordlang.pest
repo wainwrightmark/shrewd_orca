@@ -20,5 +20,4 @@ any = @{"*"+}
 character_class = ${"@" ~ ASCII_ALPHA}
 length = @{ASCII_DIGIT+}
 range = ${length ~ ".." ~ length}
-//disjunction
-equality_operator = { "=a"}
+equality_operator = ${ "=" ~ ASCII_ALPHA}

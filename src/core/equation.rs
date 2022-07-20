@@ -15,9 +15,70 @@ pub struct Equation {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum EqualityOperator {
     Anagram,
+    Spoonerism,
 }
 
 impl Equation {
+    #[auto_enum(Iterator)]
+    fn solve_spoonerism<'a>(
+        left_expression: &'a Expression,
+        right_expression: &'a Expression,
+        dict: &'a WordContext,
+    ) -> impl Iterator<Item = SpoonerismSolution> + 'a {
+
+        if left_expression.words.len() != 2{
+            return std::iter:: empty();
+        }
+        
+        else if right_expression.words.len() != 2{
+            return std::iter::empty();
+        }
+        else{
+            let result = left_expression
+            .solve(dict)
+            .filter(|x| x.homographs.len() == 2)
+            //.map(|x| (x.homographs[0], x.homographs[1] ))
+            .filter_map(|left| {
+                let w1 = left.homographs[0].clone();
+                let w2 = left.homographs[1].clone();
+                let nw1 = w2.text[0..1].to_string() + &w1.text[1..];
+
+                let h1 = dict.term_dict.try_find(nw1.as_str());
+                if h1.is_none() {
+                    return None;
+                }
+
+                let nw2 = w1.text[0..1].to_string() + &w2.text[1..];
+
+                let h2 = dict.term_dict.try_find(nw2.as_str());
+                if h2.is_none() {
+                    return None;
+                }
+
+                let right_homographs = smallvec::smallvec![h1.unwrap(), h2.unwrap()];
+
+                let right = ExpressionSolution {
+                    homographs: right_homographs,
+                };
+
+                if !right_expression.allow(&right){
+                    return None;
+                }                
+                let solution = SpoonerismSolution { left, right };
+
+                if solution.is_trivial(){
+                    return None;
+                }
+
+                Some(solution)
+            });
+
+        result
+        }
+
+        
+    }
+
     #[auto_enum(Iterator)]
     fn solve_anagram<'a>(
         left: &'a Expression,
@@ -109,17 +170,18 @@ impl Equation {
         dehydrated
     }
 
+
     #[auto_enum(Iterator)]
-    pub fn solve<'a>(
+    fn solve_as_anagram<'a>(
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
         if self.right.words.is_empty() {
-            return Equation::solve_phrase(&self.left, dict);
+            return Equation::solve_anagram_phrase(&self.left, dict);
         }
 
         if self.left.words.is_empty() {
-            return Equation::solve_phrase(&self.right, dict).map(|x| x.flip());
+            return Equation::solve_anagram_phrase(&self.right, dict).map(|x| x.flip());
         }
 
         let left_options = self.left.count_options(dict);
@@ -141,7 +203,26 @@ impl Equation {
         }
     }
 
-    pub fn solve_phrase<'a>(
+    fn solve_as_spoonerism<'a>(
+        &'a self,
+        dict: &'a WordContext,
+    ) -> impl Iterator<Item = SpoonerismSolution> + 'a {
+        
+        Equation::solve_spoonerism(&self.left, &self.right, dict)
+    }
+
+    #[auto_enum(Iterator)]
+    pub fn solve<'a>(
+        &'a self,
+        dict: &'a WordContext,
+    ) -> impl Iterator<Item = QuestionSolution> + 'a {
+        match self.operator {
+            EqualityOperator::Anagram => self.solve_as_anagram(dict).map(|x| QuestionSolution::Anagram(x)),
+            EqualityOperator::Spoonerism => self.solve_as_spoonerism(dict).map(|x| QuestionSolution::Spoonerism(x)),
+        }
+    }
+
+    pub fn solve_anagram_phrase<'a>(
         expression: &'a Expression,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
@@ -152,7 +233,7 @@ impl Equation {
                     right: right.clone(),
                     operator: EqualityOperator::Anagram,
                 }
-                .solve(dict)
+                .solve_as_anagram(dict)
                 .collect_vec()
             })
         })

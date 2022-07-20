@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 pub enum QuestionSolution {
     Expression(ExpressionSolution),
     Anagram(AnagramSolution),
+    Spoonerism(SpoonerismSolution),
 }
 
 impl QuestionSolution {
@@ -16,6 +17,7 @@ impl QuestionSolution {
         match self {
             QuestionSolution::Expression(e) => e.get_text(),
             QuestionSolution::Anagram(a) => a.get_text(),
+            QuestionSolution::Spoonerism(a) => a.get_text(),
         }
     }
 }
@@ -57,6 +59,52 @@ impl AnagramSolution {
 pub struct AnagramSolution {
     pub left: ExpressionSolution,
     pub right: ExpressionSolution,
+}
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SpoonerismSolution {
+    pub left: ExpressionSolution,
+    pub right: ExpressionSolution,
+}
+
+impl SpoonerismSolution {
+    pub fn get_text(&self) -> String {
+        self.left
+            .homographs
+            .iter()
+            .map(|x| x.text.as_str())
+            .join(" ")
+            + " : "
+            + self
+                .right
+                .homographs
+                .iter()
+                .map(|x| x.text.as_str())
+                .join(" ")
+                .as_str()
+    }
+
+    pub fn flip(self) -> Self {
+        Self {
+            left: self.right,
+            right: self.left,
+        }
+    }
+
+    pub fn is_trivial(&self) -> bool {
+        self.left.homographs.len() == self.right.homographs.len()
+            && self
+                .left
+                .homographs
+                .iter()
+                .sorted_by_key(|x| x.text.clone())
+                .zip(
+                    self.right
+                        .homographs
+                        .iter()
+                        .sorted_by_key(|x| x.text.clone()),
+                )
+                .all(|(x, y)| x.text == y.text)
+    }
 }
 
 impl AnagramSolution {

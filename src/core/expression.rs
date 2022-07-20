@@ -111,7 +111,7 @@ impl Expression {
         None
     }
 
-    fn allow(&self, solution: &ExpressionSolution) -> bool {
+    pub fn allow(&self, solution: &ExpressionSolution) -> bool {
         if solution.homographs.len() == self.words.len() {
             for (w, h) in self.words.iter().zip(solution.homographs.iter()) {
                 if !w.allow(h) {
