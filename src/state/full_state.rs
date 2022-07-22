@@ -1,6 +1,10 @@
+
+use std::rc::Rc;
+
 use crate::language::prelude::*;
-use crate::state::prelude::*;
+use crate::core::prelude::*;
 use log::debug;
+use once_cell::sync::OnceCell;
 use serde::*;
 use itertools::Itertools;
 
@@ -8,21 +12,32 @@ use yewdux::prelude::*;
 
 #[derive(PartialEq, Store, Clone, Serialize, Deserialize)]
 #[store(storage = "local")] // can also be "session"
-pub struct InputState {
+pub struct FullState {
     pub text: String,
     pub max_solutions: usize,
+    pub data: Rc<Vec<QuestionSolution>>,
+    pub warning: Option<String>,
 }
 
-impl Default for InputState {
+
+static SOLVECONTEXT: OnceCell<WordContext> = OnceCell::new();
+
+pub fn get_solve_context() -> &'static WordContext {
+    SOLVECONTEXT.get_or_init(|| WordContext::from_data(get_phrase_expressions()))
+}
+
+impl Default for FullState {
     fn default() -> Self {
         Self {
             text: "4 5".to_string(),
             max_solutions: 10,
+            data: Default::default(),
+            warning: Default::default()
         }
     }
 }
 
-impl InputState {
+impl FullState {
     pub fn load_more(&mut self) {
         self.max_solutions += 10;
         self.update();
@@ -40,18 +55,14 @@ impl InputState {
                 let diff = instant::Instant::now() - start_instant;
                 debug!("Question solved with {} solutions in {:?}", sol.len(), diff);
 
-                Dispatch::<ResultsState>::new().set(ResultsState {
-                    data: sol.into(),
-                    warning: Default::default(),
-                })
+                self.data = sol.into();
+                self.warning = Default::default();
             }
             Err(warning) => {
                 debug!("Warning {}", warning);
 
-                Dispatch::<ResultsState>::new().set(ResultsState {
-                    data: Default::default(),
-                    warning: Some(warning),
-                })
+                self.data = Default::default();
+                self.warning = Some(warning);
             }
         }
     }

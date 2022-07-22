@@ -24,10 +24,10 @@ pub fn app() -> Html {
 
 #[function_component(InputBox)]
 pub fn input_box() -> Html {
-    let text = use_selector(|state: &InputState| state.text.clone())
+    let text = use_selector(|state: &FullState| state.text.clone())
         .as_ref()
         .clone();
-    let oninput = Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: InputEvent| {
+    let oninput = Dispatch::<FullState>::new().reduce_mut_callback_with(|s, e: InputEvent| {
         let input: HtmlTextAreaElement = e.target_unchecked_into();
         let value = input.value();
         s.change(value);
@@ -44,7 +44,7 @@ pub fn input_box() -> Html {
 
 #[function_component(ErrorBox)]
 pub fn error_box() -> Html {
-    let err = use_selector(|s: &ResultsState| s.warning.clone())
+    let err = use_selector(|s: &FullState| s.warning.clone())
         .as_ref()
         .clone()
         .unwrap_or_else(|| "‎".to_string());
@@ -53,7 +53,7 @@ pub fn error_box() -> Html {
 
 #[function_component(DisplayBox)]
 pub fn diplay_box() -> Html {
-    let terms = use_selector(|s: &ResultsState| s.data.clone())
+    let terms = use_selector(|s: &FullState| s.data.clone())
         .as_ref()
         .clone();
 
@@ -70,7 +70,7 @@ pub fn diplay_box() -> Html {
 
 #[function_component(Examples)]
 pub fn examples_dropdown() -> Html {
-    let onchange = Dispatch::<InputState>::new().reduce_mut_callback_with(|s, e: Event| {
+    let onchange = Dispatch::<FullState>::new().reduce_mut_callback_with(|s, e: Event| {
         let input: HtmlSelectElement = e.target_unchecked_into();
         let value = input.value();
         s.change(value);
@@ -96,10 +96,10 @@ pub fn examples_dropdown() -> Html {
 #[function_component(LoadMoreButton)]
 pub fn load_more_button() -> Html {
     let onclick =
-        Dispatch::<InputState>::new().reduce_mut_callback_with(|s, _: MouseEvent| s.load_more());
+        Dispatch::<FullState>::new().reduce_mut_callback_with(|s, _: MouseEvent| s.load_more());
 
-    let total_results = use_selector(|s: &ResultsState| s.data.len());
-    let max_results = use_selector(|s: &InputState| s.max_solutions);
+    let total_results = use_selector(|s: &FullState| s.data.len());
+    let max_results = use_selector(|s: &FullState| s.max_solutions);
     let disabled = total_results < max_results;
 
     html!(<button {onclick} {disabled}>{"Load More"}</button>)
