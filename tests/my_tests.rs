@@ -35,7 +35,7 @@ fn test(input: String) {
 
     let p = question_parse(input).unwrap();
 
-    let solutions = p.solve(&context, &Default::default());
+    let solutions = p.solve(&context).take(10);
 
     let solutions_string = solutions.into_iter().map(|s| s.get_text()).join("; ");
 

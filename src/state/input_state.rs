@@ -1,8 +1,8 @@
-use crate::core::prelude::*;
 use crate::language::prelude::*;
 use crate::state::prelude::*;
 use log::debug;
 use serde::*;
+use itertools::Itertools;
 
 use yewdux::prelude::*;
 
@@ -35,10 +35,7 @@ impl InputState {
                 let start_instant = instant::Instant::now();
                 let sol = question.solve(
                     get_solve_context(),
-                    &SolveSettings {
-                        max_solutions: self.max_solutions,
-                    },
-                );
+                ).take(self.max_solutions).collect_vec();
 
                 let diff = instant::Instant::now() - start_instant;
                 debug!("Question solved with {} solutions in {:?}", sol.len(), diff);

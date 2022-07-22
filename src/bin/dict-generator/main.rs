@@ -4,7 +4,8 @@ use std::io::{Write};
 use serde::Deserialize;
 use quick_xml::de::{from_reader};
 pub fn main(){
-    let reader = quick_xml::Reader::from_file("src\\bin\\dict-generator\\english-wordnet-2021.xml").unwrap();
+    let reader = quick_xml::Reader::from_file("src\\bin\\dict-generator\\english-wordnet-2021.xml")
+    .expect("Could not read English Wordnet file. You may need to download this");
     let resource: LexicalResource = from_reader(reader.into_inner()).unwrap();    
     
     let synset_dic: HashMap<_,_> = resource.lexicon.synsets.iter().map(|s| (s.id.clone(), s) ).collect();

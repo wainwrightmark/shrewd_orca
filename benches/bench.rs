@@ -1,6 +1,6 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use std::rc::Rc;
-
+use itertools::Itertools;
 use shrewd_orca::{core::prelude::*, language::prelude::*};
 
 criterion_group!(
@@ -26,7 +26,7 @@ fn bench_solver(c: &mut Criterion) {
 
 fn solve(context: Rc<WordContext>) {
     let p = question_parse("Emma #l =a").unwrap();
-    let solutions = p.solve(&context, &Default::default());
+    let solutions = p.solve(&context).take(10).collect_vec();
     //let solutions_string = solutions.into_iter().map(|s| s.get_text()).join("; ");
 
     assert!(!solutions.is_empty())

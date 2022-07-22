@@ -43,28 +43,8 @@ impl Expression {
         AnagramSettings {
             min_word_length: 3,
             max_words: self.words.len(),
-            //filter: self.as_filter(context)
         }
     }
-
-    // pub fn as_filter(&self, context: &WordContext)-> Option<WordQuery>{
-
-    //     if self.words.iter().any(|x|x.is_any()){
-    //         return None;
-    //     }
-    //     if let Ok(a) = self.words.iter().exactly_one(){
-    //         return Some(a.clone());
-    //     }
-
-    //     let terms = SmallVec::from_iter(self.words
-    //     .iter()
-    //     //.sorted_by_cached_key(|x|x.count_options(context))  .rev()
-    //     .dedup()
-    //     .map(|x|x.clone().into()));
-
-    //     Some(WordQuery{terms: SmallVec::from_elem(WordQueryDisjunction{terms}, 1)})
-    // }
-
     pub fn count_options(&self, dict: &WordContext) -> usize {
         self.words.iter().map(|x| x.count_options(dict)).product()
     }

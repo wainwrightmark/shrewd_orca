@@ -1,5 +1,5 @@
 use crate::core::prelude::*;
-use itertools::Itertools;
+use auto_enums::auto_enum;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Question {
@@ -8,37 +8,16 @@ pub enum Question {
 }
 
 impl Question {
-    pub fn solve(&self, dict: &WordContext, settings: &SolveSettings) -> Vec<QuestionSolution> {
+    #[auto_enum(Iterator)]
+    pub fn solve<'a> (&'a self, dict: &'a WordContext) -> impl Iterator<Item = QuestionSolution> + 'a {
         match self {
             Question::Expression(ex) => {
-                // if ex.words.iter().all(|w| w.as_literal().is_some()) {
-                //     let text = ex
-                //         .words
-                //         .iter()
-                //         .map(|wq| wq.as_literal().unwrap().text.clone())
-                //         .join("");
-
-                //     if text.is_empty() {
-                //         return Default::default();
-                //     }
-                //     dict.anagram_dict
-                //         .solve_for_word(text.as_str(), Default::default())
-                //         .take(settings.max_solutions)
-                //         .map(QuestionSolution::Expression)
-                //         .collect_vec()
-                // } else {
-                    
-                // }
                 ex.solve(dict)
-                        .take(settings.max_solutions)
                         .map(QuestionSolution::Expression)
-                        .collect_vec()
             }
 
             Question::Equation(eq) => eq
-                .solve(dict)
-                .take(settings.max_solutions)                
-                .collect_vec(),
+                .solve(dict),
         }
     }
 }
