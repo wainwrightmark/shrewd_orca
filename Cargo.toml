@@ -17,7 +17,7 @@ enumflags2 = {version= "0.7", features= ["serde"]}
 smallvec = {version = "1.9.0", features=["serde", "union","const_generics", "const_new" ]}
 once_cell = "1.13"
 auto_enums = {version = "0.7", features=["std"]}
-
+include-flate = "0.1.4"
 
 log = "0.4"
 yew = { git = "https://github.com/yewstack/yew.git", features = ["csr",] }
