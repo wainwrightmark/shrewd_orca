@@ -77,4 +77,4 @@ package.json
 src/test/rustdoc-gui/src/**.lock
 
 # Before adding new lines, see the comment at the top.
-src/bin/dict-generator/english-wordnet-2021.xml
+**/english-wordnet-2021.xml
