@@ -11,9 +11,9 @@ pub fn main(){
     let synset_dic: HashMap<_,_> = resource.lexicon.synsets.iter().map(|s| (s.id.clone(), s) ).collect();
 
 
-    let path = "src/core/WordData.tsv";
+    let words_path = "src/core/WordData.tsv";
 
-    let mut output = File::create(path).expect("Could not open file for writing");
+    let mut words_output = File::create(words_path).expect("Could not open file for writing");
 
     let words = resource.lexicon.lexical_entries.into_iter()
     .filter(|x|x.lemma.is_dictionary_word())
@@ -33,20 +33,20 @@ pub fn main(){
             PartOfSpeech::LastName => "l",
         };
 
-        write!(output, "{}\t{}\t{}\n", part_of_speech, text, definition).expect("Could not write line");
+        write!(words_output, "{}\t{}\t{}\n", part_of_speech, text, definition).expect("Could not write line");
     }
 
     let first_names = include_str!("first-names.txt").split_ascii_whitespace().take(2500);
 
     for name in first_names{
-        write!(output, "{}\t{}\t{}\n", "f", name, "").expect("Could not write line");
+        write!(words_output, "{}\t{}\t{}\n", "f", name, "").expect("Could not write line");
     }
 
 
     let last_names = include_str!("last-names.txt").split_ascii_whitespace().take(2500);
 
     for name in last_names{
-        write!(output, "{}\t{}\t{}\n", "l", name, "").expect("Could not write line");
+        write!(words_output, "{}\t{}\t{}\n", "l", name, "").expect("Could not write line");
     }
     
 }
