@@ -7,10 +7,9 @@ use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
 
-use yewdux::prelude::*;
+use yewdux::{prelude::*, storage};
 
-#[derive(PartialEq, Store, Clone, Serialize, Deserialize)]
-#[store(storage = "local")] // can also be "session"
+#[derive(PartialEq, Clone, Serialize, Deserialize)]
 pub struct FullState {
     pub text: String,
     pub max_solutions: usize,
@@ -33,6 +32,24 @@ impl Default for FullState {
             data: Default::default(),
             warning: Default::default(),
         }
+    }
+}
+
+impl Store for FullState {
+    fn new() -> Self {
+        init_listener(storage::StorageListener::<Self>::new(storage::Area::Local));
+
+        let mut result : FullState = 
+        storage::load(storage::Area::Local)
+            .expect("Unable to load state")
+            .unwrap_or_default();
+
+        result.load_more();
+        result
+    }
+
+    fn changed(&self, other: &Self) -> bool {
+        self.text.trim() != other.text.trim()
     }
 }
 
