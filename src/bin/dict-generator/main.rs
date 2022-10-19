@@ -47,9 +47,9 @@ pub fn main() {
             PartOfSpeech::LastName => "l",
         };
 
-        write!(
+        writeln!(
             words_output,
-            "{}\t{}\t{}\n",
+            "{}\t{}\t{}",
             part_of_speech, text, definition
         )
         .expect("Could not write line");
@@ -60,7 +60,7 @@ pub fn main() {
         .take(2500);
 
     for name in first_names {
-        write!(words_output, "{}\t{}\t{}\n", "f", name, "").expect("Could not write line");
+        writeln!(words_output, "f\t{}\t", name).expect("Could not write line");
     }
 
     let last_names = include_str!("last-names.txt")
@@ -68,7 +68,7 @@ pub fn main() {
         .take(2500);
 
     for name in last_names {
-        write!(words_output, "{}\t{}\t{}\n", "l", name, "").expect("Could not write line");
+        writeln!(words_output, "l\t{}\t", name).expect("Could not write line");
     }
 }
 
@@ -131,7 +131,7 @@ impl Lemma {
         {
             return true;
         }
-        return false;
+        false
     }
 }
 

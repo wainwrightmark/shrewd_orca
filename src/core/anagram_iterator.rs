@@ -53,17 +53,13 @@ impl<'b, const N: usize> Iterator for AnagramIterator<'b, N> {
                     return Some(new_used);
                 } else if self.settings.allow_key(&remainder) {
                     if self.settings.max_words == self.used_words.len() + 2 {
-                        if remainder <= next_key {
-                            if self.dict.words.contains_key(&remainder)
-                            //let Some(l) = self.dict.words.get(&remainder)
+                        if remainder <= next_key && self.dict.words.contains_key(&remainder) {
+                            //if(self.settings.allow_word(l))
                             {
-                                //if(self.settings.allow_word(l))
-                                {
-                                    let mut new_used = self.used_words.clone();
-                                    new_used.push(next_key);
-                                    new_used.push(remainder);
-                                    return Some(new_used);
-                                }
+                                let mut new_used = self.used_words.clone();
+                                new_used.push(next_key);
+                                new_used.push(remainder);
+                                return Some(new_used);
                             }
                         }
                     } else if self.settings.max_words > self.used_words.len() + 2 {

@@ -19,10 +19,7 @@ include_flate::flate!(static WORDDATATEXT: str from "src/core/WordData.tsv");
 impl TermDict {
     pub fn try_find(&self, s: &str) -> Option<Homograph> {
         self.homographs
-            .iter()
-            .filter(|x| x.text == s)
-            .cloned()
-            .next()
+            .iter().find(|x| x.text == s).cloned()
     }
 
     pub fn from_term_data() -> Result<Self, String> {
@@ -69,7 +66,7 @@ impl TermDict {
                 let meanings = SmallVec::from_iter(
                     group
                         .inspect(|x| {
-                            if i == None {
+                            if i.is_none() {
                                 i = Some(x.0)
                             }
                         })
@@ -105,7 +102,7 @@ impl TermDict {
                             let meanings = SmallVec::from_iter(
                                 group
                                     .inspect(|x| {
-                                        if i == None {
+                                        if i.is_none() {
                                             i = Some(x.0)
                                         }
                                     })

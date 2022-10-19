@@ -40,16 +40,12 @@ impl Equation {
                     let nw1 = w2.text[0..1].to_string() + &w1.text[1..];
 
                     let h1 = dict.term_dict.try_find(nw1.as_str());
-                    if h1.is_none() {
-                        return None;
-                    }
+                    h1.as_ref()?;
 
                     let nw2 = w1.text[0..1].to_string() + &w2.text[1..];
 
                     let h2 = dict.term_dict.try_find(nw2.as_str());
-                    if h2.is_none() {
-                        return None;
-                    }
+                    h2.as_ref()?;
 
                     let right_homographs = smallvec::smallvec![h1.unwrap(), h2.unwrap()];
 
@@ -211,10 +207,10 @@ impl Equation {
         match self.operator {
             EqualityOperator::Anagram => self
                 .solve_as_anagram(dict)
-                .map(|x| QuestionSolution::Anagram(x)),
+                .map(QuestionSolution::Anagram),
             EqualityOperator::Spoonerism => self
                 .solve_as_spoonerism(dict)
-                .map(|x| QuestionSolution::Spoonerism(x)),
+                .map(QuestionSolution::Spoonerism),
         }
     }
 
