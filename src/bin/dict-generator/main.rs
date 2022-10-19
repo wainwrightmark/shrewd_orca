@@ -1,9 +1,10 @@
 use itertools::Itertools;
 use quick_xml::de::from_reader;
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
 use std::io::Write;
+
 pub fn main() {
     let reader = quick_xml::Reader::from_file("src\\bin\\dict-generator\\english-wordnet-2021.xml")
         .expect("Could not read English Wordnet file. You may need to download this");
@@ -20,58 +21,85 @@ pub fn main() {
 
     let mut words_output = File::create(words_path).expect("Could not open file for writing");
 
-    let words = resource
+    let positive_words: BTreeSet<String> = include_str!("positive-words.txt")
+        .lines()
+        .map(|x| x.to_ascii_lowercase())
+        .collect();
+
+    let negative_words: BTreeSet<String> = include_str!("negative-words.txt")        
+        .lines()
+        .map(|x| x.to_ascii_lowercase())
+        .collect();
+
+    let mut words = resource
         .lexicon
         .lexical_entries
         .into_iter()
         .filter(|x| x.lemma.is_dictionary_word())
         .map(|e| {
-            (
-                e.lemma.part_of_speech,
-                e.lemma.written_form,
-                e.senses
+            let mut tags_vec = vec![];
+            if positive_words.contains(&e.lemma.written_form.to_ascii_lowercase()){
+                tags_vec.push("positive")
+            }
+            else if negative_words.contains(&e.lemma.written_form.to_ascii_lowercase()) {
+                tags_vec.push("negative")
+            }
+            Word {
+                part_of_speech: e.lemma.part_of_speech,
+                lemma: e.lemma.written_form,
+                definition: e
+                    .senses
                     .iter()
                     .filter_map(|s| synset_dic[&s.synset].definition.clone())
                     .next()
                     .unwrap_or("".to_string()),
-            )
-        });
+                tags: tags_vec.join(" ")
+            }
+        })
+        .collect_vec();
 
-    for (pos, text, definition) in words {
-        let part_of_speech = match pos {
-            PartOfSpeech::Noun => "n",
-            PartOfSpeech::Verb => "v",
-            PartOfSpeech::Adjective => "j",
-            PartOfSpeech::Adverb => "a",
-            PartOfSpeech::AdjectiveSatellite => "j",
-            PartOfSpeech::FirstName => "f",
-            PartOfSpeech::LastName => "l",
-        };
+    let boys_names = include_str!("boys-names.txt").split_ascii_whitespace();
 
-        writeln!(words_output, "{}\t{}\t{}", part_of_speech, text, definition)
-            .expect("Could not write line");
-    }
+    let girls_names = include_str!("girls-names.txt").split_ascii_whitespace();
 
-    let boys_names = include_str!("boys-names.txt")
-        .split_ascii_whitespace();
-        
-    let girls_names = include_str!("girls-names.txt")
-        .split_ascii_whitespace();
+    let first_names = boys_names
+        .map(|name| Word {
+            part_of_speech: PartOfSpeech::FirstName,
+            lemma: name.to_string(),
+            definition: "".to_string(),
+            tags: "masculine".to_string(),
+        })
+        .interleave(girls_names.map(|name| Word {
+            part_of_speech: PartOfSpeech::FirstName,
+            lemma: name.to_string(),
+            definition: "".to_string(),
+            tags: "feminine".to_string(),
+        }));
 
-    let first_names = boys_names.map(|name|(name, "", "masculine"))
-    .interleave(girls_names.map(|name|(name, "", "feminine")))
-    ;
-
-    for (name, description, tags) in first_names {
-        writeln!(words_output, "f\t{name}\t{description}\t{tags}").expect("Could not write line");
-    }
+    words.extend(first_names);
 
     let last_names = include_str!("last-names.txt")
         .split_ascii_whitespace()
-        .take(2500);
+        .take(2500)
+        .map(|name| Word {
+            part_of_speech: PartOfSpeech::LastName,
+            lemma: name.to_string(),
+            definition: "".to_string(),
+            tags: "".to_string(),
+        });
 
-    for name in last_names {
-        writeln!(words_output, "l\t{}\t", name).expect("Could not write line");
+    words.extend(last_names);
+
+    for word in words {
+        writeln!(
+            words_output,
+            "{}\t{}\t{}\t{}",
+            word.part_of_speech.to_str(),
+            word.lemma,
+            word.definition,
+            word.tags
+        )
+        .expect("Could not write line");
     }
 }
 
@@ -199,4 +227,28 @@ pub enum PartOfSpeech {
     FirstName,
     #[serde(rename = "l")]
     LastName,
+}
+
+impl PartOfSpeech {
+    pub fn to_str(&self) -> &'static str {
+
+        use PartOfSpeech::*;
+        match self {
+            Noun => "n",
+            Verb => "v",
+            Adjective => "j",
+            Adverb => "a",
+            AdjectiveSatellite => "j",
+            FirstName => "f",
+            LastName => "l",
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Word {
+    pub part_of_speech: PartOfSpeech,
+    pub lemma: String,
+    pub definition: String,
+    pub tags: String,
 }
