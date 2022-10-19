@@ -17,16 +17,15 @@ pub struct TermDict {
 include_flate::flate!(static WORDDATATEXT: str from "src/core/WordData.tsv");
 
 impl TermDict {
-
-    pub fn try_find(&self, s: &str)-> Option<Homograph>{
-        self.homographs.iter().filter(|x|x.text == s).cloned().next()
+    pub fn try_find(&self, s: &str) -> Option<Homograph> {
+        self.homographs
+            .iter()
+            .filter(|x| x.text == s)
+            .cloned()
+            .next()
     }
 
-    
     pub fn from_term_data() -> Result<Self, String> {
-
-        
-
         Self::from_csv(&WORDDATATEXT)
     }
 
@@ -37,7 +36,7 @@ impl TermDict {
             let mut parts = line.split('\t');
             let pos_lit = parts.next().ok_or("Missing POS")?;
             let text = parts.next().ok_or("Missing Term")?;
-            let definition_str = parts.next().ok_or("Missing Deinition")?;
+            let definition_str = parts.next().ok_or("Missing Definition")?;
             let definition = if definition_str.is_empty() {
                 None
             } else {
