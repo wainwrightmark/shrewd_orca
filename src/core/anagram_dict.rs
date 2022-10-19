@@ -9,11 +9,9 @@ pub struct AnagramDict {
     pub words: BTreeMap<AnagramKey, SmallVec<[Homograph; 1]>>,
 }
 
-impl From<TermDict> for AnagramDict {
-    fn from(term_dict: TermDict) -> Self {
-        let terms = term_dict.homographs;
-
-        Self::from(terms.into_iter())
+impl From<&TermDict> for AnagramDict {
+    fn from(term_dict: &TermDict) -> Self {
+        Self::from(term_dict.homographs.iter().cloned())
     }
 }
 
@@ -78,7 +76,7 @@ mod tests {
     fn test_solve_with_term_dict() {
         let term_dict = TermDict::from_term_data().unwrap();
 
-        let dict = AnagramDict::from(term_dict);
+        let dict = AnagramDict::from(&term_dict);
 
         let solutions = dict.solve_for_word(
             "clint eastwood",

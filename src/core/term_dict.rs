@@ -41,7 +41,14 @@ impl TermDict {
                 Some(definition_str)
             };
 
-            let tags: BitFlags<WordTag> = Default::default();
+            let mut tags: BitFlags<WordTag> = Default::default();
+
+            if let Some(tags_str) = parts.next(){
+                for tag_str in tags_str.split_ascii_whitespace(){
+                    let word_tag = WordTag::from_str(tag_str)?;
+                    tags.insert(word_tag);
+                }
+            }
 
             let part_of_speech = PartOfSpeech::from_str(pos_lit)?;
             let term = (

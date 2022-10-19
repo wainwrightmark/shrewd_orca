@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use quick_xml::de::from_reader;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -51,12 +52,18 @@ pub fn main() {
             .expect("Could not write line");
     }
 
-    let first_names = include_str!("first-names.txt")
-        .split_ascii_whitespace()
-        .take(2500);
+    let boys_names = include_str!("boys-names.txt")
+        .split_ascii_whitespace();
+        
+    let girls_names = include_str!("girls-names.txt")
+        .split_ascii_whitespace();
 
-    for name in first_names {
-        writeln!(words_output, "f\t{}\t", name).expect("Could not write line");
+    let first_names = boys_names.map(|name|(name, "", "masculine"))
+    .interleave(girls_names.map(|name|(name, "", "feminine")))
+    ;
+
+    for (name, description, tags) in first_names {
+        writeln!(words_output, "f\t{name}\t{description}\t{tags}").expect("Could not write line");
     }
 
     let last_names = include_str!("last-names.txt")
