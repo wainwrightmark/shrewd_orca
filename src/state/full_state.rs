@@ -14,6 +14,7 @@ use yewdux::prelude::*;
 pub struct FullState {
     pub text: String,
     pub max_solutions: usize,
+    #[serde(skip)]
     pub data: Rc<Vec<QuestionSolution>>,
     pub warning: Option<String>,
 }

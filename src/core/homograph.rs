@@ -4,7 +4,7 @@ use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Homograph {
     pub text: String,
     pub is_single_word: bool,
@@ -15,7 +15,7 @@ pub struct Homograph {
 pub struct Meaning {
     pub part_of_speech: PartOfSpeech,
     pub tags: BitFlags<WordTag>,
-    pub definition: Option<String>,
+    pub definition: Option<&'static str>,
 }
 
 impl PartialOrd for Homograph {

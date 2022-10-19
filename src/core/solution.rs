@@ -5,7 +5,7 @@ use smallvec::SmallVec;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Serialize, PartialEq, Eq)]
 pub enum QuestionSolution {
     Expression(ExpressionSolution),
     Anagram(AnagramSolution),
@@ -22,7 +22,7 @@ impl QuestionSolution {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Serialize, PartialEq, Eq)]
 pub struct ExpressionSolution {
     pub homographs: SmallVec<[Homograph; 3]>,
 }
@@ -55,12 +55,12 @@ impl AnagramSolution {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Serialize, PartialEq, Eq)]
 pub struct AnagramSolution {
     pub left: ExpressionSolution,
     pub right: ExpressionSolution,
 }
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Serialize, PartialEq, Eq)]
 pub struct SpoonerismSolution {
     pub left: ExpressionSolution,
     pub right: ExpressionSolution,

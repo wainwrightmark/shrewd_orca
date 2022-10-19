@@ -26,7 +26,7 @@ impl TermDict {
         Self::from_csv(&WORDDATATEXT)
     }
 
-    pub fn from_csv(s: &str) -> Result<Self, String> {
+    pub fn from_csv(s: &'static str) -> Result<Self, String> {
         let mut terms: Vec<(&str, Meaning)> = Vec::new();
 
         for line in s.split_terminator('\n') {
@@ -37,7 +37,7 @@ impl TermDict {
             let definition = if definition_str.is_empty() {
                 None
             } else {
-                Some(definition_str.to_string())
+                Some(definition_str)
             };
 
             let tags: BitFlags<WordTag> = Default::default();
