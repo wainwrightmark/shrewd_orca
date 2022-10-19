@@ -65,14 +65,14 @@ impl WordQuery {
         &'a self,
         dict: &'a TermDict,
     ) -> impl Iterator<Item = &'a Homograph> + 'a + Clone {
-        if self.terms.is_empty(){
+        if self.terms.is_empty() {
             return std::iter::empty();
         }
 
         if let Ok(term) = self.terms.iter().exactly_one() {
             return term.solve(dict);
         }
-        
+
         return dict.homographs.iter().filter(|t| self.allow(t));
         //let result = dict.homographs.iter().filter(|t| self.terms.iter().all(|r|r.allow(t)));
         //result
@@ -124,9 +124,9 @@ impl WordQueryDisjunction {
         &'a self,
         dict: &'a TermDict,
     ) -> impl Iterator<Item = &'a Homograph> + 'a + Clone {
-           if let Ok(term) = self.terms.iter().exactly_one() {
+        if let Ok(term) = self.terms.iter().exactly_one() {
             return term.solve(dict);
-        }        
+        }
         return dict.homographs.iter().filter(|t| self.allow(t));
     }
 

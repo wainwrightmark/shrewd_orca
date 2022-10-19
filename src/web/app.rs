@@ -140,7 +140,8 @@ pub fn row(solution: &QuestionSolution) -> Html {
                     <td>{right_spans}</td>
                 </tr>
             )
-        }QuestionSolution::Spoonerism(spoonerism) => {
+        }
+        QuestionSolution::Spoonerism(spoonerism) => {
             let left_spans = spoonerism
                 .left
                 .homographs

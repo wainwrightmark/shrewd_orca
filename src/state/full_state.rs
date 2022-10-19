@@ -1,12 +1,11 @@
-
 use std::rc::Rc;
 
-use crate::language::prelude::*;
 use crate::core::prelude::*;
+use crate::language::prelude::*;
+use itertools::Itertools;
 use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
-use itertools::Itertools;
 
 use yewdux::prelude::*;
 
@@ -18,7 +17,6 @@ pub struct FullState {
     pub data: Rc<Vec<QuestionSolution>>,
     pub warning: Option<String>,
 }
-
 
 static SOLVECONTEXT: OnceCell<WordContext> = OnceCell::new();
 
@@ -32,7 +30,7 @@ impl Default for FullState {
             text: "4 5".to_string(),
             max_solutions: 10,
             data: Default::default(),
-            warning: Default::default()
+            warning: Default::default(),
         }
     }
 }
@@ -48,9 +46,10 @@ impl FullState {
         match r {
             Ok(question) => {
                 let start_instant = instant::Instant::now();
-                let sol = question.solve(
-                    get_solve_context(),
-                ).take(self.max_solutions).collect_vec();
+                let sol = question
+                    .solve(get_solve_context())
+                    .take(self.max_solutions)
+                    .collect_vec();
 
                 let diff = instant::Instant::now() - start_instant;
                 debug!("Question solved with {} solutions in {:?}", sol.len(), diff);

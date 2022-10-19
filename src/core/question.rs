@@ -9,15 +9,14 @@ pub enum Question {
 
 impl Question {
     #[auto_enum(Iterator)]
-    pub fn solve<'a> (&'a self, dict: &'a WordContext) -> impl Iterator<Item = QuestionSolution> + 'a {
+    pub fn solve<'a>(
+        &'a self,
+        dict: &'a WordContext,
+    ) -> impl Iterator<Item = QuestionSolution> + 'a {
         match self {
-            Question::Expression(ex) => {
-                ex.solve(dict)
-                        .map(QuestionSolution::Expression)
-            }
+            Question::Expression(ex) => ex.solve(dict).map(QuestionSolution::Expression),
 
-            Question::Equation(eq) => eq
-                .solve(dict),
+            Question::Equation(eq) => eq.solve(dict),
         }
     }
 }

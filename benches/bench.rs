@@ -1,7 +1,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use std::rc::Rc;
 use itertools::Itertools;
 use shrewd_orca::{core::prelude::*, language::prelude::*};
+use std::rc::Rc;
 
 criterion_group!(
     name = benches;
