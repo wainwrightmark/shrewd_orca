@@ -205,9 +205,7 @@ impl Equation {
         dict: &'a WordContext,
     ) -> impl Iterator<Item = QuestionSolution> + 'a {
         match self.operator {
-            EqualityOperator::Anagram => self
-                .solve_as_anagram(dict)
-                .map(QuestionSolution::Anagram),
+            EqualityOperator::Anagram => self.solve_as_anagram(dict).map(QuestionSolution::Anagram),
             EqualityOperator::Spoonerism => self
                 .solve_as_spoonerism(dict)
                 .map(QuestionSolution::Spoonerism),

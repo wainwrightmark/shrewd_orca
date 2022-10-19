@@ -87,11 +87,6 @@ impl Sub for AnagramKey {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum AnagramKeyErr {
-    WordTooBig,
-}
-
 impl Debug for AnagramKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let display = format!("{}", self);
@@ -128,9 +123,9 @@ impl Display for AnagramKey {
 }
 
 impl FromStr for AnagramKey {
-    type Err = AnagramKeyErr;
+    type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self, anyhow::Error> {
         let mut inner: u128 = 1;
         let mut len: u8 = 0;
 
@@ -146,8 +141,7 @@ impl FromStr for AnagramKey {
             match r {
                 Some(p) => inner = p,
                 None => {
-                    log::debug!("Word Too Big for anagram: '{}'", s);
-                    return Err(AnagramKeyErr::WordTooBig);
+                    anyhow::bail!("Word Too Big for anagram: '{}'", s);
                 }
             }
             len += 1;
@@ -166,9 +160,9 @@ mod tests {
 
     #[test]
     fn test_anagram_keys() {
-        let clint_eastwoord = AnagramKey::from_str("clint eastwood").unwrap();
+        let clint_eastwood = AnagramKey::from_str("clint eastwood").unwrap();
         let old_west_action = AnagramKey::from_str("old west action").unwrap();
-        assert_eq!(clint_eastwoord, old_west_action);
+        assert_eq!(clint_eastwood, old_west_action);
     }
 
     #[test]

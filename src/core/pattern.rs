@@ -48,7 +48,7 @@ impl PatternComponent {
             PatternComponent::Any => "[[:alpha:]]*".to_string(),
             PatternComponent::AnyChar(len) => format!("[[:alpha:]]{{{}}}", len),
             PatternComponent::Literal(s) => s.clone(),
-            PatternComponent::CharacterClass(c) => c.regex_char(),
+            PatternComponent::CharacterClass(c) => c.regex_char().to_string(),
         }
     }
 }
@@ -59,22 +59,22 @@ pub enum CharacterClass {
     Consonant,
 }
 impl CharacterClass {
-    pub fn regex_char(&self) -> String {
+    pub fn regex_char(&self) -> &'static str {
         match self {
-            CharacterClass::Vowel => "[aeiou]".to_string(),
-            CharacterClass::Consonant => "[bcdfghjklmnpqrstvwxyz]".to_string(),
+            CharacterClass::Vowel => "[aeiou]",
+            CharacterClass::Consonant => "[bcdfghjklmnpqrstvwxyz]",
         }
     }
 }
 
 impl FromStr for CharacterClass {
-    type Err = String;
+    type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self, anyhow::Error> {
         match s.to_ascii_lowercase().as_str() {
             "@v" => Ok(CharacterClass::Vowel),
             "@c" => Ok(CharacterClass::Consonant),
-            _ => Err("The only valid character classes are @v and @c".to_string()),
+            _ => anyhow::bail!("The only valid character classes are @v and @c"),
         }
     }
 }

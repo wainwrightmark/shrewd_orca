@@ -62,7 +62,7 @@ impl FullState {
                 debug!("Warning {}", warning);
 
                 self.data = Default::default();
-                self.warning = Some(warning);
+                self.warning = Some(warning.to_string());
             }
         }
     }

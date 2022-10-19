@@ -18,22 +18,23 @@ include_flate::flate!(static WORDDATATEXT: str from "src/core/WordData.tsv");
 
 impl TermDict {
     pub fn try_find(&self, s: &str) -> Option<Homograph> {
-        self.homographs
-            .iter().find(|x| x.text == s).cloned()
+        self.homographs.iter().find(|x| x.text == s).cloned()
     }
 
-    pub fn from_term_data() -> Result<Self, String> {
+    pub fn from_term_data() -> Result<Self, anyhow::Error> {
         Self::from_csv(&WORDDATATEXT)
     }
 
-    pub fn from_csv(s: &'static str) -> Result<Self, String> {
+    pub fn from_csv(s: &'static str) -> Result<Self, anyhow::Error> {
         let mut terms: Vec<(&str, Meaning)> = Vec::new();
 
         for line in s.split_terminator('\n') {
             let mut parts = line.split('\t');
-            let pos_lit = parts.next().ok_or("Missing POS")?;
-            let text = parts.next().ok_or("Missing Term")?;
-            let definition_str = parts.next().ok_or("Missing Definition")?;
+            let pos_lit = parts.next().ok_or(anyhow::format_err!("Missing POS"))?;
+            let text = parts.next().ok_or(anyhow::format_err!("Missing Term"))?;
+            let definition_str = parts
+                .next()
+                .ok_or(anyhow::format_err!("Missing Definition"))?;
             let definition = if definition_str.is_empty() {
                 None
             } else {

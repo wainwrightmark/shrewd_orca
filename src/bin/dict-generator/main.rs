@@ -47,12 +47,8 @@ pub fn main() {
             PartOfSpeech::LastName => "l",
         };
 
-        writeln!(
-            words_output,
-            "{}\t{}\t{}",
-            part_of_speech, text, definition
-        )
-        .expect("Could not write line");
+        writeln!(words_output, "{}\t{}\t{}", part_of_speech, text, definition)
+            .expect("Could not write line");
     }
 
     let first_names = include_str!("first-names.txt")

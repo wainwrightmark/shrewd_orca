@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use crate::core::prelude::*;
+use anyhow::{bail, Error};
 use itertools::Itertools;
 use pest::iterators::Pair;
 use pest::Parser;
@@ -15,11 +16,11 @@ pub trait CanParse
 where
     Self: Sized,
 {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String>;
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, Error>;
 }
 
-pub fn question_parse(input: &str) -> Result<Question, String> {
-    let mut pairs = WordLangParser::parse(Rule::file, input).map_err(|e| e.to_string())?;
+pub fn question_parse(input: &str) -> Result<Question, anyhow::Error> {
+    let mut pairs = WordLangParser::parse(Rule::file, input)?;
     let next = pairs.next().unwrap();
     let question = next.into_inner().next().unwrap();
 
@@ -27,7 +28,7 @@ pub fn question_parse(input: &str) -> Result<Question, String> {
 }
 
 impl CanParse for Pattern {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
         let components: Vec<PatternComponent> = pair
             .into_inner()
             .map(PatternComponent::try_parse)
@@ -38,7 +39,7 @@ impl CanParse for Pattern {
 }
 
 impl CanParse for PatternComponent {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
         match pair.as_rule() {
             Rule::question_marks => Ok(PatternComponent::AnyChar(pair.as_str().len())),
             Rule::any => Ok(PatternComponent::Any),
@@ -52,7 +53,7 @@ impl CanParse for PatternComponent {
 }
 
 impl CanParse for Question {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
         let p = pair.into_inner().next().unwrap();
         match p.as_rule() {
             Rule::equation => Ok(Question::Equation(Equation::try_parse(p)?)),
@@ -63,8 +64,8 @@ impl CanParse for Question {
 }
 
 impl CanParse for Expression {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
-        let words_result: Result<Vec<WordQuery>, String> =
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
+        let words_result: Result<Vec<WordQuery>, anyhow::Error> =
             pair.into_inner().map(WordQuery::try_parse).collect();
         let words = words_result?;
 
@@ -73,19 +74,19 @@ impl CanParse for Expression {
 }
 
 impl FromStr for EqualityOperator {
-    type Err = String;
+    type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self, anyhow::Error> {
         match s.to_ascii_lowercase().as_str() {
             "=a" => Ok(EqualityOperator::Anagram),
             "=s" => Ok(EqualityOperator::Spoonerism),
-            _ => Err(format!("Could not parse {} as equality operator", s)),
+            _ => bail!("Could not parse {} as equality operator", s),
         }
     }
 }
 
 impl CanParse for Equation {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
         let mut inner = pair.into_inner();
         let left = Expression::try_parse(inner.next().unwrap())?;
         let equality = EqualityOperator::try_parse(inner.next().unwrap())?;
@@ -99,13 +100,13 @@ impl CanParse for Equation {
     }
 }
 impl CanParse for EqualityOperator {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
         EqualityOperator::from_str(pair.as_str())
     }
 }
 
 impl CanParse for WordQuery {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
         let inner = pair.into_inner();
 
         let disjunction: Vec<WordQueryDisjunction> =
@@ -117,7 +118,7 @@ impl CanParse for WordQuery {
 }
 
 impl CanParse for WordQueryDisjunction {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
         let inner = pair.into_inner();
 
         let word_query_terms: Vec<WordQueryTerm> =
@@ -129,7 +130,7 @@ impl CanParse for WordQueryDisjunction {
 }
 
 impl CanParse for WordQueryTerm {
-    fn try_parse(pair: Pair<Rule>) -> Result<Self, String> {
+    fn try_parse(pair: Pair<Rule>) -> Result<Self, anyhow::Error> {
         let inner = pair.into_inner().next().unwrap();
         let rule = inner.as_rule();
         let s = inner.as_str();
@@ -140,7 +141,6 @@ impl CanParse for WordQueryTerm {
                 is_single_word: true,
                 meanings: Default::default(),
             })),
-            //Rule::manyany => Ok(WordQuery::ManyAny),
             Rule::any => Ok(WordQueryTerm::Any),
             Rule::length => Ok(WordQueryTerm::Length(usize::from_str(s).unwrap())),
             Rule::range => {
@@ -166,8 +166,7 @@ impl CanParse for WordQueryTerm {
                 if let Ok(wordtag) = WordTag::from_str(lit) {
                     return Ok(WordQueryTerm::Tag(wordtag));
                 }
-
-                Err(format!("'!{}' in not a valid tag", lit))
+                anyhow::bail!("'!{}' in not a valid tag", lit)
             }
 
             Rule::pattern => {

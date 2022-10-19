@@ -59,24 +59,24 @@ pub enum WordTag {
 }
 
 impl FromStr for WordTag {
-    type Err = String;
+    type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self, anyhow::Error> {
         match s.to_ascii_lowercase().as_str() {
             "masculine" => Ok(WordTag::Masculine),
             "feminine" => Ok(WordTag::Feminine),
             "positive" => Ok(WordTag::Positive),
             "negative" => Ok(WordTag::Negative),
 
-            _ => Err(format!("Could not parse {} as tag", s)),
+            _ => anyhow::bail!("Could not parse {} as tag", s),
         }
     }
 }
 
 impl FromStr for PartOfSpeech {
-    type Err = String;
+    type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self, anyhow::Error> {
         match s.to_ascii_lowercase().as_str() {
             "n" => Ok(PartOfSpeech::Noun),
             "v" => Ok(PartOfSpeech::Verb),
@@ -95,7 +95,7 @@ impl FromStr for PartOfSpeech {
             "firstname" => Ok(PartOfSpeech::FirstName),
             "lastname" => Ok(PartOfSpeech::LastName),
 
-            _ => Err(format!("Could not parse {} as part of speech", s)),
+            _ => anyhow::bail!("Could not parse {} as part of speech", s),
         }
     }
 }
