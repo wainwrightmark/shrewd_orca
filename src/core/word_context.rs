@@ -2,7 +2,7 @@ use crate::core::prelude::*;
 pub struct WordContext {
     pub term_dict: TermDict,
     pub anagram_dict: AnagramDict,
-    pub phrase_expressions: Vec<Expression>,
+    //pub phrase_expressions: Vec<Expression>,
 }
 
 impl WordContext {
@@ -10,14 +10,14 @@ impl WordContext {
         self.term_dict.homographs.iter().find(|x| x.text == word)
     }
 
-    pub fn from_data(phrase_expressions: Vec<Expression>) -> WordContext {
+    pub fn from_data() -> WordContext {
         let term_dict = TermDict::from_term_data().unwrap();
         let anagram_dict = AnagramDict::from(term_dict.homographs.clone().into_iter());
 
         WordContext {
             term_dict,
             anagram_dict,
-            phrase_expressions,
+            //phrase_expressions,
         }
     }
 }

@@ -1,106 +1,47 @@
+use auto_enums::auto_enum;
+use enum_dispatch::enum_dispatch;
 use itertools::Itertools;
 use smallvec::SmallVec;
 
 use crate::core::prelude::*;
 
+#[enum_dispatch(TypedExpression)]
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct Expression {
-    pub words: Vec<WordQuery>,
-}
-
-impl From<ExpressionSolution> for Expression {
-    fn from(es: ExpressionSolution) -> Self {
-        let words = es
-            .homographs
-            .into_iter()
-            .map(|h| WordQueryTerm::Literal(h).into())
-            .collect_vec();
-        Expression { words }
-    }
+pub enum Expression {
+    Many(ManyExpression),
+    FixedLength(FixedLengthExpression),
 }
 
 impl Expression {
+    #[auto_enum(Iterator)]
     pub fn solve<'a>(
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = ExpressionSolution> + 'a {
-        let solutions = self
-            .words
-            .iter()
-            .map(|w| w.solve(&dict.term_dict))
-            .multi_cartesian_product()
-            .map(|homographs| ExpressionSolution {
-                homographs: SmallVec::from_iter(homographs.into_iter().cloned()),
-            });
 
-        solutions
-    }
-
-    pub fn to_anagram_settings(
-        &self,
-        // context: &WordContext
-    ) -> AnagramSettings {
-        AnagramSettings {
-            min_word_length: 3,
-            max_words: self.words.len(),
+        if let Expression::Many(m) = self{
+           return m.solve(dict);
         }
-    }
-    pub fn count_options(&self, dict: &WordContext) -> usize {
-        self.words.iter().map(|x| x.count_options(dict)).product()
-    }
-
-    pub fn count_literal_chars(&self) -> usize {
-        self.words
-            .iter()
-            .filter_map(|x| x.as_literal())
-            .map(|x| x.text.len())
-            .count()
-    }
-
-    pub fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution> {
-        if solution.homographs.len() != self.words.len() {
-            return None;
+        
+        if let Expression::FixedLength(fl) = self{
+           return fl.solve(dict);
         }
-
-        if self.allow(&solution) {
-            return Some(solution);
-        }
-
-        if !self
-            .words
-            .iter()
-            .all(|w| solution.homographs.iter().any(|h| w.allow(h)))
-        {
-            return None;
-        }
-
-        'outer: for combination in solution
-            .homographs
-            .into_iter()
-            .permutations(self.words.len())
-        {
-            for (w, h) in self.words.iter().zip(combination.iter()) {
-                if !w.allow(h) {
-                    continue 'outer;
-                }
-            }
-            return Some(ExpressionSolution {
-                homographs: SmallVec::from_vec(combination),
-            });
-        }
-        None
+        
+        unreachable!()
     }
+}
 
-    pub fn allow(&self, solution: &ExpressionSolution) -> bool {
-        if solution.homographs.len() == self.words.len() {
-            for (w, h) in self.words.iter().zip(solution.homographs.iter()) {
-                if !w.allow(h) {
-                    return false;
-                }
-            }
-            return true;
-        }
+#[enum_dispatch]
+pub trait TypedExpression {
+    fn to_anagram_settings(&self) -> AnagramSettings;
 
-        false
-    }
+    fn count_options(&self, dict: &WordContext) -> Option<usize>;
+
+    fn count_literal_chars(&self) -> usize;
+
+    fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution>;
+
+    fn allow(&self, solution: &ExpressionSolution) -> bool;
+
+    fn allow_number_of_words(&self, number_of_words:usize)->bool;
 }

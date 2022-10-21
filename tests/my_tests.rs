@@ -31,7 +31,7 @@ use smallvec::SmallVec;
 #[test_case("w* + (world / earth)")]
 
 fn test(input: String) {
-    let context = WordContext::from_data(get_phrase_expressions());
+    let context = WordContext::from_data();
 
     let p = question_parse(input).unwrap();
 
@@ -45,7 +45,7 @@ fn test(input: String) {
 #[test_case("#j #n", "dishwasher ingrown", "ingrown dishwasher")]
 
 fn test_order_to_allow(query: String, text: String, expected: String) {
-    let dict = WordContext::from_data(get_phrase_expressions());
+    let dict = WordContext::from_data();
 
     let q = question_parse(query).unwrap();
     let expression = match q {

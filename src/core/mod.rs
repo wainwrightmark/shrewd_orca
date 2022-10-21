@@ -12,6 +12,8 @@ mod solvable;
 mod term_dict;
 mod word_context;
 mod word_query;
+mod many_expression_type;
+mod fixed_length_expression;
 
 pub mod prelude {
     pub use crate::core::anagram_dict::*;
@@ -28,4 +30,6 @@ pub mod prelude {
     pub use crate::core::term_dict::*;
     pub use crate::core::word_context::*;
     pub use crate::core::word_query::*;
+    pub use crate::core::many_expression_type::*;
+    pub use crate::core::fixed_length_expression::*;
 }

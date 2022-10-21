@@ -21,7 +21,7 @@ pub struct FullState {
 static SOLVECONTEXT: OnceCell<WordContext> = OnceCell::new();
 
 pub fn get_solve_context() -> &'static WordContext {
-    SOLVECONTEXT.get_or_init(|| WordContext::from_data(get_phrase_expressions()))
+    SOLVECONTEXT.get_or_init(|| WordContext::from_data())
 }
 
 impl Default for FullState {

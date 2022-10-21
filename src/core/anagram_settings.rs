@@ -3,7 +3,7 @@ use crate::core::prelude::*;
 #[derive(Clone, Debug)]
 pub struct AnagramSettings {
     pub min_word_length: u8,
-    pub max_words: usize,
+    pub max_words: Option<usize>,
     //pub filter: Option<WordQuery>
 }
 
@@ -11,7 +11,7 @@ impl Default for AnagramSettings {
     fn default() -> Self {
         Self {
             min_word_length: 3,
-            max_words: 3,
+            max_words: 3.into(),
             //filter: None
         }
     }

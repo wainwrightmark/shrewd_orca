@@ -82,7 +82,7 @@ mod tests {
             "clint eastwood",
             AnagramSettings {
                 min_word_length: 3,
-                max_words: 3,
+                max_words: Some(3),
                 //filter: None
             },
         );
@@ -146,7 +146,7 @@ mod tests {
             input,
             AnagramSettings {
                 min_word_length,
-                max_words,
+                max_words: Some(max_words),
                 //filter:None
             },
         );

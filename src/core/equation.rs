@@ -1,7 +1,7 @@
 use auto_enums::auto_enum;
 use itertools::Itertools;
 
-use std::str::FromStr;
+use std::{str::FromStr};
 
 use crate::core::prelude::*;
 
@@ -25,48 +25,45 @@ impl Equation {
         right_expression: &'a Expression,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = SpoonerismSolution> + 'a {
-        if left_expression.words.len() != 2 {
-            return std::iter::empty();
-        } else if right_expression.words.len() != 2 {
-            return std::iter::empty();
-        } else {
-            let result = left_expression
-                .solve(dict)
-                .filter(|x| x.homographs.len() == 2)
-                //.map(|x| (x.homographs[0], x.homographs[1] ))
-                .filter_map(|left| {
-                    let w1 = left.homographs[0].clone();
-                    let w2 = left.homographs[1].clone();
-                    let nw1 = w2.text[0..1].to_string() + &w1.text[1..];
-
-                    let h1 = dict.term_dict.try_find(nw1.as_str());
-                    h1.as_ref()?;
-
-                    let nw2 = w1.text[0..1].to_string() + &w2.text[1..];
-
-                    let h2 = dict.term_dict.try_find(nw2.as_str());
-                    h2.as_ref()?;
-
-                    let right_homographs = smallvec::smallvec![h1.unwrap(), h2.unwrap()];
-
-                    let right = ExpressionSolution {
-                        homographs: right_homographs,
-                    };
-
-                    if !right_expression.allow(&right) {
-                        return None;
-                    }
-                    let solution = SpoonerismSolution { left, right };
-
-                    if solution.is_trivial() {
-                        return None;
-                    }
-
-                    Some(solution)
-                });
-
-            result
+        if !left_expression.allow_number_of_words(2) || !right_expression.allow_number_of_words(2) {
+            return std::iter::empty::<SpoonerismSolution>();
         }
+
+        let result = left_expression
+            .solve(dict)
+            .filter(|x| x.homographs.len() == 2)
+            .filter_map(|left| {
+                let w1 = left.homographs[0].clone();
+                let w2 = left.homographs[1].clone();
+                let nw1 = w2.text[0..1].to_string() + &w1.text[1..];
+
+                let h1 = dict.term_dict.try_find(nw1.as_str());
+                h1.as_ref()?;
+
+                let nw2 = w1.text[0..1].to_string() + &w2.text[1..];
+
+                let h2 = dict.term_dict.try_find(nw2.as_str());
+                h2.as_ref()?;
+
+                let right_homographs = smallvec::smallvec![h1.unwrap(), h2.unwrap()];
+
+                let right = ExpressionSolution {
+                    homographs: right_homographs,
+                };
+
+                if !right_expression.allow(&right) {
+                    return None;
+                }
+                let solution = SpoonerismSolution { left, right };
+
+                if solution.is_trivial() {
+                    return None;
+                }
+
+                Some(solution)
+            });
+
+        return result
     }
 
     #[auto_enum(Iterator)]
@@ -75,78 +72,73 @@ impl Equation {
         right: &'a Expression,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
-        if right.words.is_empty() {
-            return std::iter::empty();
-        }
-
         let lefts = left.solve(dict);
-        let right_literals = right
-            .words
-            .iter()
-            .enumerate()
-            .filter_map(|(i, query)| query.as_literal().map(|l| (l, i)))
-            .collect_vec();
 
-        if right_literals.is_empty() {
-            let settings = right.to_anagram_settings();
+        if let Expression::FixedLength(right_fixed_length) = right {
+            let right_literals = right_fixed_length
+                .words
+                .iter()
+                .enumerate()
+                .filter_map(|(i, query)| query.as_literal().map(|l| (l, i)))
+                .collect_vec();
 
-            let s = lefts
-                .flat_map(move |left| {
-                    dict.anagram_dict
-                        .solve_for_word(&left.get_text(), settings.clone())
-                        .filter_map(|s| right.order_to_allow(s))
-                        .map(move |right| AnagramSolution {
-                            left: left.clone(),
-                            right,
+            if (!right_literals.is_empty()) {
+                let new_right = Expression::FixedLength(FixedLengthExpression {
+                    words: right_fixed_length
+                        .words
+                        .iter()
+                        .filter(|x| x.as_literal().is_none())
+                        .cloned()
+                        .collect_vec(),
+                });
+
+                let settings = new_right.to_anagram_settings();
+
+                if let Ok(key_to_subtract) = AnagramKey::from_str(
+                    right_literals
+                        .clone()
+                        .into_iter()
+                        .map(|(x, _)| x.text.clone())
+                        .join("")
+                        .as_str(),
+                ) {
+                    return lefts
+                        .flat_map(move |left| {
+                            AnagramKey::from_str(left.get_text().as_str())
+                                .ok()
+                                .and_then(|k| k - key_to_subtract)
+                                .map(|k| (left, k))
                         })
-                })
-                .filter(|x| !x.is_trivial());
-            return s;
-        } else {
-            let new_right = Expression {
-                words: right
-                    .words
-                    .iter()
-                    .filter(|x| x.as_literal().is_none())
-                    .cloned()
-                    .collect_vec(),
-            };
-
-            if new_right.words.is_empty() {
+                        .flat_map(move |(left, key)| {
+                            dict.anagram_dict
+                                .solve(key, settings.clone())
+                                .map(move |r| (left.clone(), r))
+                        })
+                        .filter_map(move |(left, s)| new_right.order_to_allow(s).map(|r| (left, r)))
+                        .map(move |(left, extra_rights)| AnagramSolution {
+                            left,
+                            right: Equation::hydrate(extra_rights, &right_literals),
+                        })
+                        .filter(|x| !x.is_trivial());
+                }
                 return std::iter::empty();
             }
-
-            let settings = new_right.to_anagram_settings();
-
-            if let Ok(key_to_subtract) = AnagramKey::from_str(
-                right_literals
-                    .clone()
-                    .into_iter()
-                    .map(|(x, _)| x.text.clone())
-                    .join("")
-                    .as_str(),
-            ) {
-                return lefts
-                    .flat_map(move |left| {
-                        AnagramKey::from_str(left.get_text().as_str())
-                            .ok()
-                            .and_then(|k| k - key_to_subtract)
-                            .map(|k| (left, k))
-                    })
-                    .flat_map(move |(left, key)| {
-                        dict.anagram_dict
-                            .solve(key, settings.clone())
-                            .map(move |r| (left.clone(), r))
-                    })
-                    .filter_map(move |(left, s)| new_right.order_to_allow(s).map(|r| (left, r)))
-                    .map(move |(left, extra_rights)| AnagramSolution {
-                        left,
-                        right: Equation::hydrate(extra_rights, &right_literals),
-                    })
-                    .filter(|x| !x.is_trivial());
-            }
-            return std::iter::empty();
         }
+
+        let settings = right.to_anagram_settings();
+
+        let s = lefts
+            .flat_map(move |left| {
+                dict.anagram_dict
+                    .solve_for_word(&left.get_text(), settings.clone())
+                    .filter_map(|s| right.order_to_allow(s))
+                    .map(move |right| AnagramSolution {
+                        left: left.clone(),
+                        right,
+                    })
+            })
+            .filter(|x| !x.is_trivial());
+        return s;
     }
 
     fn hydrate(
@@ -165,18 +157,18 @@ impl Equation {
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
-        if self.right.words.is_empty() {
-            return Equation::solve_anagram_phrase(&self.left, dict);
-        }
-
-        if self.left.words.is_empty() {
-            return Equation::solve_anagram_phrase(&self.right, dict).map(|x| x.flip());
-        }
 
         let left_options = self.left.count_options(dict);
+        if left_options == Some(0) {
+            return std::iter::empty();
+        }
         let left_literal_count = self.left.count_literal_chars();
 
         let right_options = self.right.count_options(dict);
+        if right_options == Some(0) {
+            return std::iter::empty();
+        }
+
         let right_literal_count = self.right.count_literal_chars();
 
         let left_first = match left_options.cmp(&right_options) {
@@ -212,20 +204,20 @@ impl Equation {
         }
     }
 
-    pub fn solve_anagram_phrase<'a>(
-        expression: &'a Expression,
-        dict: &'a WordContext,
-    ) -> impl Iterator<Item = AnagramSolution> + 'a {
-        expression.solve(dict).flat_map(move |solution| {
-            dict.phrase_expressions.iter().flat_map(move |right| {
-                Equation {
-                    left: solution.clone().into(),
-                    right: right.clone(),
-                    operator: EqualityOperator::Anagram,
-                }
-                .solve_as_anagram(dict)
-                .collect_vec()
-            })
-        })
-    }
+    // pub fn solve_anagram_phrase<'a>(
+    //     expression: &'a Expression,
+    //     dict: &'a WordContext,
+    // ) -> impl Iterator<Item = AnagramSolution> + 'a {
+    //     expression.solve(dict).flat_map(move |solution| {
+    //         dict.phrase_expressions.iter().flat_map(move |right| {
+    //             Equation {
+    //                 left: Expression::FixedLength(solution.clone().into()),
+    //                 right: right.clone(),
+    //                 operator: EqualityOperator::Anagram,
+    //             }
+    //             .solve_as_anagram(dict)
+    //             .collect_vec()
+    //         })
+    //     })
+    // }
 }

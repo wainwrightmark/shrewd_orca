@@ -14,7 +14,7 @@ criterion_group!(
 criterion_main!(benches);
 
 fn bench_solver(c: &mut Criterion) {
-    let context = Rc::new(WordContext::from_data(get_phrase_expressions()));
+    let context = Rc::new(WordContext::from_data());
 
     let mut group = c.benchmark_group("solver");
     group.sample_size(10);

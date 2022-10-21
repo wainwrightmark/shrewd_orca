@@ -1,8 +1,6 @@
 mod examples;
-mod parser;
-mod phrase_expressions;
+mod word_lang_parser;
 pub mod prelude {
     pub use crate::language::examples::*;
-    pub use crate::language::parser::*;
-    pub use crate::language::phrase_expressions::*;
+    pub use crate::language::word_lang_parser::*;
 }

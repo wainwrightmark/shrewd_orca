@@ -11,9 +11,9 @@ pub struct WordQuery {
 
 impl From<WordQueryTerm> for WordQuery {
     fn from(term: WordQueryTerm) -> Self {
-        let disj = term.into();
+        let disjunction = term.into();
         WordQuery {
-            terms: smallvec::smallvec!(disj),
+            terms: smallvec::smallvec!(disjunction),
         }
     }
 }
@@ -47,11 +47,15 @@ impl From<WordQueryTerm> for WordQueryDisjunction {
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
+pub enum Multiword{
+    Phrase
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum WordQueryTerm {
     Literal(Homograph),
     PartOfSpeech(PartOfSpeech),
     Tag(WordTag),
-    //ManyAny,
     Any,
     Range { min: usize, max: usize },
     Length(usize),
