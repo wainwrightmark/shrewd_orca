@@ -82,7 +82,7 @@ impl Equation {
                 .filter_map(|(i, query)| query.as_literal().map(|l| (l, i)))
                 .collect_vec();
 
-            if (!right_literals.is_empty()) {
+            if !right_literals.is_empty() {
                 let new_right = Expression::FixedLength(FixedLengthExpression {
                     words: right_fixed_length
                         .words
