@@ -46,8 +46,7 @@ impl TypedExpression for FixedLengthExpression {
         }
     }
     fn count_options(&self, dict: &WordContext) -> Option<usize> {
-
-        if self.words.is_empty(){
+        if self.words.is_empty() {
             return Some(0);
         }
 

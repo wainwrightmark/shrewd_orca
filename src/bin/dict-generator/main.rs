@@ -26,7 +26,7 @@ pub fn main() {
         .map(|x| x.to_ascii_lowercase())
         .collect();
 
-    let negative_words: BTreeSet<String> = include_str!("negative-words.txt")        
+    let negative_words: BTreeSet<String> = include_str!("negative-words.txt")
         .lines()
         .map(|x| x.to_ascii_lowercase())
         .collect();
@@ -38,10 +38,9 @@ pub fn main() {
         .filter(|x| x.lemma.is_dictionary_word())
         .map(|e| {
             let mut tags_vec = vec![];
-            if positive_words.contains(&e.lemma.written_form.to_ascii_lowercase()){
+            if positive_words.contains(&e.lemma.written_form.to_ascii_lowercase()) {
                 tags_vec.push("positive")
-            }
-            else if negative_words.contains(&e.lemma.written_form.to_ascii_lowercase()) {
+            } else if negative_words.contains(&e.lemma.written_form.to_ascii_lowercase()) {
                 tags_vec.push("negative")
             }
             Word {
@@ -53,7 +52,7 @@ pub fn main() {
                     .filter_map(|s| synset_dic[&s.synset].definition.clone())
                     .next()
                     .unwrap_or("".to_string()),
-                tags: tags_vec.join(" ")
+                tags: tags_vec.join(" "),
             }
         })
         .collect_vec();
@@ -231,7 +230,6 @@ pub enum PartOfSpeech {
 
 impl PartOfSpeech {
     pub fn to_str(&self) -> &'static str {
-
         use PartOfSpeech::*;
         match self {
             Noun => "n",

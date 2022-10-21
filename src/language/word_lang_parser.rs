@@ -79,7 +79,8 @@ impl WordLangParser {
     }
 
     fn pattern(input: Node) -> Result<Pattern> {
-        let components : Vec<PatternComponent> = input.into_pair()
+        let components: Vec<PatternComponent> = input
+            .into_pair()
             .into_inner()
             .map(PatternComponent::try_parse)
             .try_collect()?;
@@ -154,8 +155,6 @@ impl WordLangParser {
             [question(q), _] => q,
         ))
     }
-
-    
 }
 
 pub fn question_parse(input_str: &str) -> Result<Question> {
@@ -167,7 +166,6 @@ pub fn question_parse(input_str: &str) -> Result<Question> {
     WordLangParser::file(input)
 }
 
-
 impl PatternComponent {
     fn try_parse(pair: pest::iterators::Pair<Rule>) -> Result<Self> {
         match pair.as_rule() {
@@ -175,10 +173,16 @@ impl PatternComponent {
             Rule::any => Ok(PatternComponent::Any),
             Rule::literal => Ok(PatternComponent::Literal(pair.as_str().to_string())),
             Rule::character_class => Ok(PatternComponent::CharacterClass(
-                CharacterClass::from_str(pair.as_str()).map_err(|x| Error::new_from_span(pest::error::ErrorVariant::CustomError { message: x.to_string() }, pair.as_span()) ) ?,
+                CharacterClass::from_str(pair.as_str()).map_err(|x| {
+                    Error::new_from_span(
+                        pest::error::ErrorVariant::CustomError {
+                            message: x.to_string(),
+                        },
+                        pair.as_span(),
+                    )
+                })?,
             )),
             _ => unreachable!(),
         }
     }
 }
-

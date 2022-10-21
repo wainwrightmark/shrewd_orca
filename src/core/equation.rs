@@ -1,7 +1,7 @@
 use auto_enums::auto_enum;
 use itertools::Itertools;
 
-use std::{str::FromStr};
+use std::str::FromStr;
 
 use crate::core::prelude::*;
 
@@ -63,7 +63,7 @@ impl Equation {
                 Some(solution)
             });
 
-        return result
+        return result;
     }
 
     #[auto_enum(Iterator)]
@@ -157,7 +157,6 @@ impl Equation {
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
-
         let left_options = self.left.count_options(dict);
         if left_options == Some(0) {
             return std::iter::empty();

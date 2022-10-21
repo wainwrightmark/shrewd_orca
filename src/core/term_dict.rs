@@ -43,8 +43,8 @@ impl TermDict {
 
             let mut tags: BitFlags<WordTag> = Default::default();
 
-            if let Some(tags_str) = parts.next(){
-                for tag_str in tags_str.split_ascii_whitespace(){
+            if let Some(tags_str) = parts.next() {
+                for tag_str in tags_str.split_ascii_whitespace() {
                     let word_tag = WordTag::from_str(tag_str)?;
                     tags.insert(word_tag);
                 }

@@ -3,7 +3,7 @@ use crate::core::prelude::*;
 use itertools::Itertools;
 use smallvec::SmallVec;
 
-use serde::{Serialize};
+use serde::Serialize;
 
 #[derive(Clone, Serialize, PartialEq, Eq)]
 pub enum QuestionSolution {

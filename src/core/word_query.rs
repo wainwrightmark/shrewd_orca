@@ -47,8 +47,8 @@ impl From<WordQueryTerm> for WordQueryDisjunction {
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub enum Multiword{
-    Phrase
+pub enum Multiword {
+    Phrase,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]

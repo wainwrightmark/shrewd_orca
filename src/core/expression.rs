@@ -18,15 +18,14 @@ impl Expression {
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = ExpressionSolution> + 'a {
+        if let Expression::Many(m) = self {
+            return m.solve(dict);
+        }
 
-        if let Expression::Many(m) = self{
-           return m.solve(dict);
+        if let Expression::FixedLength(fl) = self {
+            return fl.solve(dict);
         }
-        
-        if let Expression::FixedLength(fl) = self{
-           return fl.solve(dict);
-        }
-        
+
         unreachable!()
     }
 }
@@ -43,5 +42,5 @@ pub trait TypedExpression {
 
     fn allow(&self, solution: &ExpressionSolution) -> bool;
 
-    fn allow_number_of_words(&self, number_of_words:usize)->bool;
+    fn allow_number_of_words(&self, number_of_words: usize) -> bool;
 }

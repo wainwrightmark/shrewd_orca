@@ -39,8 +39,7 @@ impl Store for FullState {
     fn new() -> Self {
         init_listener(storage::StorageListener::<Self>::new(storage::Area::Local));
 
-        let mut result : FullState = 
-        storage::load(storage::Area::Local)
+        let mut result: FullState = storage::load(storage::Area::Local)
             .expect("Unable to load state")
             .unwrap_or_default();
 

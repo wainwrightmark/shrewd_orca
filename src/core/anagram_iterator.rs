@@ -52,7 +52,7 @@ impl<'b, const N: usize> Iterator for AnagramIterator<'b, N> {
                     new_used.push(next_key);
                     return Some(new_used);
                 } else if self.settings.allow_key(&remainder) {
-                    if self.settings.max_words  == Some(self.used_words.len() + 2) {
+                    if self.settings.max_words == Some(self.used_words.len() + 2) {
                         if remainder <= next_key && self.dict.words.contains_key(&remainder) {
                             //if(self.settings.allow_word(l))
                             {
@@ -62,7 +62,9 @@ impl<'b, const N: usize> Iterator for AnagramIterator<'b, N> {
                                 return Some(new_used);
                             }
                         }
-                    } else if self.settings.max_words.is_none() || self.settings.max_words > Some(self.used_words.len() + 2) {
+                    } else if self.settings.max_words.is_none()
+                        || self.settings.max_words > Some(self.used_words.len() + 2)
+                    {
                         self.used_words.push(next_key);
                         self.stack.push((remainder, Bound::Included(next_key)))
                     }
