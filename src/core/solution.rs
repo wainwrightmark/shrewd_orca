@@ -22,7 +22,7 @@ impl QuestionSolution {
     }
 }
 
-#[derive(Clone, Serialize, PartialEq, Eq)]
+#[derive(Clone, Serialize, PartialEq, Eq, Debug)]
 pub struct ExpressionSolution {
     pub homographs: SmallVec<[Homograph; 3]>,
 }

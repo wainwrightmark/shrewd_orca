@@ -18,17 +18,22 @@ fn bench_solver(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("solver");
     group.sample_size(10);
+
     group.bench_function("Find a husband for Emma", |bench| {
-        bench.iter(|| solve(context.clone()))
+        bench.iter(|| answer_question(context.clone(), "Emma #l =a !phrase"))
     });
+    
+    
+    group.bench_function("Find a husband for Emma", |bench| {
+        bench.iter(|| answer_question(context.clone(), "Emma #l =a !phrase"))
+    });
+
     group.finish()
 }
 
-fn solve(context: Rc<WordContext>) {
-    let p = question_parse("Emma #l =a").unwrap();
+fn answer_question(context: Rc<WordContext>, input_str: &str) {
+    let p = question_parse(input_str).unwrap();
     let solutions = p.solve(&context).take(10).collect_vec();
-    //let solutions_string = solutions.into_iter().map(|s| s.get_text()).join("; ");
 
     assert!(!solutions.is_empty())
-    //solutions_string
 }

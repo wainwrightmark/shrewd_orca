@@ -1,6 +1,6 @@
 use crate::core::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct AnagramSettings {
     pub min_word_length: u8,
     pub max_words: Option<usize>,

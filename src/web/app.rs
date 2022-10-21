@@ -171,7 +171,7 @@ fn homograph_display(homograph: &Homograph) -> Html {
     if let Some(definition) = homograph
         .meanings
         .iter()
-        .filter_map(|x| x.definition.clone())
+        .filter_map(|x| x.definition)
         .next()
     {
         html!(

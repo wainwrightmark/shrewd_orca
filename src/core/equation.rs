@@ -83,17 +83,6 @@ impl Equation {
                 .collect_vec();
 
             if !right_literals.is_empty() {
-                let new_right = Expression::FixedLength(FixedLengthExpression {
-                    words: right_fixed_length
-                        .words
-                        .iter()
-                        .filter(|x| x.as_literal().is_none())
-                        .cloned()
-                        .collect_vec(),
-                });
-
-                let settings = new_right.to_anagram_settings();
-
                 if let Ok(key_to_subtract) = AnagramKey::from_str(
                     right_literals
                         .clone()
@@ -102,6 +91,19 @@ impl Equation {
                         .join("")
                         .as_str(),
                 ) {
+                    let new_right_words = right_fixed_length
+                        .words
+                        .iter()
+                        .filter(|x| x.as_literal().is_none())
+                        .cloned()
+                        .collect_vec();
+
+                    let new_right = Expression::FixedLength(FixedLengthExpression {
+                        words: new_right_words,
+                    });
+
+                    let settings = new_right.to_anagram_settings();
+
                     return lefts
                         .flat_map(move |left| {
                             AnagramKey::from_str(left.get_text().as_str())
@@ -157,23 +159,36 @@ impl Equation {
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
-        let left_options = self.left.count_options(dict);
-        if left_options == Some(0) {
-            return std::iter::empty();
-        }
-        let left_literal_count = self.left.count_literal_chars();
-
-        let right_options = self.right.count_options(dict);
-        if right_options == Some(0) {
+        let left_options = self.left.count_options(dict).unwrap_or(usize::MAX);
+        if left_options == 0 {
             return std::iter::empty();
         }
 
-        let right_literal_count = self.right.count_literal_chars();
+        let right_options = self.right.count_options(dict).unwrap_or(usize::MAX);
+        if right_options == 0 {
+            return std::iter::empty();
+        }
 
-        let left_first = match left_options.cmp(&right_options) {
-            std::cmp::Ordering::Less => true,
-            std::cmp::Ordering::Equal => right_literal_count >= left_literal_count,
-            std::cmp::Ordering::Greater => false,
+        let left_first = {
+            match left_options.cmp(&right_options) {
+                std::cmp::Ordering::Less => true,
+                std::cmp::Ordering::Equal => match (&self.left, &self.right) {
+                    (Expression::Many(l), Expression::Many(r)) => {
+                        l.terms.len() >= r.terms.len() //choose the one with more term restrictions
+                    } //the one with fewer options goes first
+                    (Expression::Many(_), Expression::FixedLength(_)) => true, //fle should be right
+                    (Expression::FixedLength(_), Expression::Many(_)) => false, //fle should be right
+                    (Expression::FixedLength(l), Expression::FixedLength(r)) => {
+                        match l.count_literal_chars().cmp(&r.count_literal_chars()) {
+                            //the one with more literal chars should be on the right
+                            std::cmp::Ordering::Less => true,
+                            std::cmp::Ordering::Greater => false,
+                            std::cmp::Ordering::Equal => true, //left goes first by default
+                        }
+                    }
+                },
+                std::cmp::Ordering::Greater => false,
+            }
         };
 
         if left_first {

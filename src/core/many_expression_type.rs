@@ -26,8 +26,6 @@ impl ManyExpression {
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = ExpressionSolution> + 'a {
-        //todo!("Solve many expression");
-
         match self.t {
             ManyExpressionType::Any => MANYANYEXPRESSIONS
                 .iter()
@@ -40,8 +38,17 @@ impl ManyExpression {
                 .flat_map(|x| x.solve(dict))
                 .filter(|x| self.allow(x)),
         }
+    }
 
-        //std::iter::empty()
+    pub fn count_literal_chars(&self) -> usize {
+        self.terms
+            .iter()
+            .filter_map(|x| match x {
+                WordQueryTerm::Literal(l) => Some(l.text.len()),
+                _ => None,
+            })
+            .max()
+            .unwrap_or(0)
     }
 }
 
@@ -52,7 +59,7 @@ impl TypedExpression for ManyExpression {
         }
         match self.max_words {
             Some(max) => num_words <= max,
-            None => return true,
+            None => true,
         }
     }
 
@@ -97,18 +104,11 @@ impl TypedExpression for ManyExpression {
         }
     }
 
-    fn count_literal_chars(&self) -> usize {
-        self.terms
-            .iter()
-            .filter_map(|x| match x {
-                WordQueryTerm::Literal(l) => Some(l.text.len()),
-                _ => None,
-            })
-            .max()
-            .unwrap_or(0)
-    }
+    
 
     fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution> {
+        //log::debug!("Testing {:?} for expression {:?}", solution, self);
+
         if !self.allow_number_of_words(solution.homographs.len()) {
             return None;
         }
@@ -142,7 +142,7 @@ impl TypedExpression for ManyExpression {
         }
 
         match self.t {
-            ManyExpressionType::Any => return true,
+            ManyExpressionType::Any => true,
             ManyExpressionType::Phrase => PHRASEEXPRESSIONS.iter().any(|pe| pe.allow(solution)),
         }
     }
@@ -150,6 +150,9 @@ impl TypedExpression for ManyExpression {
 
 impl ManyExpressionType {
     pub fn allow(&self, solution: &ExpressionSolution) -> bool {
+
+        //log::info!("Possible Solution: {:?}", solution);
+
         match self {
             ManyExpressionType::Any => true,
             ManyExpressionType::Phrase => PHRASEEXPRESSIONS.iter().any(|fle| fle.allow(solution)),
@@ -174,10 +177,12 @@ lazy_static! {
 }
 
 lazy_static! {
+    //TODO phrase expressions
     pub static ref PHRASEEXPRESSIONS: Vec<FixedLengthExpression> = {
         let expression_strings = vec![
             "*",
             "the #n",
+            "#j #n",
             "a #n + @c*",
             "an #n + @v*",
             "the #j #n",
@@ -190,10 +195,7 @@ lazy_static! {
             .into_iter()
             .map(|s| question_parse(s).unwrap())
             .map(|s| match s {
-                Question::Expression(e) => match e {
-                    Expression::FixedLength(fle) => fle,
-                    _ => unreachable!(),
-                },
+                Question::Expression(Expression::FixedLength(fle)) => fle,
                 _ => unreachable!(),
             })
             .collect_vec()

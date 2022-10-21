@@ -36,8 +36,6 @@ pub trait TypedExpression {
 
     fn count_options(&self, dict: &WordContext) -> Option<usize>;
 
-    fn count_literal_chars(&self) -> usize;
-
     fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution>;
 
     fn allow(&self, solution: &ExpressionSolution) -> bool;

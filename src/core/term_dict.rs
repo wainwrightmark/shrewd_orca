@@ -30,11 +30,11 @@ impl TermDict {
 
         for line in s.split_terminator('\n') {
             let mut parts = line.split('\t');
-            let pos_lit = parts.next().ok_or(anyhow::format_err!("Missing POS"))?;
-            let text = parts.next().ok_or(anyhow::format_err!("Missing Term"))?;
+            let pos_lit = parts.next().ok_or_else(|| anyhow::format_err!("Missing POS"))?;
+            let text = parts.next().ok_or_else(||anyhow::format_err!("Missing Term"))?;
             let definition_str = parts
                 .next()
-                .ok_or(anyhow::format_err!("Missing Definition"))?;
+                .ok_or_else(|| anyhow::format_err!("Missing Definition"))?;
             let definition = if definition_str.is_empty() {
                 None
             } else {
@@ -140,7 +140,7 @@ impl TermDict {
 
 #[derive(Debug, Deserialize)]
 pub struct CPTerm<'a> {
-    //TODO change this when we've generated out own
+    //TODO change this when we've generated our own
     pub pos: &'a str,
     pub text: &'a str,
     pub key: &'a str,

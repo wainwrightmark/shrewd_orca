@@ -5,7 +5,13 @@ use shrewd_orca::language::prelude::*;
 use ntest::test_case;
 use smallvec::SmallVec;
 
-#[test_case("davis ephanie  =a")]
+
+
+#[test_case("clint eastwood =a !phrase")]
+#[test_case("red bat =a **")]
+#[test_case("#f eastwood =a !phrase")]
+#[test_case("cat =a *")]
+#[test_case("clint eastwood =a **")]
 #[test_case("clint eastwood =a #n #j")]
 #[test_case("clint eastwood =a * *")]
 #[test_case("name * =a anagram *")]
@@ -15,7 +21,6 @@ use smallvec::SmallVec;
 #[test_case("6 7")]
 #[test_case("red")]
 #[test_case("c?t fl?p")]
-#[test_case("clint eastwood =a")]
 #[test_case("6..7")]
 #[test_case("b?d")]
 #[test_case("b*d")]
@@ -23,7 +28,6 @@ use smallvec::SmallVec;
 #[test_case("#v")]
 #[test_case("#a")]
 #[test_case("#j")]
-#[test_case("cat =a *")]
 #[test_case("c@vt")]
 #[test_case("#n + #v + #j + #a + 3")]
 #[test_case("(world)")]
@@ -69,3 +73,15 @@ fn test_order_to_allow(query: String, text: String, expected: String) {
 
     assert_eq!(expected, actual);
 }
+
+// #[test]
+// fn test_phrase_expressions(){
+//     let any : WordQuery = WordQueryTerm ::Any.into();
+//     let any_exp = FixedLengthExpression{words: vec![any]};
+
+
+//     let the_noun = FixedLengthExpression{words: vec![WordQueryTerm::Literal(Homograph "The".into()), WordQueryTerm::PartOfSpeech(PartOfSpeech::Noun)]};
+
+//     assert_eq!(PHRASEEXPRESSIONS[0],any_exp );
+//     assert_eq!(PHRASEEXPRESSIONS[1],any_exp );
+// }

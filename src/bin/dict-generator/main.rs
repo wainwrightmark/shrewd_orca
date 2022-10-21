@@ -51,7 +51,7 @@ pub fn main() {
                     .iter()
                     .filter_map(|s| synset_dic[&s.synset].definition.clone())
                     .next()
-                    .unwrap_or("".to_string()),
+                    .unwrap_or_else(|| "".to_string()),
                 tags: tags_vec.join(" "),
             }
         })

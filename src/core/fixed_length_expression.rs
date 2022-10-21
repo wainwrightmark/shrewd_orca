@@ -32,6 +32,14 @@ impl FixedLengthExpression {
                 homographs: homographs.into_iter().cloned().collect(),
             })
     }
+
+    pub fn count_literal_chars(&self) -> usize {
+        self.words
+            .iter()
+            .filter_map(|x| x.as_literal())
+            .map(|x| x.text.len())
+            .count()
+    }
 }
 
 impl TypedExpression for FixedLengthExpression {
@@ -46,19 +54,12 @@ impl TypedExpression for FixedLengthExpression {
         }
     }
     fn count_options(&self, dict: &WordContext) -> Option<usize> {
-        if self.words.is_empty() {
+
+        if self.words.is_empty(){
             return Some(0);
         }
 
         Some(self.words.iter().map(|x| x.count_options(dict)).product())
-    }
-
-    fn count_literal_chars(&self) -> usize {
-        self.words
-            .iter()
-            .filter_map(|x| x.as_literal())
-            .map(|x| x.text.len())
-            .count()
     }
 
     fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution> {
@@ -77,6 +78,8 @@ impl TypedExpression for FixedLengthExpression {
         {
             return None;
         }
+
+        //log::debug!("Testing {:?} for expression {:?}", solution, self);
 
         'outer: for combination in solution
             .homographs

@@ -4,11 +4,17 @@ use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive( Clone, PartialEq, Eq, Serialize)]
 pub struct Homograph {
     pub text: String,
     pub is_single_word: bool,
     pub meanings: SmallVec<[Meaning; 1]>,
+}
+
+impl std::fmt::Debug for Homograph {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.text)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

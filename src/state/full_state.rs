@@ -21,7 +21,7 @@ pub struct FullState {
 static SOLVECONTEXT: OnceCell<WordContext> = OnceCell::new();
 
 pub fn get_solve_context() -> &'static WordContext {
-    SOLVECONTEXT.get_or_init(|| WordContext::from_data())
+    SOLVECONTEXT.get_or_init(WordContext::from_data)
 }
 
 impl Default for FullState {
@@ -48,7 +48,7 @@ impl Store for FullState {
     }
 
     fn changed(&self, other: &Self) -> bool {
-        self.text.trim() != other.text.trim()
+        self.text.trim() != other.text.trim() || self.max_solutions != other.max_solutions
     }
 }
 

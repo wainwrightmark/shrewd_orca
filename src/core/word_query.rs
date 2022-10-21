@@ -99,10 +99,7 @@ impl WordQuery {
 
     pub fn is_any(&self) -> bool {
         self.terms.iter().all(|x| {
-            x.terms.iter().any(|x| match x {
-                WordQueryTerm::Any => true,
-                _ => false,
-            })
+            x.terms.iter().any(|x| matches!(x, WordQueryTerm::Any))
         })
     }
 

@@ -15,7 +15,7 @@ impl From<&TermDict> for AnagramDict {
     }
 }
 
-impl<'a, T: Iterator<Item = Homograph>> From<T> for AnagramDict {
+impl<T: Iterator<Item = Homograph>> From<T> for AnagramDict {
     fn from(iter: T) -> Self {
         let groups = iter
             .sorted()
@@ -94,7 +94,7 @@ mod tests {
             .take(10)
             .join("; ");
 
-        assert_eq!(solutions_string, "wainscoted lot; colonised twat; colonised watt; colonised Watt; desolation cwt; lacewood stint; downcast Eliot; anecdotist low; anecdotist owl; dislocate town")
+        assert_eq!(solutions_string, "wainscoted lot; colonised twat; colonised watt; colonised Watt; desolation cwt; satinwood Celt; lacewood stint; downcast Eliot; downcast Teilo; anecdotist low")
     }
 
     #[test_case("i react", "act ire cat", 3, 3, 10, "act ire; cat ire", name = "basic")]
