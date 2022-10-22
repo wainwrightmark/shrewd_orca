@@ -94,7 +94,7 @@ mod tests {
             .take(10)
             .join("; ");
 
-        assert_eq!(solutions_string, "wainscoted lot; colonised twat; colonised watt; colonised Watt; desolation cwt; satinwood Celt; lacewood stint; downcast Eliot; downcast Teilo; anecdotist low")
+        assert_eq!(solutions_string, "wainscoted lot; colonised twat; colonised watt; colonised Watt; desolation cwt; lacewood stint; anecdotist low; anecdotist owl; dislocate town; dislocate wont")
     }
 
     #[test_case("i react", "act ire cat", 3, 3, 10, "act ire; cat ire", name = "basic")]
