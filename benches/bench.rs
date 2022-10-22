@@ -19,14 +19,15 @@ fn bench_solver(c: &mut Criterion) {
     let mut group = c.benchmark_group("solver");
     group.sample_size(10);
 
-    group.bench_function("Find a husband for Emma", |bench| {
-        bench.iter(|| answer_question(context.clone(), "Emma #l =a !phrase"))
-    });
+    for example in Example::list(){
+        group.bench_function(example.description, |bench| {
+            bench.iter(|| answer_question(context.clone(), &example.text))
+        });
+    }
+
     
     
-    group.bench_function("Find a husband for Emma", |bench| {
-        bench.iter(|| answer_question(context.clone(), "Emma #l =a !phrase"))
-    });
+    
 
     group.finish()
 }
