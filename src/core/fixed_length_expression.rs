@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use itertools::Itertools;
 use smallvec::SmallVec;
 
@@ -40,6 +42,40 @@ impl FixedLengthExpression {
             .map(|x| x.text.len())
             .count()
     }
+
+    pub fn extract_literals(&self) -> Option<(Self, AnagramKey, Vec<(Homograph, usize)>)> {
+        let literals = self
+            .words
+            .iter()
+            .enumerate()
+            .filter_map(|(i, query)| query.as_literal().map(|l| (l.clone(), i)))            
+            .collect_vec();
+
+        if !literals.is_empty() {
+            if let Ok(key_to_subtract) = AnagramKey::from_str(
+                literals                    
+                    .iter()
+                    .map(|(x, _)| x.text.clone())
+                    .join("")
+                    .as_str(),
+            ) {
+                let new_right_words = self
+                    .words
+                    .iter()
+                    .filter(|x| x.as_literal().is_none())
+                    .cloned()
+                    .collect_vec();
+
+                let new_right = FixedLengthExpression {
+                    words: new_right_words,
+                };
+
+                return Some((new_right, key_to_subtract, literals));
+            }
+        }
+
+        None
+    }
 }
 
 impl TypedExpression for FixedLengthExpression {
@@ -54,8 +90,7 @@ impl TypedExpression for FixedLengthExpression {
         }
     }
     fn count_options(&self, dict: &WordContext) -> Option<usize> {
-
-        if self.words.is_empty(){
+        if self.words.is_empty() {
             return Some(0);
         }
 

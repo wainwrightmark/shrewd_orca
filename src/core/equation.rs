@@ -1,7 +1,7 @@
 use auto_enums::auto_enum;
 use itertools::Itertools;
 
-use std::str::FromStr;
+use std::{rc::Rc, str::FromStr};
 
 use crate::core::prelude::*;
 
@@ -67,69 +67,105 @@ impl Equation {
     }
 
     #[auto_enum(Iterator)]
+    fn solve_anagram_dehydrated<'a>(
+        left: ExpressionSolution,
+        key_to_subtract: AnagramKey,
+        dehydrated_right: Rc<FixedLengthExpression>,
+        extracted_literals: Rc<Vec<(Homograph, usize)>>,
+        dict: &'a WordContext,
+    ) -> impl Iterator<Item = AnagramSolution> + 'a {
+        if let Some(key) = AnagramKey::from_str(left.get_text().as_str())
+            .ok()
+            .and_then(|k| k - key_to_subtract)
+        {
+            let settings = dehydrated_right.to_anagram_settings();
+            let lefts = dict
+                .anagram_dict
+                .solve(key, settings)
+                .map(move |r| (left.clone(), r))
+                .filter_map(move |(left, s)| dehydrated_right.order_to_allow(s).map(|r| (left, r)))
+                .map(move |(left, extra_rights)| AnagramSolution {
+                    left,
+                    right: Equation::hydrate(extra_rights, &extracted_literals),
+                })
+                .filter(|x| !x.is_trivial());
+
+            return lefts;
+        }
+
+        return std::iter::empty::<AnagramSolution>();
+    }
+
+    #[auto_enum(Iterator)]
     fn solve_anagram<'a>(
         left: &'a Expression,
         right: &'a Expression,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
-        let lefts = left.solve(dict);
-
         if let Expression::FixedLength(right_fixed_length) = right {
-            let right_literals = right_fixed_length
-                .words
-                .iter()
-                .enumerate()
-                .filter_map(|(i, query)| query.as_literal().map(|l| (l, i)))
-                .collect_vec();
+            if let Some((dehydrated_right, key_to_subtract, extracted_literals)) =
+                right_fixed_length.extract_literals()
+            {
+                let rc_dr = Rc::from(dehydrated_right);
+                let rc_ex_l = Rc::from(extracted_literals);
 
-            if !right_literals.is_empty() {
-                if let Ok(key_to_subtract) = AnagramKey::from_str(
-                    right_literals
+                return left.solve(dict).flat_map(move |left| {
+                    Self::solve_anagram_dehydrated(
+                        left,
+                        key_to_subtract,
+                        Rc::clone(&rc_dr),
+                        Rc::clone(&rc_ex_l),
+                        dict,
+                    )
+                });
+            }
+        } else if let Expression::Many(right_as_many) = right {
+            if right_as_many.t == ManyExpressionType::Phrase {
+                let dehydrated_rights: Rc<Vec<_>> = PHRASEEXPRESSIONS
+                    .iter()
+                    .filter(|pe| right_as_many.allow_number_of_words(pe.words.len()))
+                    .map(|pe| {
+                        if let Some((new_expression, key, vec)) = pe.extract_literals() {
+                            (Rc::from(new_expression), key, Rc::from(vec))
+                        } else {
+                            (Rc::from(pe.clone()), AnagramKey::EMPTY, Rc::from(vec![]))
+                        }
+                    })
+                    .collect_vec()
+                    .into();
+
+                return left.solve(dict).flat_map(move |left| {
+                    let results = dehydrated_rights
                         .clone()
-                        .into_iter()
-                        .map(|(x, _)| x.text.clone())
-                        .join("")
-                        .as_str(),
-                ) {
-                    let new_right_words = right_fixed_length
-                        .words
                         .iter()
-                        .filter(|x| x.as_literal().is_none())
-                        .cloned()
+                        .flat_map(
+                            move |(dehydrated_right, key_to_subtract, extracted_literals)| {
+                                Self::solve_anagram_dehydrated(
+                                    left.clone(),
+                                    key_to_subtract.clone(),
+                                    Rc::clone(dehydrated_right),
+                                    Rc::clone(extracted_literals),
+                                    dict,
+                                )
+                                .filter(|solution| {
+                                    right_as_many
+                                        .terms
+                                        .iter()
+                                        .all(|t| solution.right.homographs.iter().any(|h| t.allow(h)))
+                                })
+                            },
+                        )
                         .collect_vec();
 
-                    let new_right = Expression::FixedLength(FixedLengthExpression {
-                        words: new_right_words,
-                    });
-
-                    let settings = new_right.to_anagram_settings();
-
-                    return lefts
-                        .flat_map(move |left| {
-                            AnagramKey::from_str(left.get_text().as_str())
-                                .ok()
-                                .and_then(|k| k - key_to_subtract)
-                                .map(|k| (left, k))
-                        })
-                        .flat_map(move |(left, key)| {
-                            dict.anagram_dict
-                                .solve(key, settings.clone())
-                                .map(move |r| (left.clone(), r))
-                        })
-                        .filter_map(move |(left, s)| new_right.order_to_allow(s).map(|r| (left, r)))
-                        .map(move |(left, extra_rights)| AnagramSolution {
-                            left,
-                            right: Equation::hydrate(extra_rights, &right_literals),
-                        })
-                        .filter(|x| !x.is_trivial());
-                }
-                return std::iter::empty();
+                    results
+                });
             }
         }
 
         let settings = right.to_anagram_settings();
 
-        let s = lefts
+        let s = left
+            .solve(dict)
             .flat_map(move |left| {
                 dict.anagram_dict
                     .solve_for_word(&left.get_text(), settings.clone())
@@ -145,10 +181,10 @@ impl Equation {
 
     fn hydrate(
         mut dehydrated: ExpressionSolution,
-        literals: &Vec<(&Homograph, usize)>,
+        literals: &Vec<(Homograph, usize)>,
     ) -> ExpressionSolution {
         for (element, index) in literals {
-            dehydrated.homographs.insert(*index, (*element).clone())
+            dehydrated.homographs.insert(*index, element.clone())
         }
 
         dehydrated
@@ -217,21 +253,4 @@ impl Equation {
                 .map(QuestionSolution::Spoonerism),
         }
     }
-
-    // pub fn solve_anagram_phrase<'a>(
-    //     expression: &'a Expression,
-    //     dict: &'a WordContext,
-    // ) -> impl Iterator<Item = AnagramSolution> + 'a {
-    //     expression.solve(dict).flat_map(move |solution| {
-    //         dict.phrase_expressions.iter().flat_map(move |right| {
-    //             Equation {
-    //                 left: Expression::FixedLength(solution.clone().into()),
-    //                 right: right.clone(),
-    //                 operator: EqualityOperator::Anagram,
-    //             }
-    //             .solve_as_anagram(dict)
-    //             .collect_vec()
-    //         })
-    //     })
-    // }
 }
