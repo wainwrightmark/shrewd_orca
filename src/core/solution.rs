@@ -29,7 +29,7 @@ pub struct ExpressionSolution {
 
 impl ExpressionSolution {
     pub fn get_text(&self) -> String {
-        self.homographs.iter().map(|x| x.text.as_str()).join(" ")
+        self.homographs.iter().map(|x| x.text.clone()).join(" ")
     }
 
     pub fn contains_word(&self, word: &Homograph) -> bool {
@@ -42,14 +42,14 @@ impl AnagramSolution {
         self.left
             .homographs
             .iter()
-            .map(|x| x.text.as_str())
+            .map(|x| x.text.clone())
             .join(" ")
             + " : "
             + self
                 .right
                 .homographs
                 .iter()
-                .map(|x| x.text.as_str())
+                .map(|x| x.text.clone())
                 .join(" ")
                 .as_str()
     }
@@ -71,14 +71,14 @@ impl SpoonerismSolution {
         self.left
             .homographs
             .iter()
-            .map(|x| x.text.as_str())
+            .map(|x| x.text.clone())
             .join(" ")
             + " : "
             + self
                 .right
                 .homographs
                 .iter()
-                .map(|x| x.text.as_str())
+                .map(|x| x.text.clone())
                 .join(" ")
                 .as_str()
     }

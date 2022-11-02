@@ -135,7 +135,7 @@ mod tests {
         expect: String,
     ) {
         let words = terms.split_ascii_whitespace().map(|text| Homograph {
-            text: text.to_string(),
+            text: text.into(),
             is_single_word: true,
             meanings: Default::default(),
         });

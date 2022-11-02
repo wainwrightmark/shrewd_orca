@@ -166,7 +166,7 @@ pub fn row(solution: &QuestionSolution) -> Html {
 }
 
 fn homograph_display(homograph: &Homograph) -> Html {
-    let text = homograph.text.to_owned() + " ";
+    let text = homograph.text.to_string() + " ";
 
     if let Some(definition) = homograph
         .meanings

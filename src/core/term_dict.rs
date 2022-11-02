@@ -85,7 +85,7 @@ impl TermDict {
                         .map(|p| p.1 .1),
                 );
                 let homograph = Homograph {
-                    text: text.to_string(),
+                    text: text.into(),
                     is_single_word: true,
                     meanings,
                 };
@@ -121,7 +121,7 @@ impl TermDict {
                                     .map(|p| p.1 .1),
                             );
                             let homograph = Homograph {
-                                text: text.to_string(),
+                                text: text.into(),
                                 is_single_word: true,
                                 meanings,
                             };

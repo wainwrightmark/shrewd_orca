@@ -91,7 +91,7 @@ impl WordLangParser {
         Ok(match_nodes!(input.into_children();
             [pattern(x)] =>WordQueryTerm::Pattern(x),
             [literal(text)] => WordQueryTerm::Literal(Homograph {
-                text,
+                text: text.into(),
                 is_single_word: true,
                 meanings: Default::default(),
             }) ,

@@ -3,10 +3,11 @@ use std::str::FromStr;
 use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
+use beef::lean::Cow;
 
 #[derive(Clone, PartialEq, Eq, Serialize)]
 pub struct Homograph {
-    pub text: String,
+    pub text: Cow<'static, str>,
     pub is_single_word: bool,
     pub meanings: SmallVec<[Meaning; 1]>,
 }
