@@ -94,7 +94,14 @@ impl TypedExpression for FixedLengthExpression {
             return Some(0);
         }
 
-        Some(self.words.iter().map(|x| x.count_options(dict)).product())
+        let mut accumulator: usize = 1;
+        for w in self.words.iter(){
+            let o = w.count_options(dict);
+            accumulator = accumulator.checked_mul(o)?;
+        }
+
+        let r = self.words.iter().map(|x| x.count_options(dict)).product();
+        Some(r)
     }
 
     fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution> {
