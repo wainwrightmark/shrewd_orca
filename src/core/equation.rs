@@ -1,5 +1,6 @@
 use auto_enums::auto_enum;
 use itertools::Itertools;
+use smallvec::SmallVec;
 
 use std::{rc::Rc, str::FromStr};
 
@@ -71,7 +72,7 @@ impl Equation {
         left: ExpressionSolution,
         key_to_subtract: AnagramKey,
         dehydrated_right: Rc<FixedLengthExpression>,
-        extracted_literals: Rc<Vec<(Homograph, usize)>>,
+        extracted_literals: Rc<SmallVec<[(Homograph, usize); 2]>>,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = AnagramSolution> + 'a {
         if let Some(key) = AnagramKey::from_str(left.get_text().as_str())
@@ -128,7 +129,7 @@ impl Equation {
                         if let Some((new_expression, key, vec)) = pe.extract_literals() {
                             (Rc::from(new_expression), key, Rc::from(vec))
                         } else {
-                            (Rc::from(pe.clone()), AnagramKey::EMPTY, Rc::from(vec![]))
+                            (Rc::from(pe.clone()), AnagramKey::EMPTY, Rc::from(smallvec::smallvec![]))
                         }
                     })
                     .collect_vec()
@@ -142,7 +143,7 @@ impl Equation {
                             move |(dehydrated_right, key_to_subtract, extracted_literals)| {
                                 Self::solve_anagram_dehydrated(
                                     left.clone(),
-                                    key_to_subtract.clone(),
+                                    *key_to_subtract,
                                     Rc::clone(dehydrated_right),
                                     Rc::clone(extracted_literals),
                                     dict,
@@ -167,7 +168,7 @@ impl Equation {
             .solve(dict)
             .flat_map(move |left| {
                 dict.anagram_dict
-                    .solve_for_word(&left.get_text(), settings.clone())
+                    .solve_for_word(&left.get_text(), settings)
                     .filter_map(|s| right.order_to_allow(s))
                     .map(move |right| AnagramSolution {
                         left: left.clone(),
@@ -180,7 +181,7 @@ impl Equation {
 
     fn hydrate(
         mut dehydrated: ExpressionSolution,
-        literals: &Vec<(Homograph, usize)>,
+        literals: &SmallVec<[(Homograph, usize); 2]>,
     ) -> ExpressionSolution {
         for (element, index) in literals {
             dehydrated.homographs.insert(*index, element.clone())

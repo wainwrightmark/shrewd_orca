@@ -16,15 +16,11 @@ impl Expression {
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = ExpressionSolution> + 'a {
-        if let Expression::Many(m) = self {
-            return m.solve(dict);
-        }
 
-        if let Expression::FixedLength(fl) = self {
-            return fl.solve(dict);
+        match self{
+            Expression::Many(m) =>m.solve(dict),
+            Expression::FixedLength(fl) => fl.solve(dict),
         }
-
-        unreachable!()
     }
 }
 

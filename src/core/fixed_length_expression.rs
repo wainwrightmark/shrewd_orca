@@ -40,16 +40,16 @@ impl FixedLengthExpression {
             .iter()
             .filter_map(|x| x.as_literal())
             .map(|x| x.text.len())
-            .count()
+            .sum()
     }
 
-    pub fn extract_literals(&self) -> Option<(Self, AnagramKey, Vec<(Homograph, usize)>)> {
-        let literals = self
+    pub fn extract_literals(&self) -> Option<(Self, AnagramKey, SmallVec<[(Homograph, usize); 2]>)> {
+        let literals : SmallVec<[(Homograph, usize); 2]> = self
             .words
             .iter()
             .enumerate()
             .filter_map(|(i, query)| query.as_literal().map(|l| (l.clone(), i)))
-            .collect_vec();
+            .collect();
 
         if !literals.is_empty() {
             if let Ok(key_to_subtract) = AnagramKey::from_str(
@@ -114,7 +114,6 @@ impl TypedExpression for FixedLengthExpression {
             return None;
         }
 
-        //log::debug!("Testing {:?} for expression {:?}", solution, self);
 
         'outer: for combination in solution
             .homographs
