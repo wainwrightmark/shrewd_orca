@@ -67,13 +67,15 @@ pub fn main() {
             lemma: name.to_string(),
             definition: "".to_string(),
             tags: "masculine".to_string(),
-        }).take(1000)
+        })
+        .take(1000)
         .interleave(girls_names.map(|name| Word {
             part_of_speech: PartOfSpeech::FirstName,
             lemma: name.to_string(),
             definition: "".to_string(),
             tags: "feminine".to_string(),
-        })).take(1000);
+        }))
+        .take(1000);
 
     words.extend(first_names);
 

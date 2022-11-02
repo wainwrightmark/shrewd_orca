@@ -148,10 +148,9 @@ impl Equation {
                                     dict,
                                 )
                                 .filter(|solution| {
-                                    right_as_many
-                                        .terms
-                                        .iter()
-                                        .all(|t| solution.right.homographs.iter().any(|h| t.allow(h)))
+                                    right_as_many.terms.iter().all(|t| {
+                                        solution.right.homographs.iter().any(|h| t.allow(h))
+                                    })
                                 })
                             },
                         )

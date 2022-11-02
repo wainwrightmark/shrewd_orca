@@ -19,22 +19,18 @@ fn bench_solver(c: &mut Criterion) {
     let mut group = c.benchmark_group("solver");
     group.sample_size(10);
 
-    for example in Example::list(){
+    for example in Example::list() {
         group.bench_function(example.description, |bench| {
             bench.iter(|| answer_question(context.clone(), &example.text))
         });
     }
-
-    
-    
-    
 
     group.finish()
 }
 
 fn answer_question(context: Rc<WordContext>, input_str: &str) {
     let p = question_parse(input_str).unwrap();
-    let solutions = p.solve(&context).take(10).collect_vec();
+    let solutions = p.solve(context.as_ref()).take(10).collect_vec();
 
     assert!(!solutions.is_empty())
 }

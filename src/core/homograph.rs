@@ -4,7 +4,7 @@ use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 
-#[derive( Clone, PartialEq, Eq, Serialize)]
+#[derive(Clone, PartialEq, Eq, Serialize)]
 pub struct Homograph {
     pub text: String,
     pub is_single_word: bool,

@@ -104,8 +104,6 @@ impl TypedExpression for ManyExpression {
         }
     }
 
-    
-
     fn order_to_allow(&self, solution: ExpressionSolution) -> Option<ExpressionSolution> {
         //log::debug!("Testing {:?} for expression {:?}", solution, self);
 
@@ -150,7 +148,6 @@ impl TypedExpression for ManyExpression {
 
 impl ManyExpressionType {
     pub fn allow(&self, solution: &ExpressionSolution) -> bool {
-
         //log::info!("Possible Solution: {:?}", solution);
 
         match self {

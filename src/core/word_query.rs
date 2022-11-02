@@ -98,9 +98,9 @@ impl WordQuery {
     }
 
     pub fn is_any(&self) -> bool {
-        self.terms.iter().all(|x| {
-            x.terms.iter().any(|x| matches!(x, WordQueryTerm::Any))
-        })
+        self.terms
+            .iter()
+            .all(|x| x.terms.iter().any(|x| matches!(x, WordQueryTerm::Any)))
     }
 
     pub fn count_options(&self, dict: &WordContext) -> usize {

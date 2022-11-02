@@ -1,8 +1,6 @@
 use auto_enums::auto_enum;
 use enum_dispatch::enum_dispatch;
 
-
-
 use crate::core::prelude::*;
 
 #[enum_dispatch(TypedExpression)]

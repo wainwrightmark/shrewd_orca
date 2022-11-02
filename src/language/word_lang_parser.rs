@@ -49,12 +49,11 @@ impl WordLangParser {
     }
     fn length(input: Node) -> Result<usize> {
         let lit = input.as_str();
-        
 
         usize::from_str(lit).map_err(|e| input.error(e))
     }
     fn tag(input: Node) -> Result<WordQueryTerm> {
-        let lit =& input.as_str()[1..];
+        let lit = &input.as_str()[1..];
 
         if let Ok(pos) = PartOfSpeech::from_str(lit) {
             return Ok(WordQueryTerm::PartOfSpeech(pos));

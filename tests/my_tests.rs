@@ -5,8 +5,6 @@ use shrewd_orca::language::prelude::*;
 use ntest::test_case;
 use smallvec::SmallVec;
 
-
-
 #[test_case("clint eastwood =a !phrase")]
 #[test_case("red bat =a **")]
 #[test_case("#f eastwood =a !phrase")]
@@ -78,7 +76,6 @@ fn test_order_to_allow(query: String, text: String, expected: String) {
 // fn test_phrase_expressions(){
 //     let any : WordQuery = WordQueryTerm ::Any.into();
 //     let any_exp = FixedLengthExpression{words: vec![any]};
-
 
 //     let the_noun = FixedLengthExpression{words: vec![WordQueryTerm::Literal(Homograph "The".into()), WordQueryTerm::PartOfSpeech(PartOfSpeech::Noun)]};
 

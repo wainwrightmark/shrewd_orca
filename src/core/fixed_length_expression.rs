@@ -48,12 +48,12 @@ impl FixedLengthExpression {
             .words
             .iter()
             .enumerate()
-            .filter_map(|(i, query)| query.as_literal().map(|l| (l.clone(), i)))            
+            .filter_map(|(i, query)| query.as_literal().map(|l| (l.clone(), i)))
             .collect_vec();
 
         if !literals.is_empty() {
             if let Ok(key_to_subtract) = AnagramKey::from_str(
-                literals                    
+                literals
                     .iter()
                     .map(|(x, _)| x.text.clone())
                     .join("")
