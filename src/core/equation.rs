@@ -1,5 +1,6 @@
 use auto_enums::auto_enum;
 use itertools::Itertools;
+use log::info;
 use smallvec::SmallVec;
 
 use std::{rc::Rc, str::FromStr};
@@ -20,6 +21,28 @@ pub enum EqualityOperator {
 }
 
 impl Equation {
+
+    const EASY_OPTIONS: usize = 100000;
+    pub fn is_too_difficult(&self, dict: &WordContext,) -> bool {
+        match self.operator {
+            EqualityOperator::Anagram => {
+                let left_options = self.left.count_options(dict).unwrap_or(usize::MAX);
+                if left_options <= Self::EASY_OPTIONS {
+                    return false;
+                }
+
+                let right_options = self.right.count_options(dict).unwrap_or(usize::MAX);
+                if right_options <= Self::EASY_OPTIONS{
+                    return false;
+                }
+
+                //info!("left: {}, right: {}", left_options, right_options);
+                return true;
+            }
+            EqualityOperator::Spoonerism => false,
+        }
+    }
+
     #[auto_enum(Iterator)]
     fn solve_spoonerism<'a>(
         left_expression: &'a Expression,

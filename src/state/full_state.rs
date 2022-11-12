@@ -32,7 +32,10 @@ pub struct FullState {
 
 impl PartialEq for FullState {
     fn eq(&self, other: &Self) -> bool {
-        self.text == other.text && self.data.len() == other.data.len() && self.is_complete == other.is_complete && self.hot == other.hot
+        self.text == other.text
+            && self.data.len() == other.data.len()
+            && self.is_complete == other.is_complete
+            && self.hot == other.hot
     }
 }
 
@@ -68,6 +71,8 @@ impl Store for FullState {
             },
             Err(_) => FullState::default(),
         };
+
+        //log::info!("Listener Init: {}", fs.text);
         fs.hot = true;
         fs.update_if_hot();
         fs
@@ -79,25 +84,20 @@ impl Store for FullState {
 }
 
 impl FullState {
-
-    pub fn info_text(&self)-> Cow<'static, str>{
-
-        if let Some(w) = &self.warning{
+    pub fn info_text(&self) -> Cow<'static, str> {
+        if let Some(w) = &self.warning {
             return w.clone().into();
         }
 
-        if self.hot{
+        if self.hot {
             return "...".into();
         }
 
-        if self.is_complete{
+        if self.is_complete {
             return format!("Found all {} solutions", self.data.len()).into();
-        }
-        else{
+        } else {
             return format!("Found {} solutions", self.data.len()).into();
         }
-
-        
     }
 
     pub fn load_more(&mut self) {
@@ -117,7 +117,7 @@ impl FullState {
                     break;
                 }
             }
-            if i< 10{
+            if i < 10 {
                 self.is_complete = true;
             }
             debug!(
@@ -133,13 +133,21 @@ impl FullState {
         let r = question_parse(&self.text);
         match r {
             Ok(question) => {
-                let qq = Box::leak(Box::new(question));
-                let iter = qq.solve(get_solve_context());
+                let solve_context = get_solve_context();
+                if question.is_too_difficult(solve_context) {
+                    self.data.clear();
+                    self.iter = None;
+                    self.warning = Some("Question is too difficult".to_string());
+                    self.is_complete = false;
+                } else {
+                    let qq = Box::leak(Box::new(question));
+                    let iter = qq.solve(solve_context);
 
-                self.data.clear();
-                self.iter = Some(Rc::new(RefCell::new(iter)));
-                self.warning = Default::default();
-                self.is_complete = false;
+                    self.data.clear();
+                    self.iter = Some(Rc::new(RefCell::new(iter)));
+                    self.warning = Default::default();
+                    self.is_complete = false;
+                }
             }
             Err(warning) => {
                 self.data.clear();

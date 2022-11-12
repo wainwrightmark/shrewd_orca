@@ -19,4 +19,11 @@ impl Question {
             Question::Equation(eq) => eq.solve(dict),
         }
     }
+
+    pub fn is_too_difficult(&self, dict: &WordContext)-> bool{
+        match self{
+            Question::Expression(_) => false,
+            Question::Equation(eq) => eq.is_too_difficult(dict),
+        }
+    }
 }

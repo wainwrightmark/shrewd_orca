@@ -5,6 +5,7 @@ use shrewd_orca::language::prelude::*;
 use ntest::test_case;
 use smallvec::SmallVec;
 
+#[test_case("#f #l =a !phrase + genius")]
 #[test_case("clint eastwood =a !phrase")]
 #[test_case("red bat =a **")]
 #[test_case("#f eastwood =a !phrase")]
@@ -31,6 +32,7 @@ use smallvec::SmallVec;
 #[test_case("(world)")]
 #[test_case("(world / earth)")]
 #[test_case("w* + (world / earth)")]
+
 
 fn test(input: String) {
     let context = WordContext::from_data();
