@@ -1,24 +1,28 @@
 use crate::core::prelude::*;
 use crate::state::prelude::*;
 use itertools::Itertools;
+use log::info;
 use shrewd_orca::language::prelude::Example;
 use web_sys::{HtmlSelectElement, HtmlTextAreaElement};
 use yew::prelude::*;
-use yew_hooks::use_debounce;
+use yew_hooks::{use_debounce, use_infinite_scroll};
 use yewdux::prelude::*;
 
 #[function_component(App)]
 pub fn app() -> Html {
+
+    
+
     html! {
 
-        <div class="container" style="display: flex; flex-direction: column;">
+        <div class="container" style="display: flex; flex-direction: column; overflow-y: none;" >
 
         <Examples />
         <InputBox />
 
         <ErrorBox />
         <DisplayBox/>
-        <LoadMoreButton/>
+        // <LoadMoreButton/>
         </div>
     }
 }
@@ -56,17 +60,27 @@ pub fn error_box() -> Html {
 
 #[function_component(DisplayBox)]
 pub fn display_box() -> Html {
+    let node = use_node_ref();
+
+    use_infinite_scroll(node.clone(), || {
+        Dispatch::<FullState>:: new().reduce_mut(|x|x.load_more());
+    });
+
     let terms_rc = use_selector(|s: &FullState| s.data.clone());
     let terms = terms_rc.as_ref();
 
     let rows = terms.iter().map(row).collect_vec();
 
     html!(
-        <table>
+        <div style="height: 75vh; overflow-y: scroll; overflow-x: hidden;" ref={node}>
+        <div style="height: 80vh;">
+        <table >
         <tbody>
             {rows}
         </tbody>
         </table>
+        </div>
+        </div>
     )
 }
 
