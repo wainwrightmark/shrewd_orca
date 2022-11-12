@@ -1,21 +1,36 @@
+use std::borrow::{Borrow};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::core::prelude::*;
 use crate::language::prelude::*;
-use itertools::Itertools;
 use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
+use yewdux::prelude::init_listener;
+use yewdux::storage;
+use yewdux::store::Store;
 
-use yewdux::{prelude::*, storage};
-
-#[derive(PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FullState {
     pub text: String,
-    pub max_solutions: usize,
+    //pub total_solutions: usize,
+    //pub max_solutions: usize,
     #[serde(skip)]
-    pub data: Rc<Vec<QuestionSolution>>,
+    pub data: Vec<QuestionSolution>,
+
+    #[serde(skip)]
+    pub question: Option<Question>,
     pub warning: Option<String>,
+
+    #[serde(skip)]
+    pub iter: Option<Rc<RefCell<dyn Iterator<Item = QuestionSolution>>>>,
+}
+
+impl PartialEq for FullState {
+    fn eq(&self, other: &Self) -> bool {
+        self.text == other.text && self.data.len() == other.data.len()
+    }
 }
 
 static SOLVECONTEXT: OnceCell<WordContext> = OnceCell::new();
@@ -28,9 +43,10 @@ impl Default for FullState {
     fn default() -> Self {
         Self {
             text: "4 5".to_string(),
-            max_solutions: 10,
+            question: None,
             data: Default::default(),
             warning: Default::default(),
+            iter: Default::default(),
         }
     }
 }
@@ -38,46 +54,62 @@ impl Default for FullState {
 impl Store for FullState {
     fn new() -> Self {
         init_listener(storage::StorageListener::<Self>::new(storage::Area::Local));
+        let result: Result<Option<FullState>, _>  = storage::load(storage::Area::Local);
 
-        let mut result: FullState = storage::load(storage::Area::Local)
-            .expect("Unable to load state")
-            .unwrap_or_default();
+        let mut fs = match result {
+            Ok(opt) => match opt {
+                Some(fs) => fs,
+                None => FullState::default(),
+            },
+            Err(_) => FullState::default(),
+        };
 
-        result.load_more();
-        result
+        fs.update();
+        fs.load_more();
+        fs
     }
 
-    fn changed(&self, other: &Self) -> bool {
-        self.text.trim() != other.text.trim() || self.max_solutions != other.max_solutions
+    fn should_notify(&self, old: &Self) -> bool {
+        self != old
     }
 }
 
-impl FullState {
+impl FullState{
     pub fn load_more(&mut self) {
-        self.max_solutions += 10;
-        self.update();
+        if let Some(iter) = self.iter.borrow() {
+            let mut i = 0;
+            let start_instant = instant::Instant::now();
+
+            let mut iter_borrow = iter.as_ref().borrow_mut();
+            //let mut data_borrow = self.data.as_ref().borrow_mut();
+
+            while let Some(s) = iter_borrow.next() {                
+                self.data.push(s);
+                i += 1;
+                if i >= 10 {
+                    break;
+                }
+            }
+            debug!("Found {} solutions ({} total) in {:?}", i, self.data.len(), start_instant.elapsed());
+        }
     }
 
     fn update(&mut self) {
         let r = question_parse(&self.text);
         match r {
             Ok(question) => {
-                let start_instant = instant::Instant::now();
-                let sol = question
-                    .solve(get_solve_context())
-                    .take(self.max_solutions)
-                    .collect_vec();
+                let qq = Box::leak(Box::new(question));
+                let iter = qq.solve(get_solve_context());
 
-                let diff = instant::Instant::now() - start_instant;
-                debug!("Question solved with {} solutions in {:?}", sol.len(), diff);
-
-                self.data = sol.into();
+                self.data.clear();
+                self.iter = Some(Rc::new(RefCell::new(iter)));
                 self.warning = Default::default();
             }
             Err(warning) => {
-                debug!("Warning {}", warning);
+                //debug!("Warning {}", warning);
 
-                self.data = Default::default();
+                self.data.clear();
+                self.iter = None;
                 self.warning = Some(warning.to_string());
             }
         }
@@ -87,9 +119,10 @@ impl FullState {
         if self.text.trim() == s.trim() {
         } else {
             self.text = s;
-            self.max_solutions = 10;
+            self.iter = None;
 
             self.update();
+            self.load_more();
         }
     }
 }
