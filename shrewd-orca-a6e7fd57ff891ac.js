@@ -693,7 +693,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('shrewd-orca-d744bc1b248c94eb_bg.wasm', import.meta.url);
+        input = new URL('shrewd-orca-a6e7fd57ff891ac_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
