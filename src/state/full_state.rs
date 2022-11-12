@@ -4,6 +4,7 @@ use std::rc::Rc;
 
 use crate::core::prelude::*;
 use crate::language::prelude::*;
+use beef::Cow;
 use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
@@ -14,7 +15,10 @@ use yewdux::store::Store;
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FullState {
     pub text: String,
+    #[serde(skip)]
     pub hot: bool,
+    #[serde(skip)]
+    pub is_complete: bool,
     #[serde(skip)]
     pub data: Vec<QuestionSolution>,
 
@@ -28,7 +32,7 @@ pub struct FullState {
 
 impl PartialEq for FullState {
     fn eq(&self, other: &Self) -> bool {
-        self.text == other.text && self.data.len() == other.data.len()
+        self.text == other.text && self.data.len() == other.data.len() && self.is_complete == other.is_complete && self.hot == other.hot
     }
 }
 
@@ -42,7 +46,8 @@ impl Default for FullState {
     fn default() -> Self {
         Self {
             text: "hello world =a !phrase".into(),
-            hot: false,
+            hot: true,
+            is_complete: true,
             question: None,
             data: Default::default(),
             warning: Default::default(),
@@ -74,13 +79,36 @@ impl Store for FullState {
 }
 
 impl FullState {
+
+    pub fn info_text(&self)-> Cow<'static, str>{
+
+        if let Some(w) = &self.warning{
+            return w.clone().into();
+        }
+
+        if self.hot{
+            return "...".into();
+        }
+
+        if self.is_complete{
+            return format!("Found all {} solutions", self.data.len()).into();
+        }
+        else{
+            return format!("Found {} solutions", self.data.len()).into();
+        }
+
+        
+    }
+
     pub fn load_more(&mut self) {
+        if self.is_complete {
+            return;
+        }
         if let Some(iter) = self.iter.borrow() {
             let mut i = 0;
             let start_instant = instant::Instant::now();
 
             let mut iter_borrow = iter.as_ref().borrow_mut();
-            //let mut data_borrow = self.data.as_ref().borrow_mut();
 
             while let Some(s) = iter_borrow.next() {
                 self.data.push(s);
@@ -88,6 +116,9 @@ impl FullState {
                 if i >= 10 {
                     break;
                 }
+            }
+            if i< 10{
+                self.is_complete = true;
             }
             debug!(
                 "Found {} solutions ({} total) in {:?}",
@@ -108,13 +139,13 @@ impl FullState {
                 self.data.clear();
                 self.iter = Some(Rc::new(RefCell::new(iter)));
                 self.warning = Default::default();
+                self.is_complete = false;
             }
             Err(warning) => {
-                //debug!("Warning {}", warning);
-
                 self.data.clear();
                 self.iter = None;
                 self.warning = Some(warning.to_string());
+                self.is_complete = false;
             }
         }
     }
@@ -124,6 +155,7 @@ impl FullState {
             self.iter = None;
             self.update();
             self.load_more();
+            self.hot = false;
         }
     }
 

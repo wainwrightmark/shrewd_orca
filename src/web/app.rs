@@ -48,10 +48,7 @@ pub fn input_box() -> Html {
 
 #[function_component(ErrorBox)]
 pub fn error_box() -> Html {
-    let err = use_selector(|s: &FullState| s.warning.clone())
-        .as_ref()
-        .clone()
-        .unwrap_or_else(|| "‎".to_string());
+    let err = use_selector(|s: &FullState| s.info_text());
     html!(<code> {err} </code>)
 }
 
@@ -105,18 +102,6 @@ pub fn examples_dropdown() -> Html {
             {options}
         </select>
     )
-}
-
-#[function_component(LoadMoreButton)]
-pub fn load_more_button() -> Html {
-    let onclick =
-        Dispatch::<FullState>::new().reduce_mut_callback_with(|s, _: MouseEvent| s.load_more());
-
-    //let total_results = use_selector(|s: &FullState| s.data.len());
-    //let max_results = use_selector(|s: &FullState| s.max_solutions);
-    let disabled = false; // total_results < max_results;
-
-    html!(<button {onclick} {disabled}>{"Load More"}</button>)
 }
 
 pub fn row(solution: &QuestionSolution) -> Html {
