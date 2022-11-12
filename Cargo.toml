@@ -24,7 +24,7 @@ include-flate = "0.1.4"
 log = "0.4"
 yew = { git = "https://github.com/yewstack/yew.git", features = ["csr",] }
 yewdux = { git = "https://github.com/intendednull/yewdux.git" }
-
+yew-hooks = { git = "https://github.com/jetli/yew-hooks.git" }
 
 regex= {version="1.6", features=["std", "perf",  ]}
 wasm-logger = "0.2"
