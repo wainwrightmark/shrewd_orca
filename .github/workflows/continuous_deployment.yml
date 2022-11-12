@@ -18,7 +18,7 @@ jobs:
       - uses: jetli/wasm-bindgen-action@v0.1.0
 
       - uses: actions/checkout@v2
-      - run: trunk build --release --public-url "${GITHUB_REPOSITORY#*/}"
+      - run: trunk build --release --public-url "http://wrongtree.co.uk"
       - uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
