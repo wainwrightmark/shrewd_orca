@@ -280,4 +280,10 @@ impl Equation {
                 .map(QuestionSolution::Spoonerism),
         }
     }
+
+    pub fn upgrade_literals(&mut self, dict: &WordContext){
+        self.left.upgrade_literals(dict);
+        self.right.upgrade_literals(dict);
+    }
+
 }

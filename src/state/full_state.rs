@@ -132,7 +132,7 @@ impl FullState {
     fn update(&mut self) {
         let r = question_parse(&self.text);
         match r {
-            Ok(question) => {
+            Ok(mut question) => {
                 let solve_context = get_solve_context();
                 if question.is_too_difficult(solve_context) {
                     self.data.clear();
@@ -140,6 +140,7 @@ impl FullState {
                     self.warning = Some("Question is too difficult".to_string());
                     self.is_complete = false;
                 } else {
+                    question.upgrade_literals(solve_context);
                     let qq = Box::leak(Box::new(question));
                     let iter = qq.solve(solve_context);
 

@@ -2,8 +2,10 @@ use std::str::FromStr;
 
 use beef::lean::Cow;
 use enumflags2::{bitflags, BitFlags};
+
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
+use strum::{AsStaticStr, IntoStaticStr};
 
 #[derive(Clone, PartialEq, Eq, Serialize)]
 pub struct Homograph {
@@ -15,6 +17,21 @@ pub struct Homograph {
 impl std::fmt::Debug for Homograph {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.text)
+    }
+}
+
+impl Homograph {
+    pub fn first_definition<'a> (&'a self) -> &'static str {
+        if let Some(definition) = self.meanings.iter().filter_map(|x| x.definition).next() {
+            return definition;
+        } else {
+            if let Some(meaning) =  self.meanings.iter().next(){
+                let s: &'static str = (*meaning).part_of_speech.into();
+
+                return s;
+            }
+            return "Unknown Word";
+        }
     }
 }
 
@@ -41,7 +58,7 @@ impl Ord for Homograph {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Ord, IntoStaticStr)]
 pub enum PartOfSpeech {
     Noun,
     Verb,
@@ -51,13 +68,15 @@ pub enum PartOfSpeech {
     Interjection,
     Conjunction,
     Pronoun,
+    #[strum(serialize = "First Name")]
     FirstName,
+    #[strum(serialize = "Last Name")]
     LastName,
 }
 
 #[bitflags]
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, IntoStaticStr)]
 pub enum WordTag {
     Masculine,
     Feminine,

@@ -127,12 +127,12 @@ mod tests {
         name = "min_word_length"
     )]
     fn test_solve(
-        input: String,
-        terms: String,
+        input: &str,
+        terms: &str,
         min_word_length: u8,
         max_words: usize,
         take: usize,
-        expect: String,
+        expect: &str,
     ) {
         let words = terms.split_ascii_whitespace().map(|text| Homograph {
             text: text.into(),

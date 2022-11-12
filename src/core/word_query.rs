@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use auto_enums::auto_enum;
 use itertools::Itertools;
 use smallvec::SmallVec;
@@ -38,6 +40,14 @@ pub struct WordQueryDisjunction {
     pub terms: SmallVec<[WordQueryTerm; 1]>,
 }
 
+impl WordQueryDisjunction {
+    pub fn upgrade_literals(&mut self, dict: &WordContext) {
+        for t in self.terms.iter_mut() {
+            t.upgrade_literals(dict)
+        }
+    }
+}
+
 impl From<WordQueryTerm> for WordQueryDisjunction {
     fn from(term: WordQueryTerm) -> Self {
         WordQueryDisjunction {
@@ -61,6 +71,22 @@ pub enum WordQueryTerm {
     Length(usize),
     Pattern(Pattern),
     Nested(Box<WordQuery>),
+}
+
+impl WordQueryTerm {
+    pub fn upgrade_literals(&mut self, dict: &WordContext) {
+        match self {
+            WordQueryTerm::Literal(l) => {
+                if l.meanings.is_empty() {
+                    if let Some(h) = dict.term_dict.try_find(l.text.borrow()) {
+                        *l = h;
+                    }
+                }
+            }
+            WordQueryTerm::Nested(n) => n.upgrade_literals(dict),
+            _ => (),
+        }
+    }
 }
 
 impl WordQuery {
@@ -105,6 +131,12 @@ impl WordQuery {
 
     pub fn count_options(&self, dict: &WordContext) -> usize {
         self.solve(&dict.term_dict).count()
+    }
+
+    pub fn upgrade_literals(&mut self, dict: &WordContext) {
+        for t in self.terms.iter_mut() {
+            t.upgrade_literals(dict)
+        }
     }
 }
 

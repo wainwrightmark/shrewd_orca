@@ -110,7 +110,7 @@ pub fn row(solution: &QuestionSolution) -> Html {
             let spans = expression
                 .homographs
                 .iter()
-                .map(homograph_display)
+                .map(|x| homograph_display(x, "right"))
                 .collect_vec();
 
             html!(
@@ -124,13 +124,13 @@ pub fn row(solution: &QuestionSolution) -> Html {
                 .left
                 .homographs
                 .iter()
-                .map(homograph_display)
+                .map(|x|  homograph_display(x, "right"))
                 .collect_vec();
             let right_spans = anagram
                 .right
                 .homographs
                 .iter()
-                .map(homograph_display)
+                .map(|x|  homograph_display(x, "left"))
                 .collect_vec();
 
             html!(
@@ -145,13 +145,13 @@ pub fn row(solution: &QuestionSolution) -> Html {
                 .left
                 .homographs
                 .iter()
-                .map(homograph_display)
+                .map(|x| homograph_display(x, "right"))
                 .collect_vec();
             let right_spans = spoonerism
                 .right
                 .homographs
                 .iter()
-                .map(homograph_display)
+                .map(|x|  homograph_display(x, "left"))
                 .collect_vec();
 
             html!(
@@ -164,21 +164,11 @@ pub fn row(solution: &QuestionSolution) -> Html {
     }
 }
 
-fn homograph_display(homograph: &Homograph) -> Html {
+fn homograph_display(homograph: &Homograph, tooltip_placement: &'static str) -> Html {
     let text = homograph.text.to_string() + " ";
+    let definition = homograph.first_definition();
 
-    if let Some(definition) = homograph
-        .meanings
-        .iter()
-        .filter_map(|x| x.definition)
-        .next()
-    {
-        html!(
-            <span style="border-bottom: none;" data-tooltip={definition}>{text} </span>
-        )
-    } else {
-        html!(
-            <span style="border-bottom: none;" >{text} </span>
-        )
-    }
+    html!(
+        <span style="border-bottom: none;" data-tooltip={definition} data-placement={tooltip_placement}>{text} </span>
+    )
 }

@@ -50,6 +50,14 @@ impl ManyExpression {
             .max()
             .unwrap_or(0)
     }
+
+    pub fn upgrade_literals(&mut self, dict: &WordContext){
+        for t in self.terms.iter_mut(){
+            t.upgrade_literals(dict);
+        }
+    }
+
+    
 }
 
 impl TypedExpression for ManyExpression {

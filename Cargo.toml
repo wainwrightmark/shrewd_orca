@@ -37,6 +37,7 @@ anyhow = "1.0.65"
 pest_consume = "1.1.3"
 enum_dispatch = "0.3.8"
 beef = {version= "*", features= ["const_fn", "serde", "impl_serde"]}
+strum = { version = "0.24.1", features = ["derive"] }
 
 [dependencies.web-sys]
 version = "0.3"
@@ -58,7 +59,7 @@ opt-level = 3
 
 [dev-dependencies]
 criterion = "0.4"
-ntest = "0.8"
+ntest = "0.9"
 insta = "1.15.0"
 
 
