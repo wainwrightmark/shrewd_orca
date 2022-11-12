@@ -50,7 +50,8 @@ pub fn main() {
                     .senses
                     .iter()
                     .filter_map(|s| synset_dic[&s.synset].definition.clone())
-                    .next().unwrap_or_default(),
+                    .next()
+                    .unwrap_or_default(),
                 tags: tags_vec.join(" "),
             }
         })

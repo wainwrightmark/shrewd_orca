@@ -1,7 +1,7 @@
 use crate::core::prelude::*;
 use crate::state::prelude::*;
 use itertools::Itertools;
-use log::info;
+
 use shrewd_orca::language::prelude::Example;
 use web_sys::{HtmlSelectElement, HtmlTextAreaElement};
 use yew::prelude::*;
@@ -10,9 +10,6 @@ use yewdux::prelude::*;
 
 #[function_component(App)]
 pub fn app() -> Html {
-
-    
-
     html! {
 
         <div class="container" style="display: flex; flex-direction: column; overflow-y: none;" >
@@ -63,7 +60,7 @@ pub fn display_box() -> Html {
     let node = use_node_ref();
 
     use_infinite_scroll(node.clone(), || {
-        Dispatch::<FullState>:: new().reduce_mut(|x|x.load_more());
+        Dispatch::<FullState>::new().reduce_mut(|x| x.load_more());
     });
 
     let terms_rc = use_selector(|s: &FullState| s.data.clone());

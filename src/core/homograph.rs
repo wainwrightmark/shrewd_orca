@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
+use beef::lean::Cow;
 use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
-use beef::lean::Cow;
 
 #[derive(Clone, PartialEq, Eq, Serialize)]
 pub struct Homograph {

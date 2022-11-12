@@ -16,9 +16,8 @@ impl Expression {
         &'a self,
         dict: &'a WordContext,
     ) -> impl Iterator<Item = ExpressionSolution> + 'a {
-
-        match self{
-            Expression::Many(m) =>m.solve(dict),
+        match self {
+            Expression::Many(m) => m.solve(dict),
             Expression::FixedLength(fl) => fl.solve(dict),
         }
     }

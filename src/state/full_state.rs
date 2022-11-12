@@ -7,7 +7,7 @@ use crate::language::prelude::*;
 use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
-use yewdux::prelude::{init_listener};
+use yewdux::prelude::init_listener;
 use yewdux::storage;
 use yewdux::store::Store;
 

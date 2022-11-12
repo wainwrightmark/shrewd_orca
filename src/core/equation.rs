@@ -129,7 +129,11 @@ impl Equation {
                         if let Some((new_expression, key, vec)) = pe.extract_literals() {
                             (Rc::from(new_expression), key, Rc::from(vec))
                         } else {
-                            (Rc::from(pe.clone()), AnagramKey::EMPTY, Rc::from(smallvec::smallvec![]))
+                            (
+                                Rc::from(pe.clone()),
+                                AnagramKey::EMPTY,
+                                Rc::from(smallvec::smallvec![]),
+                            )
                         }
                     })
                     .collect_vec()

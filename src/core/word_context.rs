@@ -17,7 +17,6 @@ impl WordContext {
         let term_dict = TermDict::from_term_data().unwrap();
         let anagram_dict = AnagramDict::from(term_dict.homographs.clone().into_iter());
 
-
         debug!("Loaded word context in {:?}", now.elapsed());
         WordContext {
             term_dict,

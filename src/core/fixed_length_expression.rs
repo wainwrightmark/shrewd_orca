@@ -43,8 +43,10 @@ impl FixedLengthExpression {
             .sum()
     }
 
-    pub fn extract_literals(&self) -> Option<(Self, AnagramKey, SmallVec<[(Homograph, usize); 2]>)> {
-        let literals : SmallVec<[(Homograph, usize); 2]> = self
+    pub fn extract_literals(
+        &self,
+    ) -> Option<(Self, AnagramKey, SmallVec<[(Homograph, usize); 2]>)> {
+        let literals: SmallVec<[(Homograph, usize); 2]> = self
             .words
             .iter()
             .enumerate()
@@ -95,7 +97,7 @@ impl TypedExpression for FixedLengthExpression {
         }
 
         let mut accumulator: usize = 1;
-        for w in self.words.iter(){
+        for w in self.words.iter() {
             let o = w.count_options(dict);
             accumulator = accumulator.checked_mul(o)?;
         }
@@ -120,7 +122,6 @@ impl TypedExpression for FixedLengthExpression {
         {
             return None;
         }
-
 
         'outer: for combination in solution
             .homographs
