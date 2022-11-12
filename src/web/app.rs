@@ -60,20 +60,26 @@ pub fn display_box() -> Html {
         Dispatch::<FullState>::new().reduce_mut(|x| x.load_more());
     });
 
-    let terms_rc = use_selector(|s: &FullState| s.data.clone());
-    let terms = terms_rc.as_ref();
+    let selected = use_selector(|s: &FullState| (s.data.clone(), s.is_complete));
 
-    let rows = terms.iter().map(row).collect_vec();
+    let rows = selected.0.iter().map(row).collect_vec();
 
     html!(
         <div style="height: 75vh; overflow-y: scroll; overflow-x: hidden;" ref={node}>
-        <div style="height: 80vh;">
+        <div>
         <table >
         <tbody>
             {rows}
         </tbody>
         </table>
         </div>
+        {if !selected.as_ref().1{
+            html!(<div style="height: 40vh; width: 100%; background: none;"></div>)
+        }else{
+            html!(<></>)
+        }}
+        
+        
         </div>
     )
 }
