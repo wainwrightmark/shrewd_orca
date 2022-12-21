@@ -18,13 +18,13 @@ array-const-fn-init = "0.1"
 enumflags2 = {version= "0.7", features= ["serde"]}
 smallvec = {version = "1.9.0", features=["serde", "union","const_generics", "const_new" ]}
 once_cell = "1.13"
-auto_enums = {version = "0.7", features=["std"]}
+auto_enums = {version = "0.8", features=["std"]}
 include-flate = "0.1.4"
 
 log = "0.4"
-yew = { git = "https://github.com/yewstack/yew.git", features = ["csr",] }
-yewdux = { git = "https://github.com/intendednull/yewdux.git" }
-yew-hooks = { git = "https://github.com/jetli/yew-hooks.git" }
+yew = { version="0.20", features = ["csr",] }
+yewdux = { version="0.9" }
+yew-hooks = { version="0.2" }
 
 regex= {version="1.6", features=["std", "perf",  ]}
 wasm-logger = "0.2"
