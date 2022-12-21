@@ -46,7 +46,7 @@ impl PatternComponent {
     pub fn regex_str(&self) -> String {
         match self {
             PatternComponent::Any => "[[:alpha:]]*".to_string(),
-            PatternComponent::AnyChar(len) => format!("[[:alpha:]]{{{}}}", len),
+            PatternComponent::AnyChar(len) => format!("[[:alpha:]]{{{len}}}"),
             PatternComponent::Literal(s) => s.clone(),
             PatternComponent::CharacterClass(c) => c.regex_char().to_string(),
         }

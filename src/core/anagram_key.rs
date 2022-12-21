@@ -89,7 +89,7 @@ impl Sub for AnagramKey {
 
 impl Debug for AnagramKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let display = format!("{}", self);
+        let display = format!("{self}");
 
         f.debug_struct("AnagramKey")
             .field("txt", &display)

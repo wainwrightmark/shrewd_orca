@@ -36,7 +36,7 @@ impl Equation {
                 }
 
                 //info!("left: {}, right: {}", left_options, right_options);
-                return true;
+                true
             }
             EqualityOperator::Spoonerism => false,
         }

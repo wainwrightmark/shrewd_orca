@@ -23,14 +23,14 @@ impl std::fmt::Debug for Homograph {
 impl Homograph {
     pub fn first_definition<'a>(&'a self) -> &'static str {
         if let Some(definition) = self.meanings.iter().filter_map(|x| x.definition).next() {
-            return definition;
+            definition
         } else {
             if let Some(meaning) = self.meanings.iter().next() {
-                let s: &'static str = (*meaning).part_of_speech.into();
+                let s: &'static str = meaning.part_of_speech.into();
 
                 return s;
             }
-            return "Unknown Word";
+            "Unknown Word"
         }
     }
 }
