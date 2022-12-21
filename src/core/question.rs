@@ -20,15 +20,15 @@ impl Question {
         }
     }
 
-    pub fn is_too_difficult(&self, dict: &WordContext)-> bool{
-        match self{
+    pub fn is_too_difficult(&self, dict: &WordContext) -> bool {
+        match self {
             Question::Expression(_) => false,
             Question::Equation(eq) => eq.is_too_difficult(dict),
         }
     }
 
     /// Upgrade all literals so they have definitions
-    pub fn upgrade_literals(&mut self, dict: &WordContext){
+    pub fn upgrade_literals(&mut self, dict: &WordContext) {
         match self {
             Question::Expression(ex) => ex.upgrade_literals(dict),
             Question::Equation(eq) => eq.upgrade_literals(dict),

@@ -78,8 +78,8 @@ pub fn display_box() -> Html {
         }else{
             html!(<></>)
         }}
-        
-        
+
+
         </div>
     )
 }
@@ -130,13 +130,13 @@ pub fn row(solution: &QuestionSolution) -> Html {
                 .left
                 .homographs
                 .iter()
-                .map(|x|  homograph_display(x, "right"))
+                .map(|x| homograph_display(x, "right"))
                 .collect_vec();
             let right_spans = anagram
                 .right
                 .homographs
                 .iter()
-                .map(|x|  homograph_display(x, "left"))
+                .map(|x| homograph_display(x, "left"))
                 .collect_vec();
 
             html!(
@@ -157,7 +157,7 @@ pub fn row(solution: &QuestionSolution) -> Html {
                 .right
                 .homographs
                 .iter()
-                .map(|x|  homograph_display(x, "left"))
+                .map(|x| homograph_display(x, "left"))
                 .collect_vec();
 
             html!(

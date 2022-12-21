@@ -33,7 +33,6 @@ use smallvec::SmallVec;
 #[test_case("(world / earth)")]
 #[test_case("w* + (world / earth)")]
 
-
 fn test(input: &str) {
     let context = WordContext::from_data();
 

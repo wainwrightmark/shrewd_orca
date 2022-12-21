@@ -18,7 +18,6 @@ impl Example {
             Example::make("#n + 4..5", "Short nouns"),
             Example::make("!phrase", "Short Phrase"),
             Example::make("Beau Singleton =a !phrase", "Anagram my name"),
-
             Example::make("Emma #l =a !phrase", "Find me a husband!"),
             Example::make(
                 "#f + #feminine Darcy =a !phrase + #negative",

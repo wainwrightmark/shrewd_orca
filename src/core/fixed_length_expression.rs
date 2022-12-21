@@ -79,8 +79,8 @@ impl FixedLengthExpression {
         None
     }
 
-    pub fn upgrade_literals(&mut self, dict: &WordContext){
-        for w in self.words.iter_mut(){
+    pub fn upgrade_literals(&mut self, dict: &WordContext) {
+        for w in self.words.iter_mut() {
             w.upgrade_literals(dict)
         }
     }

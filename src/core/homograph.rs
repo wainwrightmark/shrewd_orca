@@ -5,7 +5,7 @@ use enumflags2::{bitflags, BitFlags};
 
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
-use strum::{AsStaticStr, IntoStaticStr};
+use strum::IntoStaticStr;
 
 #[derive(Clone, PartialEq, Eq, Serialize)]
 pub struct Homograph {
@@ -21,11 +21,11 @@ impl std::fmt::Debug for Homograph {
 }
 
 impl Homograph {
-    pub fn first_definition<'a> (&'a self) -> &'static str {
+    pub fn first_definition<'a>(&'a self) -> &'static str {
         if let Some(definition) = self.meanings.iter().filter_map(|x| x.definition).next() {
             return definition;
         } else {
-            if let Some(meaning) =  self.meanings.iter().next(){
+            if let Some(meaning) = self.meanings.iter().next() {
                 let s: &'static str = (*meaning).part_of_speech.into();
 
                 return s;
@@ -58,7 +58,9 @@ impl Ord for Homograph {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Ord, IntoStaticStr)]
+#[derive(
+    Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Ord, IntoStaticStr,
+)]
 pub enum PartOfSpeech {
     Noun,
     Verb,

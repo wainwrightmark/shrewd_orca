@@ -23,7 +23,7 @@ impl Expression {
     }
 
     /// Upgrade all literals so they have definitions
-    pub fn upgrade_literals(&mut self, dict: &WordContext){
+    pub fn upgrade_literals(&mut self, dict: &WordContext) {
         match self {
             Expression::Many(m) => m.upgrade_literals(dict),
             Expression::FixedLength(fl) => fl.upgrade_literals(dict),

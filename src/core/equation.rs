@@ -1,6 +1,6 @@
 use auto_enums::auto_enum;
 use itertools::Itertools;
-use log::info;
+
 use smallvec::SmallVec;
 
 use std::{rc::Rc, str::FromStr};
@@ -21,9 +21,8 @@ pub enum EqualityOperator {
 }
 
 impl Equation {
-
     const EASY_OPTIONS: usize = 100000;
-    pub fn is_too_difficult(&self, dict: &WordContext,) -> bool {
+    pub fn is_too_difficult(&self, dict: &WordContext) -> bool {
         match self.operator {
             EqualityOperator::Anagram => {
                 let left_options = self.left.count_options(dict).unwrap_or(usize::MAX);
@@ -32,7 +31,7 @@ impl Equation {
                 }
 
                 let right_options = self.right.count_options(dict).unwrap_or(usize::MAX);
-                if right_options <= Self::EASY_OPTIONS{
+                if right_options <= Self::EASY_OPTIONS {
                     return false;
                 }
 
@@ -281,9 +280,8 @@ impl Equation {
         }
     }
 
-    pub fn upgrade_literals(&mut self, dict: &WordContext){
+    pub fn upgrade_literals(&mut self, dict: &WordContext) {
         self.left.upgrade_literals(dict);
         self.right.upgrade_literals(dict);
     }
-
 }
