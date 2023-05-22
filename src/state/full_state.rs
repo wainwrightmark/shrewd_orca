@@ -8,7 +8,7 @@ use beef::Cow;
 use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
-use yewdux::prelude::init_listener;
+
 use yewdux::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
@@ -62,10 +62,13 @@ impl Default for FullState {
     }
 }
 
+
+
 impl Store for FullState {
     fn new() -> Self {
 
         #[cfg(target_arch ="wasm32")]{
+            use yewdux::prelude::init_listener;
             init_listener(storage::StorageListener::<Self>::new(storage::Area::Local));
             let result: Result<Option<FullState>, _> = storage::load(storage::Area::Local);
     

@@ -1,6 +1,6 @@
 use crate::core::prelude::*;
 use crate::state::prelude::*;
-use itertools::Itertools;
+use itertools::{Itertools, Duplicates};
 
 use shrewd_orca::language::prelude::Example;
 use web_sys::{HtmlSelectElement, HtmlTextAreaElement};
@@ -56,31 +56,30 @@ pub fn error_box() -> Html {
 pub fn display_box() -> Html {
     let node = use_node_ref();
 
-    use_infinite_scroll(node.clone(), || {
-        Dispatch::<FullState>::new().reduce_mut(|x| x.load_more());
+    let (state, dispatch) = use_store::<FullState>();
+
+    let onclick = dispatch.reduce_mut_future_callback(|state| {
+        Box::pin(async move {
+            state.load_more();
+        })
     });
 
-    let selected = use_selector(|s: &FullState| (s.data.clone(), s.is_complete));
-
-    let rows = selected.0.iter().map(row).collect_vec();
+    let rows = state.data.iter().map(row).collect_vec();
 
     html!(
-        <div style="height: 75vh; overflow-y: scroll; overflow-x: hidden;" ref={node}>
+        <>
+        <div style="max-height: 60vh; overflow-y: scroll; overflow-x: hidden;" ref={node}>
         <div>
         <table >
         <tbody>
             {rows}
         </tbody>
         </table>
-        </div>
-        {if !selected.as_ref().1{
-            html!(<div style="height: 40vh; width: 100%; background: none;"></div>)
-        }else{
-            html!(<></>)
-        }}
-        
+        </div>            
         
         </div>
+        <button {onclick} disabled={state.is_complete}>{"Load More"}</button>
+        </>
     )
 }
 
