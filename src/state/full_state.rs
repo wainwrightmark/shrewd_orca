@@ -9,8 +9,11 @@ use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
 use yewdux::prelude::init_listener;
+use yewdux::prelude::*;
+
+#[cfg(target_arch = "wasm32")]
 use yewdux::storage;
-use yewdux::store::Store;
+
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FullState {
@@ -61,21 +64,27 @@ impl Default for FullState {
 
 impl Store for FullState {
     fn new() -> Self {
-        init_listener(storage::StorageListener::<Self>::new(storage::Area::Local));
-        let result: Result<Option<FullState>, _> = storage::load(storage::Area::Local);
 
-        let mut fs = match result {
-            Ok(opt) => match opt {
-                Some(fs) => fs,
-                None => FullState::default(),
-            },
-            Err(_) => FullState::default(),
-        };
-
-        //log::info!("Listener Init: {}", fs.text);
-        fs.hot = true;
-        fs.update_if_hot();
-        fs
+        #[cfg(target_arch ="wasm32")]{
+            init_listener(storage::StorageListener::<Self>::new(storage::Area::Local));
+            let result: Result<Option<FullState>, _> = storage::load(storage::Area::Local);
+    
+            let mut fs = match result {
+                Ok(opt) => match opt {
+                    Some(fs) => fs,
+                    None => FullState::default(),
+                },
+                Err(_) => FullState::default(),
+            };
+    
+            //log::info!("Listener Init: {}", fs.text);
+            fs.hot = true;
+            fs.update_if_hot();
+            fs
+        }
+        #[cfg(not(target_arch ="wasm32"))]
+            Self::default()
+        
     }
 
     fn should_notify(&self, old: &Self) -> bool {
