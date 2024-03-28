@@ -99,7 +99,7 @@ impl Equation {
     ) -> impl Iterator<Item = AnagramSolution> + '_ {
         if let Some(key) = AnagramKey::from_str(left.get_text().as_str())
             .ok()
-            .and_then(|k| k - key_to_subtract)
+            .and_then(|k| k.try_sub(key_to_subtract))
         {
             let settings = dehydrated_right.to_anagram_settings();
             let lefts = dict

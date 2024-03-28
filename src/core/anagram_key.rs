@@ -1,6 +1,5 @@
 use std::{
     fmt::{Debug, Display, Write},
-    ops::{Add, Sub},
     str::FromStr,
 };
 
@@ -11,20 +10,8 @@ use super::prelude::Character;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct AnagramKey {
-    pub len: u8,
-    pub inner: prime_bag::PrimeBag128<Character>,
-}
-
-impl Ord for AnagramKey {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.inner.cmp(&other.inner)
-    }
-}
-
-impl PartialOrd for AnagramKey {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
+    len: u8,
+    inner: prime_bag::PrimeBag128<Character>,
 }
 
 impl AnagramKey {
@@ -38,25 +25,33 @@ impl AnagramKey {
             inner: Default::default(),
         }
     }
-}
 
-impl Add for AnagramKey {
-    type Output = Option<Self>;
+    pub fn is_length_at_least(&self, l: u8) -> bool {
+        self.len >= l
+    }
 
-    fn add(self, rhs: Self) -> Self::Output {
+    pub fn try_add(self, rhs: Self) -> Option<Self> {
         let inner = self.inner.try_sum(&rhs.inner)?;
         let len = self.len + rhs.len;
         AnagramKey { inner, len }.into()
     }
-}
 
-impl Sub for AnagramKey {
-    type Output = Option<Self>;
-
-    fn sub(self, rhs: Self) -> Self::Output {
+    pub fn try_sub(self, rhs: Self) -> Option<Self> {
         let inner = self.inner.try_difference(&rhs.inner)?;
         let len = self.len - rhs.len;
         AnagramKey { inner, len }.into()
+    }
+}
+
+impl Ord for AnagramKey {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.inner.cmp(&other.inner)
+    }
+}
+
+impl PartialOrd for AnagramKey {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -123,7 +118,7 @@ mod tests {
         let clint = AnagramKey::from_str("clint").unwrap();
         let eastwood = AnagramKey::from_str("eastwood").unwrap();
 
-        let clint_eastwood = (clint + eastwood).unwrap();
+        let clint_eastwood = (clint.try_add(eastwood)).unwrap();
 
         let old_west_action = AnagramKey::from_str("old west action").unwrap();
         assert_eq!(clint_eastwood, old_west_action);
@@ -137,7 +132,7 @@ mod tests {
 
         let clint = AnagramKey::from_str("clint").unwrap();
 
-        let subbed = (old_west_action - eastwood).unwrap();
+        let subbed = (old_west_action.try_sub(eastwood)).unwrap();
 
         assert_eq!(clint, subbed);
     }

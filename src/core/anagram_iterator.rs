@@ -41,7 +41,7 @@ impl<'b, const N: usize> Iterator for AnagramIterator<'b, N> {
                     //&& self.settings.allow_word(possible_homographs)
                 })
                 .filter_map(|(&next_key, _)| {
-                    (top.0 - next_key).map(|remainder| (remainder, next_key))
+                    (top.0.try_sub(next_key)).map(|remainder| (remainder, next_key))
                 })
                 .next()
             {
