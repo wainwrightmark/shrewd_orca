@@ -1,12 +1,12 @@
 use auto_enums::auto_enum;
 use itertools::Itertools;
 use smallvec::SmallVec;
-use std::{collections::BTreeMap, str::FromStr};
+use std::str::FromStr;
 
 use crate::core::prelude::*;
 
 pub struct AnagramDict {
-    pub words: BTreeMap<AnagramKey, SmallVec<[Homograph; 1]>>,
+    pub words: BinaryMap<AnagramKey, Homograph, 1>, //pub words: BTreeMap<AnagramKey, SmallVec<[Homograph; 1]>>,
 }
 
 impl From<&TermDict> for AnagramDict {
@@ -17,15 +17,9 @@ impl From<&TermDict> for AnagramDict {
 
 impl<T: Iterator<Item = Homograph>> From<T> for AnagramDict {
     fn from(iter: T) -> Self {
-        let groups = iter
-            .sorted()
-            .dedup()
-            .filter_map(|term| AnagramKey::from_str(&term.text).ok().map(|key| (key, term)))
-            .into_group_map();
-        let words =
-            BTreeMap::from_iter(groups.into_iter().map(|(k, g)| (k, SmallVec::from_vec(g))));
-
-        AnagramDict { words }
+        AnagramDict {
+            words: BinaryMap::from(iter),
+        }
     }
 }
 
@@ -68,7 +62,7 @@ mod tests {
     use itertools::Itertools;
 
     // Note this useful idiom: importing names from outer (for mod tests) scope.
-    use super::AnagramDict;
+
     use crate::core::prelude::*;
     use ntest::test_case;
 
