@@ -1,13 +1,20 @@
 use std::{
     fmt::{Debug, Display, Write},
+    marker::PhantomData,
     ops::{Add, Sub},
     str::FromStr,
 };
 
+use anyhow::anyhow;
+use prime_bag::PrimeBag128;
+use quick_xml::se;
+
+use super::prelude::Character;
+
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct AnagramKey {
     pub len: u8,
-    pub inner: u128,
+    pub inner: prime_bag::PrimeBag128<Character>,
 }
 
 impl Ord for AnagramKey {
@@ -24,42 +31,39 @@ impl PartialOrd for AnagramKey {
 
 impl AnagramKey {
     pub fn is_empty(&self) -> bool {
-        self.inner == 1
+        self.inner.is_empty()
     }
 
-    pub const EMPTY: AnagramKey = AnagramKey { inner: 1, len: 0 };
+    // pub const EMPTY: AnagramKey = AnagramKey {
+    //     inner: PrimeBag128(1, PhantomData),
+    //     len: 0,
+    // };
 
-    pub const PRIMESBYSIZE: [usize; 26] = [
-        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
-        97, 101,
-    ];
-    pub const LETTERSBYFREQUENCY: [char; 26] = [
-        'e', 't', 'a', 'i', 'n', 'o', 's', 'h', 'r', 'd', 'l', 'u', 'c', 'm', 'f', 'w', 'y', 'g',
-        'p', 'b', 'v', 'k', 'q', 'j', 'x', 'z',
-    ];
-
-    pub const PRIMESBYLETTER: [usize; 26] =
-        array_const_fn_init::array_const_fn_init![prime_for_letter; 26];
-}
-
-const fn prime_for_letter(i: usize) -> usize {
-    let a = 'a' as usize;
-    let c = i + a;
-    let mut index = 0;
-    while index < AnagramKey::LETTERSBYFREQUENCY.len() {
-        if (AnagramKey::LETTERSBYFREQUENCY[index] as usize) == c {
-            return AnagramKey::PRIMESBYSIZE[index];
+    pub fn empty()-> Self{
+        Self{
+            len: 0,
+            inner: Default::default()
         }
-        index += 1;
     }
-    unreachable!()
+
+    // pub const PRIMESBYSIZE: [usize; 26] = [
+    //     2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
+    //     97, 101,
+    // ];
+    // pub const LETTERSBYFREQUENCY: [char; 26] = [
+    //     'e', 't', 'a', 'i', 'n', 'o', 's', 'h', 'r', 'd', 'l', 'u', 'c', 'm', 'f', 'w', 'y', 'g',
+    //     'p', 'b', 'v', 'k', 'q', 'j', 'x', 'z',
+    // ];
+
+    // pub const PRIMESBYLETTER: [usize; 26] =
+    //     array_const_fn_init::array_const_fn_init![prime_for_letter; 26];
 }
 
 impl Add for AnagramKey {
     type Output = Option<Self>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        let inner = self.inner.checked_mul(rhs.inner)?;
+        let inner = self.inner.try_sum(&rhs.inner)?;
         let len = self.len + rhs.len;
         AnagramKey { inner, len }.into()
     }
@@ -69,19 +73,7 @@ impl Sub for AnagramKey {
     type Output = Option<Self>;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        if rhs.inner == 0 {
-            return None;
-        }
-
-        if self.len < rhs.len {
-            return None;
-        }
-
-        if self.inner % rhs.inner != 0 {
-            return None;
-        }
-
-        let inner = self.inner / rhs.inner;
+        let inner = self.inner.try_difference(&rhs.inner)?;
         let len = self.len - rhs.len;
         AnagramKey { inner, len }.into()
     }
@@ -101,24 +93,15 @@ impl Debug for AnagramKey {
 
 impl Display for AnagramKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut rem = self.inner;
-
-        if rem > 1 {
-            for (p, i) in AnagramKey::PRIMESBYLETTER.into_iter().enumerate() {
-                while rem % (p as u128) == 0 {
-                    let c = b'a' + (i as u8);
-                    f.write_char(c as char)?;
-                    rem /= p as u128;
-
-                    if rem == 1 {
-                        return std::fmt::Result::Ok(());
-                    }
-                }
-            }
-            unreachable!()
+        if self.is_empty() {
+            f.write_char('!')?;
         } else {
-            f.write_char('!')
+            for char in self.inner.into_iter() {
+                f.write_char(char.as_char())?;
+            }
         }
+
+        return std::fmt::Result::Ok(());
     }
 }
 
@@ -126,26 +109,16 @@ impl FromStr for AnagramKey {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, anyhow::Error> {
-        let mut inner: u128 = 1;
         let mut len: u8 = 0;
 
-        for c in s
-            .to_ascii_lowercase()
+        let s = s.to_ascii_lowercase();
+
+        let chars = s
             .chars()
             .filter(|c| c.is_ascii_lowercase())
-        {
-            let i = c as usize - 'a' as usize;
-            let prime = AnagramKey::PRIMESBYLETTER[i];
-            let r = inner.checked_mul(prime as u128);
+            .flat_map(Character::try_from).inspect(|_|len += 1);
 
-            match r {
-                Some(p) => inner = p,
-                None => {
-                    anyhow::bail!("Word Too Big for anagram: '{}'", s);
-                }
-            }
-            len += 1;
-        }
+        let inner = PrimeBag128::try_from_iter(chars).ok_or(anyhow!("String is too long"))?;
 
         Ok(AnagramKey { inner, len })
     }

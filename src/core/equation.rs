@@ -153,7 +153,7 @@ impl Equation {
                         } else {
                             (
                                 Rc::from(pe.clone()),
-                                AnagramKey::EMPTY,
+                                AnagramKey::empty(),
                                 Rc::from(smallvec::smallvec![]),
                             )
                         }

@@ -15,6 +15,7 @@ mod solvable;
 mod term_dict;
 mod word_context;
 mod word_query;
+mod character;
 
 pub mod prelude {
     pub use crate::core::anagram_dict::*;
@@ -22,6 +23,7 @@ pub mod prelude {
     pub use crate::core::anagram_key::*;
     pub use crate::core::anagram_settings::*;
     pub use crate::core::binary_map::*;
+    pub use crate::core::character::*;
 
     pub use crate::core::equation::*;
     pub use crate::core::expression::*;
