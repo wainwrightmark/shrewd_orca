@@ -26,6 +26,7 @@ yew = { version="0.20", features = ["csr",] }
 yewdux = { version="0.9" }
 yew-hooks = { version="0.2" }
 
+
 regex= {version="1", features=["std", "perf",  ]}
 wasm-logger = "0.2"
 wasm-bindgen-futures = "0.4"
@@ -60,7 +61,7 @@ opt-level = 3
 [dev-dependencies]
 criterion = "0.4"
 ntest = "0.9"
-insta = "1.28"
+insta = "1"
 
 
 

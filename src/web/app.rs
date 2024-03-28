@@ -1,10 +1,9 @@
 use crate::core::prelude::*;
 use crate::state::prelude::*;
-use crate::RowLoader;
+
 use itertools::Itertools;
 
 use shrewd_orca::language::prelude::Example;
-use wasm_bindgen::prelude::Closure;
 use web_sys::{HtmlSelectElement, HtmlTextAreaElement};
 use yew::prelude::*;
 use yew_hooks::*;
@@ -18,7 +17,7 @@ pub fn app() -> Html {
 
         <Examples />
         <InputBox />
-        <RowLoader/>
+        // <RowLoader/>
         <ErrorBox />
         <DisplayBox/>
         // <LoadMoreButton/>
@@ -58,16 +57,19 @@ pub fn error_box() -> Html {
 pub fn display_box() -> Html {
     let node = use_node_ref();
 
-    // use_infinite_scroll(node.clone(), || {
-    //     Dispatch::<FullState>::new().reduce_mut(|x| x.load_more());
-    // });
+    let (state, dispatch) = use_store::<FullState>();
 
-    let selected = use_selector(|s: &FullState| (s.data.clone(), s.is_complete));
+    let onclick = dispatch.reduce_mut_future_callback(|state| {
+        Box::pin(async move {
+            state.load_more(10);
+        })
+    });
 
-    let rows = selected.0.iter().map(row).collect_vec();
+    let rows = state.data.iter().map(row).collect_vec();
 
     html!(
-        <div style="height: 75vh; overflow-y: scroll; overflow-x: hidden;" ref={node}>
+        <>
+        <div style="max-height: 60vh; overflow-y: scroll; overflow-x: hidden;" ref={node}>
         <div>
         <table >
         <tbody>
@@ -75,14 +77,10 @@ pub fn display_box() -> Html {
         </tbody>
         </table>
         </div>
-        {if !selected.as_ref().1{
-            html!(<div style="height: 40vh; width: 100%; background: none;"></div>)
-        }else{
-            html!(<></>)
-        }}
-
 
         </div>
+        <button {onclick} disabled={state.is_complete}>{"Load More"}</button>
+        </>
     )
 }
 

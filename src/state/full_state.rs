@@ -9,9 +9,11 @@ use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
 
+use yewdux::prelude::*;
+
 #[cfg(target_arch = "wasm32")]
 use yewdux::storage;
-use yewdux::store::Store;
+
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FullState {
@@ -59,6 +61,8 @@ impl Default for FullState {
         }
     }
 }
+
+
 
 impl Store for FullState {
     fn new() -> Self {

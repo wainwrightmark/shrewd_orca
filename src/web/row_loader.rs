@@ -1,6 +1,6 @@
 use crate::state::prelude::*;
 use wasm_bindgen::{prelude::Closure, JsCast};
-use web_sys::{window,};
+use web_sys::window;
 use yew::prelude::*;
 use yewdux::prelude::*;
 
