@@ -1,13 +1,11 @@
 use std::{
     fmt::{Debug, Display, Write},
-    marker::PhantomData,
     ops::{Add, Sub},
     str::FromStr,
 };
 
 use anyhow::anyhow;
 use prime_bag::PrimeBag128;
-use quick_xml::se;
 
 use super::prelude::Character;
 
@@ -25,7 +23,7 @@ impl Ord for AnagramKey {
 
 impl PartialOrd for AnagramKey {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.inner.partial_cmp(&other.inner)
+        Some(self.cmp(other))
     }
 }
 
@@ -34,29 +32,12 @@ impl AnagramKey {
         self.inner.is_empty()
     }
 
-    // pub const EMPTY: AnagramKey = AnagramKey {
-    //     inner: PrimeBag128(1, PhantomData),
-    //     len: 0,
-    // };
-
-    pub fn empty()-> Self{
-        Self{
+    pub fn empty() -> Self {
+        Self {
             len: 0,
-            inner: Default::default()
+            inner: Default::default(),
         }
     }
-
-    // pub const PRIMESBYSIZE: [usize; 26] = [
-    //     2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
-    //     97, 101,
-    // ];
-    // pub const LETTERSBYFREQUENCY: [char; 26] = [
-    //     'e', 't', 'a', 'i', 'n', 'o', 's', 'h', 'r', 'd', 'l', 'u', 'c', 'm', 'f', 'w', 'y', 'g',
-    //     'p', 'b', 'v', 'k', 'q', 'j', 'x', 'z',
-    // ];
-
-    // pub const PRIMESBYLETTER: [usize; 26] =
-    //     array_const_fn_init::array_const_fn_init![prime_for_letter; 26];
 }
 
 impl Add for AnagramKey {
@@ -101,7 +82,7 @@ impl Display for AnagramKey {
             }
         }
 
-        return std::fmt::Result::Ok(());
+        std::fmt::Result::Ok(())
     }
 }
 
@@ -116,7 +97,8 @@ impl FromStr for AnagramKey {
         let chars = s
             .chars()
             .filter(|c| c.is_ascii_lowercase())
-            .flat_map(Character::try_from).inspect(|_|len += 1);
+            .flat_map(Character::try_from)
+            .inspect(|_| len += 1);
 
         let inner = PrimeBag128::try_from_iter(chars).ok_or(anyhow!("String is too long"))?;
 
@@ -126,10 +108,8 @@ impl FromStr for AnagramKey {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::AnagramKey;
+    use std::str::FromStr;
 
     #[test]
     fn test_anagram_keys() {

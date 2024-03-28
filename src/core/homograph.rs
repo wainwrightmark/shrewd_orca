@@ -21,7 +21,7 @@ impl std::fmt::Debug for Homograph {
 }
 
 impl Homograph {
-    pub fn first_definition<'a>(&'a self) -> &'static str {
+    pub fn first_definition(&self) -> &'static str {
         if let Some(definition) = self.meanings.iter().filter_map(|x| x.definition).next() {
             definition
         } else {
@@ -44,9 +44,7 @@ pub struct Meaning {
 
 impl PartialOrd for Homograph {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.text
-            .to_ascii_lowercase()
-            .partial_cmp(&other.text.to_ascii_lowercase())
+        Some(self.cmp(other))
     }
 }
 

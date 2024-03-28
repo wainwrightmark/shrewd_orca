@@ -3,6 +3,7 @@ mod anagram_iterator;
 mod anagram_key;
 mod anagram_settings;
 mod binary_map;
+mod character;
 mod equation;
 mod expression;
 mod fixed_length_expression;
@@ -15,7 +16,6 @@ mod solvable;
 mod term_dict;
 mod word_context;
 mod word_query;
-mod character;
 
 pub mod prelude {
     pub use crate::core::anagram_dict::*;

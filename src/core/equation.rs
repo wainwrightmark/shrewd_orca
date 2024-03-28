@@ -90,13 +90,13 @@ impl Equation {
     }
 
     #[auto_enum(Iterator)]
-    fn solve_anagram_dehydrated<'a>(
+    fn solve_anagram_dehydrated(
         left: ExpressionSolution,
         key_to_subtract: AnagramKey,
         dehydrated_right: Rc<FixedLengthExpression>,
         extracted_literals: Rc<SmallVec<[(Homograph, usize); 2]>>,
-        dict: &'a WordContext,
-    ) -> impl Iterator<Item = AnagramSolution> + 'a {
+        dict: &WordContext,
+    ) -> impl Iterator<Item = AnagramSolution> + '_ {
         if let Some(key) = AnagramKey::from_str(left.get_text().as_str())
             .ok()
             .and_then(|k| k - key_to_subtract)

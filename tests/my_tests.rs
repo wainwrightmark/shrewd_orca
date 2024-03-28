@@ -5,7 +5,7 @@ use shrewd_orca::language::prelude::*;
 use ntest::test_case;
 use smallvec::SmallVec;
 
-#[test_case("#f #l =a !phrase + genius")]
+#[test_case("sean aguirre =a !phrase + genius")]
 #[test_case("clint eastwood =a !phrase")]
 #[test_case("red bat =a **")]
 #[test_case("#f eastwood =a !phrase")]

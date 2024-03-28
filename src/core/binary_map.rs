@@ -24,7 +24,7 @@ impl<Key: Ord, Value, const SIZE: usize> BinaryMap<Key, Value, SIZE> {
     pub fn range(
         &self,
         range: impl RangeBounds<Key>,
-    ) -> impl Iterator<Item = (&Key, &smallvec::SmallVec<[Value; SIZE]>)> + DoubleEndedIterator
+    ) -> impl DoubleEndedIterator<Item = (&Key, &smallvec::SmallVec<[Value; SIZE]>)>
     {
         let start_bound = match range.start_bound() {
             Bound::Included(inc) => match self.keys.binary_search(inc) {

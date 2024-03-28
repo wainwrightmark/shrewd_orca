@@ -14,7 +14,6 @@ use yewdux::prelude::*;
 #[cfg(target_arch = "wasm32")]
 use yewdux::storage;
 
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FullState {
     pub text: String,
@@ -62,8 +61,6 @@ impl Default for FullState {
     }
 }
 
-
-
 impl Store for FullState {
     fn new() -> Self {
         #[cfg(target_arch = "wasm32")]
@@ -107,9 +104,9 @@ impl FullState {
         }
 
         if self.is_complete {
-            return format!("Found all {} solutions", self.data.len()).into();
+            format!("Found all {} solutions", self.data.len()).into()
         } else {
-            return format!("Found {} solutions", self.data.len()).into();
+            format!("Found {} solutions", self.data.len()).into()
         }
     }
 
@@ -122,6 +119,8 @@ impl FullState {
             let start_instant = instant::Instant::now();
 
             let mut iter_borrow = iter.as_ref().borrow_mut();
+
+
 
             while let Some(s) = iter_borrow.next() {
                 self.data.push(s);
