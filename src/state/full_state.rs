@@ -8,7 +8,8 @@ use beef::Cow;
 use log::debug;
 use once_cell::sync::OnceCell;
 use serde::*;
-use yewdux::prelude::init_listener;
+
+#[cfg(target_arch = "wasm32")]
 use yewdux::storage;
 use yewdux::store::Store;
 
@@ -61,21 +62,29 @@ impl Default for FullState {
 
 impl Store for FullState {
     fn new() -> Self {
-        init_listener(storage::StorageListener::<Self>::new(storage::Area::Local));
-        let result: Result<Option<FullState>, _> = storage::load(storage::Area::Local);
+        #[cfg(target_arch = "wasm32")]
+        {
+            use yewdux::prelude::init_listener;
+            init_listener(storage::StorageListener::<Self>::new(storage::Area::Local));
+            let result: Result<Option<FullState>, _> = storage::load(storage::Area::Local);
 
-        let mut fs = match result {
-            Ok(opt) => match opt {
-                Some(fs) => fs,
-                None => FullState::default(),
-            },
-            Err(_) => FullState::default(),
-        };
+            let mut fs = match result {
+                Ok(opt) => match opt {
+                    Some(fs) => fs,
+                    None => FullState::default(),
+                },
+                Err(_) => FullState::default(),
+            };
 
-        //log::info!("Listener Init: {}", fs.text);
-        fs.hot = true;
-        fs.update_if_hot();
-        fs
+            //log::info!("Listener Init: {}", fs.text);
+            fs.hot = true;
+            fs.update_if_hot();
+            fs
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            FullState::default()
+        }
     }
 
     fn should_notify(&self, old: &Self) -> bool {
@@ -100,7 +109,7 @@ impl FullState {
         }
     }
 
-    pub fn load_more(&mut self) {
+    pub fn load_more(&mut self, number_to_load: usize) {
         if self.is_complete {
             return;
         }
@@ -113,11 +122,11 @@ impl FullState {
             while let Some(s) = iter_borrow.next() {
                 self.data.push(s);
                 i += 1;
-                if i >= 10 {
+                if i >= number_to_load {
                     break;
                 }
             }
-            if i < 10 {
+            if i < number_to_load {
                 self.is_complete = true;
             }
             debug!(
@@ -163,7 +172,7 @@ impl FullState {
         if self.hot {
             self.iter = None;
             self.update();
-            self.load_more();
+            self.load_more(10);
             self.hot = false;
         }
     }

@@ -2,6 +2,7 @@ mod anagram_dict;
 mod anagram_iterator;
 mod anagram_key;
 mod anagram_settings;
+mod binary_map;
 mod equation;
 mod expression;
 mod fixed_length_expression;
@@ -20,6 +21,8 @@ pub mod prelude {
     pub use crate::core::anagram_iterator::*;
     pub use crate::core::anagram_key::*;
     pub use crate::core::anagram_settings::*;
+    pub use crate::core::binary_map::*;
+
     pub use crate::core::equation::*;
     pub use crate::core::expression::*;
     pub use crate::core::fixed_length_expression::*;

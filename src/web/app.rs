@@ -1,11 +1,13 @@
 use crate::core::prelude::*;
 use crate::state::prelude::*;
+use crate::RowLoader;
 use itertools::Itertools;
 
 use shrewd_orca::language::prelude::Example;
+use wasm_bindgen::prelude::Closure;
 use web_sys::{HtmlSelectElement, HtmlTextAreaElement};
 use yew::prelude::*;
-use yew_hooks::{use_debounce, use_infinite_scroll};
+use yew_hooks::*;
 use yewdux::prelude::*;
 
 #[function_component(App)]
@@ -16,7 +18,7 @@ pub fn app() -> Html {
 
         <Examples />
         <InputBox />
-
+        <RowLoader/>
         <ErrorBox />
         <DisplayBox/>
         // <LoadMoreButton/>
@@ -56,9 +58,9 @@ pub fn error_box() -> Html {
 pub fn display_box() -> Html {
     let node = use_node_ref();
 
-    use_infinite_scroll(node.clone(), || {
-        Dispatch::<FullState>::new().reduce_mut(|x| x.load_more());
-    });
+    // use_infinite_scroll(node.clone(), || {
+    //     Dispatch::<FullState>::new().reduce_mut(|x| x.load_more());
+    // });
 
     let selected = use_selector(|s: &FullState| (s.data.clone(), s.is_complete));
 
